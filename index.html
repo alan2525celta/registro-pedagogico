@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro Pedagógico 2026</title>
+<style>
+  :root {
+    --azul: #1a3a6b;
+    --azul-claro: #2563eb;
+    --verde: #1a7a4a;
+    --dorado: #c8a96e;
+    --rojo: #dc2626;
+    --naranja: #ea580c;
+    --gris: #f1f5f9;
+    --gris-oscuro: #64748b;
+    --blanco: #ffffff;
+    --texto: #1e293b;
+    --borde: #e2e8f0;
+    --sombra: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--gris); color: var(--texto); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--azul); color: white; padding: 0; position: sticky; top: 0; z-index: 100; box-shadow: var(--sombra); }
+  .header-top { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+  .header-logo { width: 40px; height: 40px; background: var(--dorado); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .header-info h1 { font-size: 15px; font-weight: 600; }
+  .header-info p { font-size: 11px; opacity: 0.8; }
+  .header-docente { margin-left: auto; text-align: right; font-size: 11px; opacity: 0.85; }
+
+  /* NAV */
+  .nav { background: var(--azul); border-top: 1px solid rgba(255,255,255,0.15); display: flex; overflow-x: auto; }
+  .nav-btn { flex: 1; min-width: 60px; padding: 8px 4px; background: none; border: none; color: rgba(255,255,255,0.7); font-size: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.2s; }
+  .nav-btn.active { color: var(--dorado); border-bottom: 2px solid var(--dorado); }
+  .nav-btn:hover { color: white; }
+  .nav-icon { font-size: 18px; }
+
+  /* MAIN */
+  .main { max-width: 900px; margin: 0 auto; padding: 16px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* CARDS CURSOS */
+  .cursos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 8px; }
+  .curso-card { background: var(--azul); color: white; border-radius: 12px; padding: 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+  .curso-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,58,107,0.3); }
+  .curso-card .turno { font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .curso-card .nombre { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+  .curso-card .materia { font-size: 12px; opacity: 0.85; }
+
+  /* SECCIÓN TÍTULO */
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .section-title { font-size: 16px; font-weight: 600; color: var(--azul); }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+  .btn-primary { background: var(--azul-claro); color: white; }
+  .btn-primary:hover { background: var(--azul); }
+  .btn-green { background: var(--verde); color: white; }
+  .btn-danger { background: var(--rojo); color: white; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  /* TABLA ESTUDIANTES */
+  .table-container { background: white; border-radius: 12px; box-shadow: var(--sombra); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--azul); color: white; padding: 10px 12px; text-align: left; font-weight: 500; font-size: 12px; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--borde); }
+  tr:hover td { background: #f8fafc; }
+  tr:last-child td { border-bottom: none; }
+
+  /* FORM */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 16px; padding: 20px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-size: 16px; font-weight: 600; color: var(--azul); margin-bottom: 16px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--gris-oscuro); margin-bottom: 4px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--borde); border-radius: 8px; font-size: 13px; outline: none; transition: border 0.2s; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--azul-claro); }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+  /* ASISTENCIA */
+  .asist-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: white; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .asist-nombre { flex: 1; font-size: 13px; font-weight: 500; }
+  .asist-btns { display: flex; gap: 4px; }
+  .asist-btn { width: 34px; height: 30px; border-radius: 6px; border: 1.5px solid var(--borde); font-size: 11px; font-weight: 700; cursor: pointer; background: white; transition: all 0.15s; }
+  .asist-btn.P { background: #dcfce7; border-color: var(--verde); color: var(--verde); }
+  .asist-btn.F { background: #fee2e2; border-color: var(--rojo); color: var(--rojo); }
+  .asist-btn.A { background: #fef3c7; border-color: #d97706; color: #d97706; }
+  .asist-stats { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat-box { flex: 1; text-align: center; padding: 8px; border-radius: 8px; }
+  .stat-box.p { background: #dcfce7; }
+  .stat-box.f { background: #fee2e2; }
+  .stat-box.a { background: #fef3c7; }
+  .stat-num { font-size: 22px; font-weight: 700; }
+  .stat-lbl { font-size: 10px; }
+
+  /* NOTAS */
+  .nota-input { width: 60px; padding: 4px 6px; border: 1px solid var(--borde); border-radius: 6px; font-size: 13px; text-align: center; }
+  .nota-input:focus { outline: none; border-color: var(--azul-claro); }
+  .total-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .total-ok { background: #dcfce7; color: var(--verde); }
+  .total-low { background: #fee2e2; color: var(--rojo); }
+  .total-empty { background: var(--gris); color: var(--gris-oscuro); }
+  .dim-tabs { display: flex; gap: 4px; margin-bottom: 12px; overflow-x: auto; }
+  .dim-tab { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--borde); background: white; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .dim-tab.active { background: var(--azul); color: white; border-color: var(--azul); }
+
+  /* ACTIVIDADES */
+  .act-card { background: white; border-radius: 10px; padding: 12px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 10px; }
+  .act-dim { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+  .act-dim.SER { background: #dbeafe; color: #1d4ed8; }
+  .act-dim.SABER { background: #e0e7ff; color: #4338ca; }
+  .act-dim.HACER { background: #d1fae5; color: #065f46; }
+
+  /* OBSERVACIONES */
+  .obs-card { background: white; border-radius: 10px; padding: 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .obs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .obs-estudiante { font-weight: 600; font-size: 13px; }
+  .obs-fecha { font-size: 11px; color: var(--gris-oscuro); }
+  .obs-texto { font-size: 13px; color: var(--texto); line-height: 1.5; }
+  .obs-visible { font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+  .obs-visible.SI { background: #dcfce7; color: var(--verde); }
+  .obs-visible.NO { background: var(--gris); color: var(--gris-oscuro); }
+
+  /* FILTRO CURSO */
+  .filtro-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filtro-chip { padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--borde); background: white; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .filtro-chip.active { background: var(--azul); color: white; border-color: var(--azul); }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 40px 20px; color: var(--gris-oscuro); }
+  .empty-icon { font-size: 40px; margin-bottom: 8px; }
+  .empty p { font-size: 14px; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 600px) {
+    .main { padding: 12px; }
+    .cursos-grid { grid-template-columns: repeat(2, 1fr); }
+    table { font-size: 12px; }
+    th, td { padding: 7px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">🎓</div>
+    <div class="header-info">
+      <h1>Registro Pedagógico 2026</h1>
+      <p>U.E. Franz Tamayo de Chachacomani</p>
+    </div>
+    <div class="header-docente" id="header-docente">
+      <div style="font-weight:600" id="docente-nombre">Alan Calcina</div>
+      <div>Docente</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showScreen('inicio')" id="nav-inicio">
+      <span class="nav-icon">🏠</span><span>Inicio</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('estudiantes')" id="nav-estudiantes">
+      <span class="nav-icon">👥</span><span>Estudiantes</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('asistencia')" id="nav-asistencia">
+      <span class="nav-icon">✋</span><span>Asistencia</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('notas')" id="nav-notas">
+      <span class="nav-icon">📝</span><span>Notas</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('actividades')" id="nav-actividades">
+      <span class="nav-icon">📋</span><span>Actividades</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('observaciones')" id="nav-observaciones">
+      <span class="nav-icon">💬</span><span>Observaciones</span>
+    </button>
+  </nav>
+</div>
+
+<div class="main">
+
+  <!-- INICIO -->
+  <div id="screen-inicio" class="screen active">
+    <div class="section-header" style="margin-bottom:16px">
+      <div>
+        <div class="section-title">Mis Cursos y Materias</div>
+        <div style="font-size:12px;color:var(--gris-oscuro)">Toca un curso para ver sus estudiantes</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-curso')">+ Agregar curso</button>
+    </div>
+    <div class="cursos-grid" id="cursos-grid"></div>
+  </div>
+
+  <!-- ESTUDIANTES -->
+  <div id="screen-estudiantes" class="screen">
+    <div class="section-header">
+      <div class="section-title">Estudiantes</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-estudiante')">+ Agregar</button>
+    </div>
+    <div class="filtro-bar" id="filtro-cursos"></div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Apellidos y Nombres</th>
+            <th>Código RUDE</th>
+            <th>Curso</th>
+            <th>Materia</th>
+            <th>Fecha Nac.</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-estudiantes"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ASISTENCIA -->
+  <div id="screen-asistencia" class="screen">
+    <div class="section-header">
+      <div class="section-title">Asistencia Diaria</div>
+      <div style="font-size:12px;color:var(--gris-oscuro)" id="fecha-hoy"></div>
+    </div>
+    <div class="filtro-bar" id="filtro-asist"></div>
+    <div class="asist-stats">
+      <div class="stat-box p"><div class="stat-num" id="cnt-p">0</div><div class="stat-lbl">Presentes</div></div>
+      <div class="stat-box f"><div class="stat-num" id="cnt-f">0</div><div class="stat-lbl">Faltas</div></div>
+      <div class="stat-box a"><div class="stat-num" id="cnt-a">0</div><div class="stat-lbl">Atrasos</div></div>
+    </div>
+    <div id="lista-asistencia"></div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn btn-green" onclick="marcarTodos('P')">✓ Todos presentes</button>
+      <button class="btn btn-primary" onclick="guardarAsistencia()">💾 Guardar asistencia</button>
+    </div>
+  </div>
+
+  <!-- NOTAS -->
+  <div id="screen-notas" class="screen">
+    <div class="section-header">
+      <div class="section-title">Registro de Notas</div>
+      <button class="btn btn-primary btn-sm" onclick="guardarNotas()">💾 Guardar</button>
+    </div>
+    <div class="filtro-bar" id="filtro-notas"></div>
+    <div class="dim-tabs">
+      <button class="dim-tab active" onclick="selectDim('RESUMEN',this)">Resumen</button>
+      <button class="dim-tab" onclick="selectDim('SER',this)">SER (10)</button>
+      <button class="dim-tab" onclick="selectDim('SABER',this)">SABER (45)</button>
+      <button class="dim-tab" onclick="selectDim('HACER',this)">HACER (40)</button>
+      <button class="dim-tab" onclick="selectDim('AUTO',this)">Autoevaluación (5)</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead id="notas-thead"></thead>
+        <tbody id="tabla-notas"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ACTIVIDADES -->
+  <div id="screen-actividades" class="screen">
+    <div class="section-header">
+      <div class="section-title">Actividades de Evaluación</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-actividad')">+ Nueva actividad</button>
+    </div>
+    <div class="filtro-bar" id="filtro-act"></div>
+    <div id="lista-actividades"></div>
+  </div>
+
+  <!-- OBSERVACIONES -->
+  <div id="screen-observaciones" class="screen">
+    <div class="section-header">
+      <div class="section-title">Observaciones</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-obs')">+ Nueva</button>
+    </div>
+    <div class="filtro-bar" id="filtro-obs"></div>
+    <div id="lista-observaciones"></div>
+  </div>
+
+</div>
+
+<!-- MODALES -->
+<div class="modal-overlay" id="modal-curso">
+  <div class="modal">
+    <h2>Agregar Curso</h2>
+    <div class="form-group"><label>Curso</label><input id="f-curso" placeholder="Ej: 2do A"></div>
+    <div class="form-group"><label>Materia</label><input id="f-materia" placeholder="Ej: Física"></div>
+    <div class="form-group"><label>Turno</label>
+      <select id="f-turno"><option>MAÑANA</option><option>TARDE</option></select>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModal('modal-curso')">Cancelar</button>
+      <button class="btn btn-primary" onclick="agregarCurso()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-estudiante">
+  <div class="modal">
+    <h2>Agregar Estudiante</h2>
+    <div class="form-group"><label>Apellidos y Nombres</label><input id="e-nombre" placeholder="Apellido Nombre"></div>
+    <div class="form-group"><label>Código RUDE</label><input id="e-rude" placeholder="606200212017612"></div>
+    <div class="form-group"><label>Curso</label><select id="e-curso"></select></div>
+    <div class="form-group"><label>Materia</label><select id="e-materia-sel"></select></div>
+    <div class="form-group"><label>Fecha de Nacimiento</label><input type="date" id="e-fecha"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModal('modal-estudiante')">Cancelar</button>
+      <button class="btn btn-primary" onclick="agregarEstudiante()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-actividad">
+  <div class="modal">
+    <h2>Nueva Actividad</h2>
+    <div class="form-group"><label>Nombre de la actividad</label><input id="a-nombre" placeholder="Ej: Examen parcial 1"></div>
+    <div class="form-group"><label>Dimensión</label>
+      <select id="a-dim"><option>SABER</option><option>HACER</option><option>SER</option></select>
+    </div>
+    <div class="form-group"><label>Curso</label><select id="a-curso"></select></div>
+    <div class="form-group"><label>Trimestre</label>
+      <select id="a-trim"><option>1</option><option>2</option><option>3</option></select>
+    </div>
+    <div class="form-group"><label>Fecha</label><input type="date" id="a-fecha"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModal('modal-actividad')">Cancelar</button>
+      <button class="btn btn-primary" onclick="agregarActividad()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-obs">
+  <div class="modal">
+    <h2>Nueva Observación</h2>
+    <div class="form-group"><label>Estudiante</label><select id="o-estudiante"></select></div>
+    <div class="form-group"><label>Observación</label>
+      <textarea id="o-texto" rows="3" placeholder="Describe la observación..."></textarea>
+    </div>
+    <div class="form-group"><label>¿Visible para el padre?</label>
+      <select id="o-visible"><option value="SI">Sí</option><option value="NO">No</option></select>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModal('modal-obs')">Cancelar</button>
+      <button class="btn btn-primary" onclick="agregarObservacion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== ESTADO GLOBAL =====
+let DB = {
+  docente: { id: 'D001', nombre: 'Alan Calcina Aruquipa', email: 'alan2525@gmail.com', ue: 'Franz Tamayo' },
+  cursos: [
+    { id: 'A1', curso: '2do A', materia: 'FISICA', turno: 'MAÑANA' },
+    { id: 'A2', curso: '2do B', materia: 'QUIMICA', turno: 'MAÑANA' }
+  ],
+  estudiantes: [],
+  asistencia: {},
+  notas: {},
+  actividades: [],
+  observaciones: []
+};
+
+let filtroCursoActual = 'todos';
+let dimActual = 'RESUMEN';
+
+// ===== PERSISTENCIA LOCAL =====
+function guardarDB() { localStorage.setItem('registroDB', JSON.stringify(DB)); }
+function cargarDB() {
+  const saved = localStorage.getItem('registroDB');
+  if (saved) DB = JSON.parse(saved);
+}
+
+// ===== NAVEGACIÓN =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  renderScreen(id);
+}
+
+function renderScreen(id) {
+  if (id === 'inicio') renderInicio();
+  if (id === 'estudiantes') renderEstudiantes();
+  if (id === 'asistencia') renderAsistencia();
+  if (id === 'notas') renderNotas();
+  if (id === 'actividades') renderActividades();
+  if (id === 'observaciones') renderObservaciones();
+}
+
+// ===== INICIO =====
+function renderInicio() {
+  const grid = document.getElementById('cursos-grid');
+  if (DB.cursos.length === 0) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">📚</div><p>No hay cursos aún. Agrega tu primer curso.</p></div>';
+    return;
+  }
+  grid.innerHTML = DB.cursos.map(c => `
+    <div class="curso-card" onclick="irACurso('${c.id}')">
+      <div class="turno">${c.turno}</div>
+      <div class="nombre">${c.curso}</div>
+      <div class="materia">${c.materia}</div>
+      <div style="margin-top:8px;font-size:11px;opacity:0.7">${contarEstudiantes(c.id)} estudiantes</div>
+    </div>
+  `).join('');
+}
+
+function contarEstudiantes(cursoId) {
+  const c = DB.cursos.find(x => x.id === cursoId);
+  if (!c) return 0;
+  return DB.estudiantes.filter(e => e.curso === c.curso && e.materia === c.materia).length;
+}
+
+function irACurso(cursoId) {
+  const c = DB.cursos.find(x => x.id === cursoId);
+  if (c) {
+    filtroCursoActual = c.curso + '|' + c.materia;
+    showScreen('estudiantes');
+  }
+}
+
+// ===== CURSOS =====
+function agregarCurso() {
+  const curso = document.getElementById('f-curso').value.trim();
+  const materia = document.getElementById('f-materia').value.trim();
+  const turno = document.getElementById('f-turno').value;
+  if (!curso || !materia) { showToast('Completa todos los campos'); return; }
+  DB.cursos.push({ id: 'A' + Date.now(), curso, materia: materia.toUpperCase(), turno });
+  guardarDB();
+  closeModal('modal-curso');
+  renderInicio();
+  showToast('Curso agregado ✓');
+}
+
+// ===== ESTUDIANTES =====
+function renderEstudiantes() {
+  renderFiltros('filtro-cursos', filtroCursoActual);
+  const tbody = document.getElementById('tabla-estudiantes');
+  let lista = DB.estudiantes;
+  if (filtroCursoActual !== 'todos') {
+    const [c, m] = filtroCursoActual.split('|');
+    lista = lista.filter(e => e.curso === c && e.materia === m);
+  }
+  if (lista.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gris-oscuro);padding:30px">No hay estudiantes. Agrega el primero.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = lista.map((e, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td><strong>${e.nombre}</strong></td>
+      <td style="font-size:11px;color:var(--gris-oscuro)">${e.rude}</td>
+      <td>${e.curso}</td>
+      <td>${e.materia}</td>
+      <td>${e.fecha || '-'}</td>
+    </tr>
+  `).join('');
+}
+
+function agregarEstudiante() {
+  const nombre = document.getElementById('e-nombre').value.trim();
+  const rude = document.getElementById('e-rude').value.trim();
+  const curso = document.getElementById('e-curso').value;
+  const materia = document.getElementById('e-materia-sel').value;
+  const fecha = document.getElementById('e-fecha').value;
+  if (!nombre || !rude || !curso) { showToast('Completa los campos requeridos'); return; }
+  DB.estudiantes.push({ id: 'E' + Date.now(), nombre: nombre.toUpperCase(), rude, curso, materia, fecha });
+  guardarDB();
+  closeModal('modal-estudiante');
+  renderEstudiantes();
+  showToast('Estudiante agregado ✓');
+}
+
+// ===== ASISTENCIA =====
+let asistTemp = {};
+function renderAsistencia() {
+  document.getElementById('fecha-hoy').textContent = new Date().toLocaleDateString('es-BO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  renderFiltros('filtro-asist', filtroCursoActual);
+  let lista = DB.estudiantes;
+  if (filtroCursoActual !== 'todos') {
+    const [c, m] = filtroCursoActual.split('|');
+    lista = lista.filter(e => e.curso === c && e.materia === m);
+  }
+  const hoy = new Date().toISOString().split('T')[0];
+  lista.forEach(e => { if (!asistTemp[e.id]) asistTemp[e.id] = DB.asistencia[hoy + '_' + e.id] || ''; });
+  actualizarContadores();
+  const div = document.getElementById('lista-asistencia');
+  if (lista.length === 0) {
+    div.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><p>No hay estudiantes en este curso.</p></div>';
+    return;
+  }
+  div.innerHTML = lista.map((e, i) => `
+    <div class="asist-row">
+      <span style="color:var(--gris-oscuro);font-size:11px;min-width:20px">${i+1}</span>
+      <span class="asist-nombre">${e.nombre}</span>
+      <div class="asist-btns">
+        <button class="asist-btn ${asistTemp[e.id]==='P'?'P':''}" onclick="setAsist('${e.id}','P',this)">P</button>
+        <button class="asist-btn ${asistTemp[e.id]==='F'?'F':''}" onclick="setAsist('${e.id}','F',this)">F</button>
+        <button class="asist-btn ${asistTemp[e.id]==='A'?'A':''}" onclick="setAsist('${e.id}','A',this)">A</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function setAsist(id, tipo, btn) {
+  asistTemp[id] = asistTemp[id] === tipo ? '' : tipo;
+  const row = btn.closest('.asist-row');
+  row.querySelectorAll('.asist-btn').forEach(b => { b.className = 'asist-btn'; });
+  if (asistTemp[id]) btn.className = 'asist-btn ' + tipo;
+  actualizarContadores();
+}
+
+function actualizarContadores() {
+  const vals = Object.values(asistTemp);
+  document.getElementById('cnt-p').textContent = vals.filter(v => v === 'P').length;
+  document.getElementById('cnt-f').textContent = vals.filter(v => v === 'F').length;
+  document.getElementById('cnt-a').textContent = vals.filter(v => v === 'A').length;
+}
+
+function marcarTodos(tipo) {
+  let lista = DB.estudiantes;
+  if (filtroCursoActual !== 'todos') {
+    const [c, m] = filtroCursoActual.split('|');
+    lista = lista.filter(e => e.curso === c && e.materia === m);
+  }
+  lista.forEach(e => { asistTemp[e.id] = tipo; });
+  renderAsistencia();
+}
+
+function guardarAsistencia() {
+  const hoy = new Date().toISOString().split('T')[0];
+  Object.entries(asistTemp).forEach(([id, estado]) => {
+    if (estado) DB.asistencia[hoy + '_' + id] = estado;
+  });
+  guardarDB();
+  showToast('Asistencia guardada ✓');
+}
+
+// ===== NOTAS =====
+function renderNotas() {
+  renderFiltros('filtro-notas', filtroCursoActual);
+  let lista = DB.estudiantes;
+  if (filtroCursoActual !== 'todos') {
+    const [c, m] = filtroCursoActual.split('|');
+    lista = lista.filter(e => e.curso === c && e.materia === m);
+  }
+  const thead = document.getElementById('notas-thead');
+  const tbody = document.getElementById('tabla-notas');
+  if (dimActual === 'RESUMEN') {
+    thead.innerHTML = '<tr><th>#</th><th>Estudiante</th><th>SER (10)</th><th>SABER (45)</th><th>HACER (40)</th><th>AUTO (5)</th><th>TOTAL</th></tr>';
+    tbody.innerHTML = lista.map((e, i) => {
+      const n = DB.notas[e.id] || {};
+      const total = calcularTotal(n);
+      const cls = total === '-' ? 'total-empty' : total >= 51 ? 'total-ok' : 'total-low';
+      return `<tr>
+        <td>${i+1}</td>
+        <td><strong>${e.nombre}</strong></td>
+        <td>${n.ser || '-'}</td>
+        <td>${n.saber ? (n.saber * 0.45).toFixed(1) : '-'}</td>
+        <td>${n.hacer ? (n.hacer * 0.40).toFixed(1) : '-'}</td>
+        <td>${n.auto || '-'}</td>
+        <td><span class="total-badge ${cls}">${total}</span></td>
+      </tr>`;
+    }).join('');
+  } else {
+    const labels = { SER: 'SER (sobre 10)', SABER: 'SABER (sobre 100 → convierte a 45)', HACER: 'HACER (sobre 100 → convierte a 40)', AUTO: 'Autoevaluación (sobre 5)' };
+    const keys = { SER: 'ser', SABER: 'saber', HACER: 'hacer', AUTO: 'auto' };
+    const key = keys[dimActual];
+    thead.innerHTML = `<tr><th>#</th><th>Estudiante</th><th>${labels[dimActual]}</th><th>Nota convertida</th></tr>`;
+    tbody.innerHTML = lista.map((e, i) => {
+      const n = DB.notas[e.id] || {};
+      const val = n[key] || '';
+      let conv = '-';
+      if (val) {
+        if (dimActual === 'SABER') conv = (val * 0.45).toFixed(1);
+        else if (dimActual === 'HACER') conv = (val * 0.40).toFixed(1);
+        else conv = val;
+      }
+      return `<tr>
+        <td>${i+1}</td>
+        <td><strong>${e.nombre}</strong></td>
+        <td><input class="nota-input" type="number" min="0" max="100" value="${val}" onchange="setNota('${e.id}','${key}',this.value)" placeholder="-"></td>
+        <td><span class="total-badge ${val ? 'total-ok' : 'total-empty'}">${conv}</span></td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function calcularTotal(n) {
+  if (!n.ser && !n.saber && !n.hacer && !n.auto) return '-';
+  const ser = parseFloat(n.ser) || 0;
+  const saber = (parseFloat(n.saber) || 0) * 0.45;
+  const hacer = (parseFloat(n.hacer) || 0) * 0.40;
+  const auto = parseFloat(n.auto) || 0;
+  return (ser + saber + hacer + auto).toFixed(1);
+}
+
+function setNota(estId, campo, valor) {
+  if (!DB.notas[estId]) DB.notas[estId] = {};
+  DB.notas[estId][campo] = parseFloat(valor) || 0;
+}
+
+function guardarNotas() {
+  guardarDB();
+  showToast('Notas guardadas ✓');
+  if (dimActual === 'RESUMEN') renderNotas();
+}
+
+function selectDim(dim, btn) {
+  dimActual = dim;
+  document.querySelectorAll('.dim-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderNotas();
+}
+
+// ===== ACTIVIDADES =====
+function renderActividades() {
+  renderFiltros('filtro-act', filtroCursoActual);
+  let lista = DB.actividades;
+  if (filtroCursoActual !== 'todos') {
+    const [c] = filtroCursoActual.split('|');
+    lista = lista.filter(a => a.curso === c);
+  }
+  const div = document.getElementById('lista-actividades');
+  if (lista.length === 0) {
+    div.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>No hay actividades. Crea la primera.</p></div>';
+    return;
+  }
+  div.innerHTML = lista.map(a => `
+    <div class="act-card">
+      <span class="act-dim ${a.dimension}">${a.dimension}</span>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${a.nombre}</div>
+        <div style="font-size:11px;color:var(--gris-oscuro)">${a.curso} · Trim. ${a.trimestre} · ${a.fecha}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function agregarActividad() {
+  const nombre = document.getElementById('a-nombre').value.trim();
+  const dim = document.getElementById('a-dim').value;
+  const curso = document.getElementById('a-curso').value;
+  const trim = document.getElementById('a-trim').value;
+  const fecha = document.getElementById('a-fecha').value;
+  if (!nombre || !curso) { showToast('Completa los campos requeridos'); return; }
+  DB.actividades.push({ id: 'ACT' + Date.now(), nombre, dimension: dim, curso, trimestre: trim, fecha });
+  guardarDB();
+  closeModal('modal-actividad');
+  renderActividades();
+  showToast('Actividad creada ✓');
+}
+
+// ===== OBSERVACIONES =====
+function renderObservaciones() {
+  renderFiltros('filtro-obs', filtroCursoActual);
+  let lista = DB.observaciones;
+  const div = document.getElementById('lista-observaciones');
+  if (lista.length === 0) {
+    div.innerHTML = '<div class="empty"><div class="empty-icon">💬</div><p>No hay observaciones registradas.</p></div>';
+    return;
+  }
+  div.innerHTML = lista.map(o => `
+    <div class="obs-card">
+      <div class="obs-header">
+        <span class="obs-estudiante">${o.estudiante}</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="obs-fecha">${o.fecha}</span>
+          <span class="obs-visible ${o.visible}">${o.visible === 'SI' ? '👁 Visible' : '🔒 Privado'}</span>
+        </div>
+      </div>
+      <div class="obs-texto">${o.texto}</div>
+    </div>
+  `).join('');
+}
+
+function agregarObservacion() {
+  const estudiante = document.getElementById('o-estudiante').value;
+  const texto = document.getElementById('o-texto').value.trim();
+  const visible = document.getElementById('o-visible').value;
+  if (!estudiante || !texto) { showToast('Completa todos los campos'); return; }
+  DB.observaciones.push({ id: 'O' + Date.now(), estudiante, texto, visible, fecha: new Date().toLocaleDateString('es-BO') });
+  guardarDB();
+  closeModal('modal-obs');
+  renderObservaciones();
+  showToast('Observación guardada ✓');
+}
+
+// ===== FILTROS =====
+function renderFiltros(containerId, activo) {
+  const div = document.getElementById(containerId);
+  let html = `<button class="filtro-chip ${activo === 'todos' ? 'active' : ''}" onclick="setFiltro('todos','${containerId}')">Todos</button>`;
+  DB.cursos.forEach(c => {
+    const key = c.curso + '|' + c.materia;
+    html += `<button class="filtro-chip ${activo === key ? 'active' : ''}" onclick="setFiltro('${key}','${containerId}')">${c.curso} - ${c.materia}</button>`;
+  });
+  div.innerHTML = html;
+}
+
+function setFiltro(val, containerId) {
+  filtroCursoActual = val;
+  const screenMap = { 'filtro-cursos': 'estudiantes', 'filtro-asist': 'asistencia', 'filtro-notas': 'notas', 'filtro-act': 'actividades', 'filtro-obs': 'observaciones' };
+  renderScreen(screenMap[containerId]);
+}
+
+// ===== MODALES =====
+function openModal(id) {
+  if (id === 'modal-estudiante') {
+    const sel = document.getElementById('e-curso');
+    const selM = document.getElementById('e-materia-sel');
+    sel.innerHTML = DB.cursos.map(c => `<option value="${c.curso}">${c.curso}</option>`).join('');
+    selM.innerHTML = DB.cursos.map(c => `<option value="${c.materia}">${c.materia}</option>`).join('');
+  }
+  if (id === 'modal-actividad') {
+    document.getElementById('a-curso').innerHTML = DB.cursos.map(c => `<option value="${c.curso}">${c.curso} - ${c.materia}</option>`).join('');
+    document.getElementById('a-fecha').value = new Date().toISOString().split('T')[0];
+  }
+  if (id === 'modal-obs') {
+    document.getElementById('o-estudiante').innerHTML = DB.estudiantes.map(e => `<option value="${e.nombre}">${e.nombre}</option>`).join('');
+  }
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== INIT =====
+cargarDB();
+document.getElementById('docente-nombre').textContent = DB.docente.nombre;
+renderInicio();
+</script>
+</body>
+</html>
