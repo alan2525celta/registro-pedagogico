@@ -193,7 +193,9 @@
         <button class="dt" onclick="setDim('HACER',this)">HACER (40)</button>
         <button class="dt" onclick="setDim('AUTO',this)">Autoevaluación (5)</button>
       </div>
-      <div class="tc"><table><thead id="nth"></thead><tbody id="tb-notas"></tbody></table></div>
+      <div style="background:#fff;border-radius:12px;box-shadow:var(--sombra);overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table style="min-width:100%;width:max-content;border-collapse:collapse;font-size:13px"><thead id="nth"></thead><tbody id="tb-notas"></tbody></table>
+      </div>
     </div>
 
     <!-- OBSERVACIONES -->
@@ -308,6 +310,7 @@ async function iniciarApp() {
 async function cargarDatos() {
   CURSOS = await sbGet('asignaciones', { id_docente: DOCENTE.id });
   ESTUDIANTES = await sbGet('estudiantes', { id_docente: DOCENTE.id });
+  ESTUDIANTES.sort((a, b) => a.nombre.localeCompare(b.nombre));
   ACTIVIDADES = await sbGet('actividades', { id_docente: DOCENTE.id });
   const notasArr = await sbGet('notas', { id_docente: DOCENTE.id });
   NOTAS = {};
@@ -433,6 +436,7 @@ async function agregarEstudiante() {
   showToast('Guardando...');
   await sbInsert('estudiantes', obj);
   ESTUDIANTES.push(obj);
+  ESTUDIANTES.sort((a, b) => a.nombre.localeCompare(b.nombre));
   closeModal('modal-est');
   renderEstudiantes();
   showToast('Estudiante agregado ✓');
@@ -508,6 +512,10 @@ async function guardarAsistencia() {
       });
     }
   }
+  // Reset: deseleccionar todos los botones y limpiar estado temporal
+  lista.forEach(e => { ASIST_TEMP[e.id] = ''; });
+  document.querySelectorAll('.ab').forEach(b => b.className = 'ab');
+  actualizarContadores();
   showToast('Asistencia guardada en Supabase ✓');
 }
 
@@ -561,27 +569,42 @@ function renderNotas() {
   const tbody = document.getElementById('tb-notas');
 
   if (dimActual === 'RESUMEN') {
-    nth.innerHTML = '<tr><th>#</th><th>Estudiante</th><th>SER</th><th>SABER→45</th><th>HACER→40</th><th>AUTO</th><th>TOTAL</th></tr>';
+    const serActs = actsDelTrim.filter(a => a.dimension === 'SER');
+    const saberActs = actsDelTrim.filter(a => a.dimension === 'SABER');
+    const hacerActs = actsDelTrim.filter(a => a.dimension === 'HACER');
+    // Build header with all activity columns
+    let thSer = serActs.map(a => `<th style="background:#dbeafe;color:#1d4ed8;font-size:10px">${a.nombre_actividad}<br><small>SER(0-10)</small></th>`).join('');
+    let thSaber = saberActs.map(a => `<th style="background:#e0e7ff;color:#4338ca;font-size:10px">${a.nombre_actividad}<br><small>SABER(0-100)</small></th>`).join('');
+    let thHacer = hacerActs.map(a => `<th style="background:#d1fae5;color:#065f46;font-size:10px">${a.nombre_actividad}<br><small>HACER(0-100)</small></th>`).join('');
+    nth.innerHTML = `<tr>
+      <th>#</th><th>Apellidos y Nombres</th>
+      ${thSer}<th style="background:#93c5fd;color:#1e3a8a">Prom.SER</th>
+      ${thSaber}<th style="background:#a5b4fc;color:#312e81">Prom.SABER→45</th>
+      ${thHacer}<th style="background:#6ee7b7;color:#064e3b">Prom.HACER→40</th>
+      <th style="background:#fef3c7;color:#92400e">Auto(5)</th>
+      <th style="background:#1a3a6b;color:#fff">TOTAL</th>
+      <th>Estado</th>
+    </tr>`;
     tbody.innerHTML = lista.map((e, i) => {
-      const serActs = actsDelTrim.filter(a => a.dimension === 'SER');
-      const saberActs = actsDelTrim.filter(a => a.dimension === 'SABER');
-      const hacerActs = actsDelTrim.filter(a => a.dimension === 'HACER');
       const ser = promDim(e.id, serActs);
       const saber = promDim(e.id, saberActs);
       const hacer = promDim(e.id, hacerActs);
-      const saberConv = saber !== null ? (saber * 0.45).toFixed(1) : '-';
-      const hacerConv = hacer !== null ? (hacer * 0.40).toFixed(1) : '-';
       const autoNota = getAutoEval(e.id);
       const total = calcTotal(ser, saber, hacer, autoNota);
       const cls = total === '-' ? 'tem' : parseFloat(total) >= 51 ? 'tok' : 'tlo';
+      const estado = total === '-' ? '' : parseFloat(total) >= 51 ? 'APROBADO' : 'REPROBADO';
+      const serCols = serActs.map(a => `<td style="text-align:center">${NOTAS[e.id]?.[a.id] ?? '-'}</td>`).join('');
+      const saberCols = saberActs.map(a => `<td style="text-align:center">${NOTAS[e.id]?.[a.id] ?? '-'}</td>`).join('');
+      const hacerCols = hacerActs.map(a => `<td style="text-align:center">${NOTAS[e.id]?.[a.id] ?? '-'}</td>`).join('');
       return `<tr>
         <td>${i+1}</td>
         <td><strong>${e.nombre}</strong></td>
-        <td>${ser !== null ? ser.toFixed(1) : '-'}</td>
-        <td>${saberConv}</td>
-        <td>${hacerConv}</td>
-        <td><input class="ni2" type="number" min="0" max="5" value="${autoNota||''}" placeholder="-" onchange="saveAutoEval('${e.id}',this.value,'${e.curso}','${e.materia}')"></td>
-        <td><span class="tb ${cls}">${total}</span></td>
+        ${serCols}<td style="text-align:center;font-weight:600">${ser !== null ? ser.toFixed(1) : '-'}</td>
+        ${saberCols}<td style="text-align:center;font-weight:600">${saber !== null ? (saber*0.45).toFixed(1) : '-'}</td>
+        ${hacerCols}<td style="text-align:center;font-weight:600">${hacer !== null ? (hacer*0.40).toFixed(1) : '-'}</td>
+        <td style="text-align:center"><input class="ni2" type="number" min="0" max="5" value="${autoNota||''}" placeholder="0-5" onchange="saveAutoEval('${e.id}',this.value,'${e.curso}','${e.materia}')"></td>
+        <td style="text-align:center"><span class="tb ${cls}">${total}</span></td>
+        <td style="font-size:11px;font-weight:500;color:${estado==='APROBADO'?'var(--verde)':'var(--rojo)'}">${estado}</td>
       </tr>`;
     }).join('');
   } else {
@@ -596,12 +619,16 @@ function renderNotas() {
           <td><input class="ni2" type="number" min="0" max="5" value="${getAutoEval(e.id)||''}" placeholder="-" onchange="saveAutoEval('${e.id}',this.value,'${e.curso}','${e.materia}')"></td>
         </tr>`).join('');
     } else {
-      const actCols = acts.map(a => `<th>${a.nombre_actividad}<br><small style="opacity:.7;font-weight:400">${a.dimension}</small></th>`).join('');
+      const actCols = acts.map(a => {
+        const maxPts = a.dimension === 'SER' ? 10 : 100;
+        return `<th>${a.nombre_actividad}<br><small style="opacity:.7;font-weight:400">${a.dimension} (0-${maxPts})</small></th>`;
+      }).join('');
       nth.innerHTML = `<tr><th>#</th><th>Estudiante</th>${actCols}<th>Promedio</th></tr>`;
       tbody.innerHTML = lista.map((e, i) => {
         const cols = acts.map(a => {
+          const maxPts = a.dimension === 'SER' ? 10 : 100;
           const nota = NOTAS[e.id]?.[a.id] || '';
-          return `<td><input class="ni2" type="number" min="0" max="100" value="${nota}" placeholder="-" onchange="saveNota('${e.id}','${a.id}','${a.dimension}','${e.curso}','${e.materia}',this.value)"></td>`;
+          return `<td><input class="ni2" type="number" min="0" max="${maxPts}" value="${nota}" placeholder="0-${maxPts}" title="Ingresa entre 0 y ${maxPts}" onchange="saveNota('${e.id}','${a.id}','${a.dimension}','${e.curso}','${e.materia}',this.value,this)"></td>`;
         }).join('');
         const prom = promDim(e.id, acts);
         return `<tr><td>${i+1}</td><td><strong>${e.nombre}</strong></td>${cols}<td><span class="tb ${prom!==null?'tok':'tem'}">${prom!==null?prom.toFixed(1):'-'}</span></td></tr>`;
@@ -623,20 +650,36 @@ function getAutoEval(estId) {
 }
 
 async function saveAutoEval(estId, val, curso, materia) {
-  localStorage.setItem('auto_' + estId, val);
+  const num = parseFloat(val);
+  if (isNaN(num) || num < 0 || num > 5) {
+    showToast('⚠️ Autoevaluación: ingresa entre 0 y 5');
+    return;
+  }
+  localStorage.setItem('auto_' + estId, num);
   await sbInsert('autoevaluacion', {
     id: 'AE_' + estId + '_' + trimActual,
     id_docente: DOCENTE.id,
     id_estudiante: estId,
     curso, materia,
     trimestre: String(trimActual),
-    nota: parseFloat(val) || 0
+    nota: num
   });
 }
 
-async function saveNota(estId, actId, dim, curso, materia, val) {
+async function saveNota(estId, actId, dim, curso, materia, val, inputEl) {
+  const num = parseFloat(val);
+  const maximos = { SER: 10, SABER: 100, HACER: 100 };
+  const max = maximos[dim] || 100;
+  if (isNaN(num) || num < 0 || num > max) {
+    inputEl.style.border = '1.5px solid var(--rojo)';
+    inputEl.title = `Ingresa un valor entre 0 y ${max}`;
+    showToast(`⚠️ Nota inválida. Rango: 0 a ${max}`);
+    return;
+  }
+  inputEl.style.border = '1px solid var(--borde)';
+  inputEl.title = '';
   if (!NOTAS[estId]) NOTAS[estId] = {};
-  NOTAS[estId][actId] = parseFloat(val) || 0;
+  NOTAS[estId][actId] = num;
   await sbInsert('notas', {
     id: 'N_' + estId + '_' + actId,
     id_docente: DOCENTE.id,
@@ -645,7 +688,7 @@ async function saveNota(estId, actId, dim, curso, materia, val) {
     curso, materia,
     trimestre: String(trimActual),
     dimension: dim,
-    nota: parseFloat(val) || 0
+    nota: num
   });
 }
 
@@ -776,7 +819,11 @@ function openModal(id) {
     document.getElementById('fa-trim').value = String(trimActual);
   }
   if (id === 'modal-obs') {
-    document.getElementById('fo-est').innerHTML = ESTUDIANTES.map(e => `<option value="${e.id}">${e.nombre} - ${e.curso}</option>`).join('');
+    let estFiltrados = filtroActual !== 'todos'
+      ? ESTUDIANTES.filter(e => { const [c,m] = filtroActual.split('|'); return e.curso === c && e.materia === m; })
+      : ESTUDIANTES;
+    if (!estFiltrados.length) estFiltrados = ESTUDIANTES;
+    document.getElementById('fo-est').innerHTML = estFiltrados.map(e => `<option value="${e.id}">${e.nombre} - ${e.curso}</option>`).join('');
   }
   document.getElementById(id).classList.add('open');
 }
