@@ -118,7 +118,14 @@ tr:last-child td{border-bottom:none}
 .ov{font-size:10px;padding:2px 7px;border-radius:10px;cursor:pointer;border:none;font-weight:500}
 .ov.SI{background:#dcfce7;color:var(--verde)}
 .ov.NO{background:var(--gris);color:var(--gris2)}
-/* CONTEXT MENU */
+/* VERTICAL TH */
+.th-vert{writing-mode:vertical-rl;transform:rotate(180deg);max-height:100px;min-width:28px;max-width:36px;padding:6px 4px !important;font-size:10px !important;overflow:hidden;text-overflow:ellipsis;white-space:normal;word-break:break-all;vertical-align:bottom}
+/* ENCABEZADOS degradados profesionales */
+th.th-ser{background:linear-gradient(135deg,#1e3a8a,#2563eb)}
+th.th-saber{background:linear-gradient(135deg,#581c87,#7c3aed)}
+th.th-hacer{background:linear-gradient(135deg,#064e3b,#059669)}
+th.th-auto{background:linear-gradient(135deg,#78350f,#d97706)}
+th.th-total{background:linear-gradient(135deg,#111827,#374151)}
 .ctx-menu{position:fixed;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:500;min-width:160px;overflow:hidden;display:none}
 .ctx-menu.show{display:block}
 .ctx-item{padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}
@@ -417,7 +424,60 @@ tr:last-child td{border-bottom:none}
   <div class="fa"><button class="btn" onclick="closeModal('modal-obs')">Cancelar</button><button class="btn btn-p" onclick="agregarObservacion()">Guardar</button></div>
 </div></div>
 
-<div class="mo" id="modal-confirm"><div class="md" style="max-width:340px;text-align:center">
+<div class="mo" id="modal-edit-curso"><div class="md">
+  <h2>✏️ Editar Curso</h2>
+  <input type="hidden" id="edit-curso-id">
+  <div class="fg"><label>Nivel y Curso</label>
+    <select id="edit-curso-nombre">
+      <optgroup label="Educación Primaria">
+        <option>1ro A</option><option>1ro B</option><option>2do A</option><option>2do B</option>
+        <option>3ro A</option><option>3ro B</option><option>4to A</option><option>4to B</option>
+        <option>5to A</option><option>5to B</option><option>6to A</option><option>6to B</option>
+      </optgroup>
+      <optgroup label="Educación Secundaria">
+        <option>1ro A Sec.</option><option>1ro B Sec.</option><option>2do A Sec.</option><option>2do B Sec.</option>
+        <option>3ro A Sec.</option><option>3ro B Sec.</option><option>4to A Sec.</option><option>4to B Sec.</option>
+        <option>5to A Sec.</option><option>5to B Sec.</option><option>6to A Sec.</option><option>6to B Sec.</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="fg"><label>Área / Materia</label>
+    <select id="edit-curso-mat">
+      <optgroup label="Comunidad y Sociedad">
+        <option>Comunicación y Lenguajes</option><option>Lengua Extranjera</option>
+        <option>Ciencias Sociales</option><option>Educación Física y Deportes</option>
+        <option>Educación Musical</option><option>Artes Plásticas y Visuales</option>
+        <option>Valores Espirituales y Religiones</option>
+      </optgroup>
+      <optgroup label="Vida Tierra y Territorio">
+        <option>Ciencias Naturales: Biología-Geografía</option><option>Física</option>
+        <option>Química</option><option>Cosmovisiones y Filosofía</option>
+      </optgroup>
+      <optgroup label="Ciencia Tecnología y Producción">
+        <option>Matemática</option><option>Técnica Tecnológica General</option>
+        <option>Técnica Tecnológica Especializada</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="fg"><label>Turno</label><select id="edit-curso-turno"><option>MAÑANA</option><option>TARDE</option></select></div>
+  <div class="fa"><button class="btn" onclick="closeModal('modal-edit-curso')">Cancelar</button><button class="btn btn-p" onclick="guardarEditCurso()">Guardar cambios</button></div>
+</div></div>
+
+<div class="mo" id="modal-edit-act"><div class="md">
+  <h2>✏️ Editar Actividad</h2>
+  <input type="hidden" id="edit-act-id">
+  <div class="fg"><label>Nombre de la actividad</label><input id="edit-act-nombre"></div>
+  <div class="fg"><label>Dimensión</label>
+    <select id="edit-act-dim">
+      <option value="SABER">SABER (sobre 100 → 45)</option>
+      <option value="HACER">HACER (sobre 100 → 40)</option>
+      <option value="SER">SER (sobre 10)</option>
+    </select>
+  </div>
+  <div class="fg"><label>Trimestre</label><select id="edit-act-trim"><option value="1">1er Trimestre</option><option value="2">2do Trimestre</option><option value="3">3er Trimestre</option></select></div>
+  <div class="fg"><label>Fecha</label><input type="date" id="edit-act-fecha"></div>
+  <div class="fa"><button class="btn" onclick="closeModal('modal-edit-act')">Cancelar</button><button class="btn btn-p" onclick="guardarEditAct()">Guardar cambios</button></div>
+</div></div><div class="md" style="max-width:340px;text-align:center">
   <div style="font-size:36px;margin-bottom:10px">⚠️</div>
   <h2 style="justify-content:center" id="confirm-title">¿Confirmar eliminación?</h2>
   <p id="confirm-msg" style="font-size:13px;color:var(--gris2);margin:8px 0 16px"></p>
@@ -544,7 +604,15 @@ async function cargarDatos(){
     if(!NOTAS[n.id_estudiante]) NOTAS[n.id_estudiante]={};
     NOTAS[n.id_estudiante][n.id_actividad]=parseFloat(n.nota);
   });
-  // Load autoevaluacion from supabase too
+  // FIX 5: Pre-load asistencia and observaciones to localStorage for offline use
+  if(isOnline){
+    try{
+      const {data:asistData}=await sb.from('asistencia').select('*').eq('id_docente',DOCENTE.id);
+      if(asistData) saveLocalAll('asistencia',asistData);
+      const {data:obsData}=await sb.from('observaciones').select('*').eq('id_docente',DOCENTE.id);
+      if(obsData) saveLocalAll('observaciones',obsData);
+    }catch(e){ console.log('Preload offline data error:',e); }
+  }
   const autoArr=await sbGet('autoevaluacion',{id_docente:DOCENTE.id});
   autoArr.forEach(a=>{ localStorage.setItem('auto_'+a.id_estudiante+'_'+a.trimestre, a.nota); });
 }
@@ -777,22 +845,42 @@ async function guardarAsistencia(){
 async function renderAsistResumen(){
   if(!cursoCurrent) return;
   const lista=getEstCurso();
-  const allAsist=await sbGet('asistencia',{id_docente:DOCENTE.id});
+  // FIX 4: Load ALL asistencia records (not filtered by date) from local cache (includes offline data)
+  const allAsist=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia);
+  // Also try to get from Supabase if online to ensure latest data
+  if(isOnline){
+    try{
+      const {data}=await sb.from('asistencia').select('*').eq('id_docente',DOCENTE.id).eq('curso',cursoCurrent.curso);
+      if(data) saveLocalAll('asistencia',[...getLocalAll('asistencia').filter(a=>a.curso!==cursoCurrent.curso||a.materia!==cursoCurrent.materia),...data]);
+    }catch(e){}
+  }
+  const allAsistFinal=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia);
+  // Get unique dates
+  const fechas=[...new Set(allAsistFinal.map(a=>a.fecha))].sort();
   const tbody=document.getElementById('tb-asist-resumen');
+  // Update header with date count
+  document.querySelector('#tb-asist-resumen').closest('table').querySelector('thead tr').innerHTML=`
+    <th style="text-align:left;background:var(--azul);color:#fff">Estudiante</th>
+    <th style="background:linear-gradient(135deg,#064e3b,#059669);color:#fff">P</th>
+    <th style="background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff">F</th>
+    <th style="background:linear-gradient(135deg,#78350f,#d97706);color:#fff">A</th>
+    <th style="background:linear-gradient(135deg,#312e81,#6366f1);color:#fff">L</th>
+    <th style="background:linear-gradient(135deg,#111827,#374151);color:#fff">Total días (${fechas.length})</th>`;
   tbody.innerHTML=lista.map(e=>{
-    const reg=allAsist.filter(a=>a.id_estudiante===e.id);
+    const reg=allAsistFinal.filter(a=>a.id_estudiante===e.id);
     const P=reg.filter(a=>a.estado==='P').length;
     const F=reg.filter(a=>a.estado==='F').length;
     const A=reg.filter(a=>a.estado==='A').length;
     const L=reg.filter(a=>a.estado==='L').length;
     const total=P+F+A+L;
+    const pct=total>0?Math.round(P/total*100):0;
     return `<tr>
       <td class="td-nombre">${e.nombre}</td>
-      <td style="color:var(--verde);font-weight:600">${P}</td>
-      <td style="color:var(--rojo);font-weight:600">${F}</td>
+      <td style="color:#059669;font-weight:600">${P}</td>
+      <td style="color:#dc2626;font-weight:600">${F}</td>
       <td style="color:#d97706;font-weight:600">${A}</td>
       <td style="color:#6366f1;font-weight:600">${L}</td>
-      <td><strong>${total}</strong></td>
+      <td><strong>${total}</strong> <span style="font-size:10px;color:var(--gris2)">(${pct}% asist.)</span></td>
     </tr>`;
   }).join('');
 }
@@ -846,9 +934,9 @@ function renderNotas(){
     const serActs=actsDelTrim.filter(a=>a.dimension==='SER');
     const saberActs=actsDelTrim.filter(a=>a.dimension==='SABER');
     const hacerActs=actsDelTrim.filter(a=>a.dimension==='HACER');
-    const thSer=serActs.map(a=>`<th class="th-ser" style="writing-mode:vertical-rl;transform:rotate(180deg);height:90px;padding:6px 4px;font-size:10px">${a.nombre_actividad}</th>`).join('');
-    const thSaber=saberActs.map(a=>`<th class="th-saber" style="writing-mode:vertical-rl;transform:rotate(180deg);height:90px;padding:6px 4px;font-size:10px">${a.nombre_actividad}</th>`).join('');
-    const thHacer=hacerActs.map(a=>`<th class="th-hacer" style="writing-mode:vertical-rl;transform:rotate(180deg);height:90px;padding:6px 4px;font-size:10px">${a.nombre_actividad}</th>`).join('');
+    const thSer=serActs.map(a=>`<th class="th-ser th-vert">${a.nombre_actividad}</th>`).join('');
+    const thSaber=saberActs.map(a=>`<th class="th-saber th-vert">${a.nombre_actividad}</th>`).join('');
+    const thHacer=hacerActs.map(a=>`<th class="th-hacer th-vert">${a.nombre_actividad}</th>`).join('');
     nth.innerHTML=`<tr>
       <th class="th-nombre" style="min-width:160px;text-align:left">#&nbsp;Apellidos y Nombres</th>
       ${thSer}<th class="th-ser" style="font-size:10px">⌀SER</th>
@@ -891,7 +979,7 @@ function renderNotas(){
           <td><input class="ni2" type="number" min="0" max="5" step="0.5" value="${getAutoEval(e.id)||''}" placeholder="0–5" onclick="event.stopPropagation()" onchange="saveAutoEval('${e.id}',this.value,'${cursoCurrent.curso}','${cursoCurrent.materia}',this)"></td>
         </tr>`).join('');
     } else {
-      const actCols=acts.map(a=>`<th class="${colClass}" style="writing-mode:vertical-rl;transform:rotate(180deg);height:90px;padding:6px 4px;font-size:10px">${a.nombre_actividad}<br><span style="font-size:9px;opacity:.8">0–${maxPts}</span></th>`).join('');
+      const actCols=acts.map(a=>`<th class="${colClass} th-vert">${a.nombre_actividad}<br><span style="font-size:9px;opacity:.85">0–${maxPts}</span></th>`).join('');
       nth.innerHTML=`<tr><th class="th-nombre" style="text-align:left;min-width:160px"># Estudiante</th>${actCols}<th class="${colClass}">Promedio</th></tr>`;
       tbody.innerHTML=lista.map((e,i)=>{
         const cols=acts.map(a=>{
@@ -1017,11 +1105,15 @@ function showCtx(e,type,id){
   ctxType=type; ctxTarget=id;
   const menu=document.getElementById('ctx-menu');
   const editItem=document.getElementById('ctx-edit');
-  editItem.style.display=type==='actividad'?'none':'flex';
-  menu.style.left=Math.min(e.clientX||e.touches?.[0]?.clientX||0, window.innerWidth-170)+'px';
-  menu.style.top=Math.min(e.clientY||e.touches?.[0]?.clientY||0, window.innerHeight-100)+'px';
+  // Show edit for all types
+  editItem.style.display='flex';
+  const x=e.clientX||e.touches?.[0]?.clientX||0;
+  const y=e.clientY||e.touches?.[0]?.clientY||0;
+  menu.style.left=Math.min(x, window.innerWidth-170)+'px';
+  menu.style.top=Math.min(y, window.innerHeight-100)+'px';
   menu.classList.add('show');
   e.preventDefault();
+  e.stopPropagation();
 }
 
 document.addEventListener('click',()=>document.getElementById('ctx-menu').classList.remove('show'));
@@ -1037,6 +1129,54 @@ function ctxEdit(){
     document.getElementById('edit-est-fecha').value=est.fecha_nac||'';
     openModal('modal-edit-est');
   }
+  if(ctxType==='curso'){
+    const c=CURSOS.find(x=>x.id===ctxTarget);
+    if(!c) return;
+    document.getElementById('edit-curso-id').value=c.id;
+    document.getElementById('edit-curso-nombre').value=c.curso;
+    document.getElementById('edit-curso-mat').value=c.materia;
+    document.getElementById('edit-curso-turno').value=c.turno;
+    openModal('modal-edit-curso');
+  }
+  if(ctxType==='actividad'){
+    const a=ACTIVIDADES.find(x=>x.id===ctxTarget);
+    if(!a) return;
+    document.getElementById('edit-act-id').value=a.id;
+    document.getElementById('edit-act-nombre').value=a.nombre_actividad;
+    document.getElementById('edit-act-dim').value=a.dimension;
+    document.getElementById('edit-act-trim').value=a.trimestre;
+    document.getElementById('edit-act-fecha').value=a.fecha||'';
+    openModal('modal-edit-act');
+  }
+}
+
+async function guardarEditCurso(){
+  const id=document.getElementById('edit-curso-id').value;
+  const c=CURSOS.find(x=>x.id===id);
+  if(!c) return;
+  c.curso=document.getElementById('edit-curso-nombre').value;
+  c.materia=document.getElementById('edit-curso-mat').value;
+  c.turno=document.getElementById('edit-curso-turno').value;
+  await sbUpsert('asignaciones',c);
+  if(cursoCurrent?.id===id){ cursoCurrent=c; seleccionarCurso(id); }
+  closeModal('modal-edit-curso');
+  renderInicio();
+  showToast('Curso actualizado ✓');
+}
+
+async function guardarEditAct(){
+  const id=document.getElementById('edit-act-id').value;
+  const a=ACTIVIDADES.find(x=>x.id===id);
+  if(!a) return;
+  a.nombre_actividad=document.getElementById('edit-act-nombre').value.trim();
+  a.dimension=document.getElementById('edit-act-dim').value;
+  a.trimestre=document.getElementById('edit-act-trim').value;
+  a.fecha=document.getElementById('edit-act-fecha').value;
+  await sbUpsert('actividades',a);
+  closeModal('modal-edit-act');
+  renderActividades();
+  renderNotas();
+  showToast('Actividad actualizada ✓');
 }
 
 async function guardarEditEst(){
@@ -1065,21 +1205,17 @@ async function confirmarEliminar(){
   closeModal('modal-confirm');
   showToast('Eliminando...');
   if(ctxType==='estudiante'){
-    await sbDelete('estudiantes',ctxTarget);
-    // Delete related notas and asistencia
-    const notasRel=getLocalAll('notas').filter(n=>n.id_estudiante===ctxTarget);
-    for(const n of notasRel) await sbDelete('notas',n.id);
-    const asistRel=getLocalAll('asistencia').filter(a=>a.id_estudiante===ctxTarget);
-    for(const a of asistRel) await sbDelete('asistencia',a.id);
+    // FIX 3: Only remove from local app, keep in Supabase for historical records
+    deleteLocal('estudiantes',ctxTarget);
     ESTUDIANTES=ESTUDIANTES.filter(e=>e.id!==ctxTarget);
     renderEstudiantes(); renderInicio();
+    showToast('Estudiante ocultado (datos conservados en Supabase) ✓');
+    return;
   }
   if(ctxType==='actividad'){
     await sbDelete('actividades',ctxTarget);
-    // Delete related notas
     const notasRel=getLocalAll('notas').filter(n=>n.id_actividad===ctxTarget);
     for(const n of notasRel){ await sbDelete('notas',n.id); }
-    // Update local NOTAS cache
     Object.keys(NOTAS).forEach(estId=>{ delete NOTAS[estId][ctxTarget]; });
     ACTIVIDADES=ACTIVIDADES.filter(a=>a.id!==ctxTarget);
     renderActividades(); renderNotas();
@@ -1162,3 +1298,4 @@ if(saved){ DOCENTE=JSON.parse(saved); iniciarApp(); }
 </script>
 </body>
 </html>
+
