@@ -48,11 +48,12 @@ body{font-family:'Segoe UI',sans-serif;background:var(--gris);color:var(--texto)
 .tc{background:#fff;border-radius:12px;box-shadow:var(--sombra);overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{border-collapse:collapse;font-size:12px;white-space:nowrap}
 th{background:var(--azul);color:#fff;padding:8px 9px;text-align:center;font-weight:500;font-size:11px;position:sticky;top:0;z-index:2}
-th.th-ser{background:var(--ser-h)}
-th.th-saber{background:var(--saber-h)}
-th.th-hacer{background:var(--hacer-h)}
-th.th-auto{background:var(--auto);color:#fff}
-th.th-total{background:#1e293b}
+th.th-ser{background:linear-gradient(135deg,#1e3a8a,#2563eb)}
+th.th-saber{background:linear-gradient(135deg,#581c87,#7c3aed)}
+th.th-hacer{background:linear-gradient(135deg,#064e3b,#059669)}
+th.th-auto{background:linear-gradient(135deg,#78350f,#d97706);color:#fff}
+th.th-total{background:linear-gradient(135deg,#111827,#374151)}
+th.th-vert{writing-mode:vertical-rl;transform:rotate(180deg);max-height:100px;min-width:28px;max-width:36px;padding:6px 4px !important;font-size:10px !important;overflow:hidden;word-break:break-all;vertical-align:bottom}
 th.th-nombre{text-align:left;position:sticky;left:0;z-index:3;background:var(--azul)}
 td{padding:7px 9px;border-bottom:1px solid var(--borde);text-align:center}
 td.td-nombre{text-align:left;font-weight:500;position:sticky;left:0;background:#fff;z-index:1;min-width:160px}
@@ -70,7 +71,6 @@ tr:last-child td{border-bottom:none}
 .fg input,.fg select,.fg textarea{width:100%;padding:8px 10px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;transition:border .2s}
 .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--azul2)}
 .fa{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-/* ASISTENCIA */
 .ar{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fff;border-radius:8px;margin-bottom:5px;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:all .15s}
 .ar:hover{box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .an{flex:1;font-size:13px;font-weight:500}
@@ -85,13 +85,11 @@ tr:last-child td{border-bottom:none}
 .sb.p{background:#dcfce7}.sb.f{background:#fee2e2}.sb.a{background:#fef3c7}.sb.l{background:#e0e7ff}
 .sn{font-size:18px;font-weight:700}
 .sl{font-size:9px;font-weight:500}
-/* NOTAS INPUT */
 .ni2{width:52px;padding:3px 4px;border:1.5px solid var(--borde);border-radius:5px;font-size:12px;text-align:center;transition:border .15s}
 .ni2:focus{outline:none;border-color:var(--azul2);background:#eff6ff}
 .ni2.invalid{border-color:var(--rojo);background:#fff1f2}
 .tb{display:inline-block;padding:3px 7px;border-radius:10px;font-size:11px;font-weight:600}
 .tok{background:#dcfce7;color:var(--verde)}.tlo{background:#fee2e2;color:var(--rojo)}.tem{background:var(--gris);color:var(--gris2)}
-/* DIM TABS */
 .dtabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
 .dt{padding:5px 11px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .12s}
 .dt.active-ser{background:var(--ser-h);color:#fff;border-color:var(--ser-h)}
@@ -99,17 +97,14 @@ tr:last-child td{border-bottom:none}
 .dt.active-hacer{background:var(--hacer-h);color:#fff;border-color:var(--hacer-h)}
 .dt.active-auto{background:var(--auto);color:#fff;border-color:var(--auto)}
 .dt.active-res{background:var(--azul);color:#fff;border-color:var(--azul)}
-/* FILTROS */
 .fc{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
 .fch{padding:4px 10px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-size:11px;cursor:pointer;transition:all .12s}
 .fch.active{background:var(--azul);color:#fff;border-color:var(--azul)}
-/* ACTIVIDADES */
 .ac{background:#fff;border-radius:10px;padding:11px;margin-bottom:6px;box-shadow:0 1px 3px rgba(0,0,0,.07);display:flex;align-items:center;gap:8px}
 .adim{padding:3px 7px;border-radius:10px;font-size:10px;font-weight:600}
 .adim.SER{background:var(--ser-bg);color:var(--ser-h)}
 .adim.SABER{background:var(--saber-bg);color:var(--saber-h)}
 .adim.HACER{background:var(--hacer-bg);color:var(--hacer-h)}
-/* OBSERVACIONES */
 .oc{background:#fff;border-radius:10px;padding:12px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
 .oh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;gap:8px}
 .oe{font-weight:600;font-size:13px}
@@ -118,34 +113,22 @@ tr:last-child td{border-bottom:none}
 .ov{font-size:10px;padding:2px 7px;border-radius:10px;cursor:pointer;border:none;font-weight:500}
 .ov.SI{background:#dcfce7;color:var(--verde)}
 .ov.NO{background:var(--gris);color:var(--gris2)}
-/* VERTICAL TH */
-.th-vert{writing-mode:vertical-rl;transform:rotate(180deg);max-height:100px;min-width:28px;max-width:36px;padding:6px 4px !important;font-size:10px !important;overflow:hidden;text-overflow:ellipsis;white-space:normal;word-break:break-all;vertical-align:bottom}
-/* ENCABEZADOS degradados profesionales */
-th.th-ser{background:linear-gradient(135deg,#1e3a8a,#2563eb)}
-th.th-saber{background:linear-gradient(135deg,#581c87,#7c3aed)}
-th.th-hacer{background:linear-gradient(135deg,#064e3b,#059669)}
-th.th-auto{background:linear-gradient(135deg,#78350f,#d97706)}
-th.th-total{background:linear-gradient(135deg,#111827,#374151)}
+/* CONTEXT MENU */
 .ctx-menu{position:fixed;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:500;min-width:160px;overflow:hidden;display:none}
 .ctx-menu.show{display:block}
 .ctx-item{padding:10px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s}
 .ctx-item:hover{background:var(--gris)}
 .ctx-item.danger{color:var(--rojo)}
 .ctx-item.danger:hover{background:#fff1f2}
-/* OFFLINE BANNER */
 .offline-banner{background:#f59e0b;color:#fff;text-align:center;padding:5px;font-size:11px;font-weight:500;display:none}
 .offline-banner.show{display:block}
 .sync-badge{position:fixed;bottom:16px;right:16px;background:#1e293b;color:#fff;border-radius:20px;padding:6px 12px;font-size:11px;z-index:300;display:none;align-items:center;gap:6px}
 .sync-badge.show{display:flex}
-/* ASISTENCIA RESUMEN TABLE */
 .asist-resumen{background:#fff;border-radius:10px;box-shadow:var(--sombra);overflow-x:auto;margin-top:10px}
-/* EMPTY */
 .empty{text-align:center;padding:30px 20px;color:var(--gris2)}
 .ei{font-size:32px;margin-bottom:6px}
-/* TOAST */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
-/* LOGIN */
 .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#1a3a6b 0%,#1e40af 100%)}
 .login-box{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .login-box .logo-big{width:60px;height:60px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px}
@@ -154,9 +137,12 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
 .trim-sel{display:flex;gap:6px;margin-bottom:12px}
 .trim-btn{flex:1;padding:7px;border-radius:8px;border:1.5px solid var(--borde);background:#fff;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .12s}
 .trim-btn.active{background:var(--azul);color:#fff;border-color:var(--azul)}
-/* SYNC INDICATOR */
 .saving-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#f59e0b;margin-right:4px;animation:pulse .8s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* IMPORT EXCEL */
+.import-zone{border:2px dashed var(--borde);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border .2s;margin-bottom:10px}
+.import-zone:hover{border-color:var(--azul2)}
+.import-zone.dragover{border-color:var(--azul2);background:#eff6ff}
 @media(max-width:600px){.main{padding:8px}.cgrid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -225,7 +211,10 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
     <div id="screen-estudiantes" class="screen">
       <div class="sh">
         <div class="st">Estudiantes</div>
-        <button class="btn btn-p btn-sm" onclick="openModal('modal-est')">+ Agregar</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-p btn-sm" onclick="openModal('modal-est')">+ Agregar</button>
+          <button class="btn btn-sm" style="background:var(--verde);color:#fff" onclick="openModal('modal-import')">📂 Importar Excel</button>
+        </div>
       </div>
       <div id="curso-info-bar" style="background:var(--azul);color:#fff;border-radius:8px;padding:7px 12px;margin-bottom:10px;font-size:12px;display:flex;justify-content:space-between;align-items:center">
         <span id="curso-info-text">Selecciona un curso desde Inicio</span>
@@ -244,12 +233,10 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
         <span id="asist-curso-text">Selecciona un curso desde Inicio</span>
         <button onclick="showScreen('inicio')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">← Cambiar</button>
       </div>
-      <!-- TABS asistencia -->
       <div style="display:flex;gap:6px;margin-bottom:10px">
-        <button class="btn btn-p btn-sm active-asist-tab" id="tab-llamada" onclick="showAsistTab('llamada',this)">📋 Llamada</button>
+        <button class="btn btn-p btn-sm" id="tab-llamada" onclick="showAsistTab('llamada',this)">📋 Llamada</button>
         <button class="btn btn-sm" id="tab-resumen" style="background:var(--gris);color:var(--gris2)" onclick="showAsistTab('resumen',this)">📊 Resumen</button>
       </div>
-      <!-- LLAMADA -->
       <div id="asist-llamada">
         <div class="as">
           <div class="sb p"><div class="sn" id="cp">0</div><div class="sl">Presentes</div></div>
@@ -263,14 +250,16 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
           <button class="btn btn-p" onclick="guardarAsistencia()">💾 Guardar asistencia</button>
         </div>
       </div>
-      <!-- RESUMEN ASISTENCIA -->
       <div id="asist-resumen-panel" style="display:none">
         <div class="asist-resumen">
           <table style="width:100%">
-            <thead><tr>
-              <th style="text-align:left">Estudiante</th>
-              <th class="th-ser">P</th><th class="th-rojo" style="background:var(--rojo)">F</th>
-              <th class="th-auto">A</th><th class="th-saber">L</th><th class="th-total">Total días</th>
+            <thead id="asist-resumen-thead"><tr>
+              <th style="text-align:left;background:var(--azul)">Estudiante</th>
+              <th style="background:linear-gradient(135deg,#064e3b,#059669)">P</th>
+              <th style="background:linear-gradient(135deg,#991b1b,#dc2626)">F</th>
+              <th style="background:linear-gradient(135deg,#78350f,#d97706)">A</th>
+              <th style="background:linear-gradient(135deg,#312e81,#6366f1)">L</th>
+              <th style="background:linear-gradient(135deg,#111827,#374151)">Total días</th>
             </tr></thead>
             <tbody id="tb-asist-resumen"></tbody>
           </table>
@@ -308,7 +297,7 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
         <button class="dt" onclick="setDim('HACER',this,'hacer')" style="border-color:var(--hacer-h);color:var(--hacer-h)">HACER (40)</button>
         <button class="dt" onclick="setDim('AUTO',this,'auto')" style="border-color:var(--auto);color:var(--auto)">Autoevaluación (5)</button>
       </div>
-      <div class="tc"><table id="tabla-notas-table"><thead id="nth"></thead><tbody id="tb-notas"></tbody></table></div>
+      <div class="tc"><table><thead id="nth"></thead><tbody id="tb-notas"></tbody></table></div>
     </div>
 
     <!-- OBSERVACIONES -->
@@ -389,41 +378,7 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
   <div class="fa"><button class="btn" onclick="closeModal('modal-edit-est')">Cancelar</button><button class="btn btn-p" onclick="guardarEditEst()">Guardar cambios</button></div>
 </div></div>
 
-<div class="mo" id="modal-act"><div class="md">
-  <h2>📋 Nueva Actividad</h2>
-  <div class="fg"><label>Nombre de la actividad</label><input id="fa-nombre" placeholder="Ej: Examen parcial 1"></div>
-  <div class="fg"><label>Dimensión</label>
-    <select id="fa-dim">
-      <option value="SABER">SABER (califica sobre 100 → promedia a 45)</option>
-      <option value="HACER">HACER (califica sobre 100 → promedia a 40)</option>
-      <option value="SER">SER (califica sobre 10)</option>
-    </select>
-  </div>
-  <div class="fg"><label>Trimestre</label><select id="fa-trim"><option value="1">1er Trimestre</option><option value="2">2do Trimestre</option><option value="3">3er Trimestre</option></select></div>
-  <div class="fg"><label>Fecha</label><input type="date" id="fa-fecha"></div>
-  <div class="fa"><button class="btn" onclick="closeModal('modal-act')">Cancelar</button><button class="btn btn-p" onclick="agregarActividad()">Guardar</button></div>
-</div></div>
-
-<div class="mo" id="modal-obs"><div class="md">
-  <h2>💬 Nueva Observación</h2>
-  <div class="fg"><label>Estudiante</label><select id="fo-est"></select></div>
-  <div class="fg"><label>Tipo</label>
-    <select id="fo-tipo">
-      <option value="ACADEMICA">Académica</option><option value="CONDUCTUAL">Conductual</option>
-      <option value="ASISTENCIA">Asistencia</option><option value="LOGRO">Logro destacado</option>
-      <option value="GENERAL">General</option>
-    </select>
-  </div>
-  <div class="fg"><label>Descripción</label><textarea id="fo-texto" rows="3" placeholder="Describe la observación..."></textarea></div>
-  <div class="fg"><label>Visibilidad para el padre de familia</label>
-    <select id="fo-vis">
-      <option value="SI">👁 VISIBLE — El padre puede verla en su acceso</option>
-      <option value="NO">🔒 PRIVADO — Solo visible para el docente</option>
-    </select>
-  </div>
-  <div class="fa"><button class="btn" onclick="closeModal('modal-obs')">Cancelar</button><button class="btn btn-p" onclick="agregarObservacion()">Guardar</button></div>
-</div></div>
-
+<!-- NUEVO: modal editar curso -->
 <div class="mo" id="modal-edit-curso"><div class="md">
   <h2>✏️ Editar Curso</h2>
   <input type="hidden" id="edit-curso-id">
@@ -463,6 +418,7 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
   <div class="fa"><button class="btn" onclick="closeModal('modal-edit-curso')">Cancelar</button><button class="btn btn-p" onclick="guardarEditCurso()">Guardar cambios</button></div>
 </div></div>
 
+<!-- NUEVO: modal editar actividad -->
 <div class="mo" id="modal-edit-act"><div class="md">
   <h2>✏️ Editar Actividad</h2>
   <input type="hidden" id="edit-act-id">
@@ -477,7 +433,70 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
   <div class="fg"><label>Trimestre</label><select id="edit-act-trim"><option value="1">1er Trimestre</option><option value="2">2do Trimestre</option><option value="3">3er Trimestre</option></select></div>
   <div class="fg"><label>Fecha</label><input type="date" id="edit-act-fecha"></div>
   <div class="fa"><button class="btn" onclick="closeModal('modal-edit-act')">Cancelar</button><button class="btn btn-p" onclick="guardarEditAct()">Guardar cambios</button></div>
-</div></div><div class="md" style="max-width:340px;text-align:center">
+</div></div>
+
+<div class="mo" id="modal-act"><div class="md">
+  <h2>📋 Nueva Actividad</h2>
+  <div class="fg"><label>Nombre de la actividad</label><input id="fa-nombre" placeholder="Ej: Examen parcial 1"></div>
+  <div class="fg"><label>Dimensión</label>
+    <select id="fa-dim">
+      <option value="SABER">SABER (califica sobre 100 → promedia a 45)</option>
+      <option value="HACER">HACER (califica sobre 100 → promedia a 40)</option>
+      <option value="SER">SER (califica sobre 10)</option>
+    </select>
+  </div>
+  <div class="fg"><label>Trimestre</label><select id="fa-trim"><option value="1">1er Trimestre</option><option value="2">2do Trimestre</option><option value="3">3er Trimestre</option></select></div>
+  <div class="fg"><label>Fecha</label><input type="date" id="fa-fecha"></div>
+  <div class="fa"><button class="btn" onclick="closeModal('modal-act')">Cancelar</button><button class="btn btn-p" onclick="agregarActividad()">Guardar</button></div>
+</div></div>
+
+<div class="mo" id="modal-obs"><div class="md">
+  <h2>💬 Nueva Observación</h2>
+  <div class="fg"><label>Estudiante</label><select id="fo-est"></select></div>
+  <div class="fg"><label>Tipo</label>
+    <select id="fo-tipo">
+      <option value="ACADEMICA">Académica</option><option value="CONDUCTUAL">Conductual</option>
+      <option value="ASISTENCIA">Asistencia</option><option value="LOGRO">Logro destacado</option>
+      <option value="GENERAL">General</option>
+    </select>
+  </div>
+  <div class="fg"><label>Descripción</label><textarea id="fo-texto" rows="3" placeholder="Describe la observación..."></textarea></div>
+  <div class="fg"><label>Visibilidad para el padre de familia</label>
+    <select id="fo-vis">
+      <option value="SI">👁 VISIBLE — El padre puede verla en su acceso</option>
+      <option value="NO">🔒 PRIVADO — Solo visible para el docente</option>
+    </select>
+  </div>
+  <div class="fa"><button class="btn" onclick="closeModal('modal-obs')">Cancelar</button><button class="btn btn-p" onclick="agregarObservacion()">Guardar</button></div>
+</div></div>
+
+<!-- NUEVO: modal importar Excel/CSV -->
+<div class="mo" id="modal-import"><div class="md">
+  <h2>📂 Importar Nómina de Estudiantes</h2>
+  <p style="font-size:12px;color:var(--gris2);margin-bottom:12px">Sube un archivo Excel (.xlsx) o CSV con la nómina. El archivo debe tener columnas: <strong>NOMBRE</strong>, <strong>RUDE</strong> (opcional), <strong>FECHA_NAC</strong> (opcional).</p>
+  <div class="import-zone" id="import-zone" onclick="document.getElementById('import-file').click()"
+    ondragover="event.preventDefault();this.classList.add('dragover')"
+    ondragleave="this.classList.remove('dragover')"
+    ondrop="handleDrop(event)">
+    <div style="font-size:28px;margin-bottom:6px">📄</div>
+    <div style="font-size:13px;font-weight:500;color:var(--azul)">Toca para seleccionar archivo</div>
+    <div style="font-size:11px;color:var(--gris2);margin-top:4px">Excel (.xlsx) o CSV (.csv)</div>
+  </div>
+  <input type="file" id="import-file" accept=".csv,.xlsx" style="display:none" onchange="handleImportFile(this.files[0])">
+  <div id="import-preview" style="display:none">
+    <div style="font-size:12px;font-weight:500;color:var(--azul);margin-bottom:6px" id="import-count"></div>
+    <div class="tc" style="max-height:200px;overflow-y:auto">
+      <table style="width:100%"><thead><tr><th style="text-align:left">#</th><th style="text-align:left">Nombre</th><th>RUDE</th><th>Fecha Nac.</th></tr></thead>
+      <tbody id="import-tbody"></tbody></table>
+    </div>
+  </div>
+  <div class="fa">
+    <button class="btn" onclick="closeModal('modal-import');resetImport()">Cancelar</button>
+    <button class="btn btn-p" id="import-confirm-btn" style="display:none" onclick="confirmarImport()">✓ Importar todos</button>
+  </div>
+</div></div>
+
+<div class="mo" id="modal-confirm"><div class="md" style="max-width:340px;text-align:center">
   <div style="font-size:36px;margin-bottom:10px">⚠️</div>
   <h2 style="justify-content:center" id="confirm-title">¿Confirmar eliminación?</h2>
   <p id="confirm-msg" style="font-size:13px;color:var(--gris2);margin:8px 0 16px"></p>
@@ -490,24 +509,24 @@ th.th-total{background:linear-gradient(135deg,#111827,#374151)}
 <div class="toast" id="toast"></div>
 <div class="sync-badge" id="sync-badge"><span class="saving-dot"></span> Sincronizando...</div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const SUPA_URL='https://dmhkidkzriiorctxmwzv.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtaGtpZGt6cmlpb3JjdHhtd3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDEyNjAsImV4cCI6MjA4OTI3NzI2MH0.XkRFktuBo051m-CLsso4dhPcj2oOzUZEHRLyC4jGMRg';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
 let DOCENTE=null,CURSOS=[],ESTUDIANTES=[],ACTIVIDADES=[],NOTAS={},ASIST_TEMP={};
-let cursoCurrent=null; // {curso, materia, id} objeto del curso seleccionado
+let cursoCurrent=null;
 let dimActual='RESUMEN',trimActual=1;
 let selectedRowId=null;
 let ctxTarget=null,ctxType=null;
-let pendingQueue=[]; // offline queue
+let pendingQueue=[];
 let isOnline=navigator.onLine;
 const COLORES_CURSOS=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)','var(--c8)'];
 
 // ===== OFFLINE =====
 window.addEventListener('online',()=>{ isOnline=true; document.getElementById('offline-banner').classList.remove('show'); syncPending(); });
 window.addEventListener('offline',()=>{ isOnline=false; document.getElementById('offline-banner').classList.add('show'); });
-
 function showSync(){ const s=document.getElementById('sync-badge'); s.classList.add('show'); setTimeout(()=>s.classList.remove('show'),2000); }
 
 async function syncPending(){
@@ -525,26 +544,15 @@ async function syncPending(){
 }
 
 async function sbUpsert(tabla,data){
-  // Save locally first (instant)
   saveLocal(tabla,data);
-  if(isOnline){
-    showSync();
-    sb.from(tabla).upsert(data).then(({error})=>{ if(error) console.error(error); });
-  } else {
-    pendingQueue.push({type:'upsert',tabla,data});
-    localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue));
-  }
+  if(isOnline){ showSync(); sb.from(tabla).upsert(data).then(({error})=>{ if(error) console.error(error); }); }
+  else{ pendingQueue.push({type:'upsert',tabla,data}); localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue)); }
 }
 
 async function sbDelete(tabla,id){
   deleteLocal(tabla,id);
-  if(isOnline){
-    showSync();
-    sb.from(tabla).delete().eq('id',id).then(({error})=>{ if(error) console.error(error); });
-  } else {
-    pendingQueue.push({type:'delete',tabla,id});
-    localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue));
-  }
+  if(isOnline){ showSync(); sb.from(tabla).delete().eq('id',id).then(({error})=>{ if(error) console.error(error); }); }
+  else{ pendingQueue.push({type:'delete',tabla,id}); localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue)); }
 }
 
 async function sbGet(tabla,filtros={}){
@@ -552,7 +560,7 @@ async function sbGet(tabla,filtros={}){
     let q=sb.from(tabla).select('*');
     for(const [k,v] of Object.entries(filtros)) q=q.eq(k,v);
     const {data,error}=await q;
-    if(!error && data){ saveLocalAll(tabla,data); return data; }
+    if(!error&&data){ saveLocalAll(tabla,data); return data; }
   }
   return getLocalAll(tabla,filtros);
 }
@@ -584,7 +592,6 @@ async function iniciarApp(){
   document.getElementById('app').style.display='block';
   document.getElementById('doc-nombre').textContent=DOCENTE.nombre.split(' ').slice(0,2).join(' ');
   document.getElementById('ue-nombre').textContent=DOCENTE.unidad_educativa||'U.E.';
-  // Load pending queue
   try{ pendingQueue=JSON.parse(localStorage.getItem('pendingQueue')||'[]'); }catch(e){}
   showToast('Cargando...');
   await cargarDatos();
@@ -600,21 +607,18 @@ async function cargarDatos(){
   ACTIVIDADES=await sbGet('actividades',{id_docente:DOCENTE.id});
   const notasArr=await sbGet('notas',{id_docente:DOCENTE.id});
   NOTAS={};
-  notasArr.forEach(n=>{
-    if(!NOTAS[n.id_estudiante]) NOTAS[n.id_estudiante]={};
-    NOTAS[n.id_estudiante][n.id_actividad]=parseFloat(n.nota);
-  });
-  // FIX 5: Pre-load asistencia and observaciones to localStorage for offline use
+  notasArr.forEach(n=>{ if(!NOTAS[n.id_estudiante]) NOTAS[n.id_estudiante]={}; NOTAS[n.id_estudiante][n.id_actividad]=parseFloat(n.nota); });
+  const autoArr=await sbGet('autoevaluacion',{id_docente:DOCENTE.id});
+  autoArr.forEach(a=>{ localStorage.setItem('auto_'+a.id_estudiante+'_'+a.trimestre,a.nota); });
+  // preload asistencia y observaciones para offline
   if(isOnline){
     try{
-      const {data:asistData}=await sb.from('asistencia').select('*').eq('id_docente',DOCENTE.id);
-      if(asistData) saveLocalAll('asistencia',asistData);
-      const {data:obsData}=await sb.from('observaciones').select('*').eq('id_docente',DOCENTE.id);
-      if(obsData) saveLocalAll('observaciones',obsData);
-    }catch(e){ console.log('Preload offline data error:',e); }
+      const {data:ad}=await sb.from('asistencia').select('*').eq('id_docente',DOCENTE.id);
+      if(ad) saveLocalAll('asistencia',ad);
+      const {data:od}=await sb.from('observaciones').select('*').eq('id_docente',DOCENTE.id);
+      if(od) saveLocalAll('observaciones',od);
+    }catch(e){}
   }
-  const autoArr=await sbGet('autoevaluacion',{id_docente:DOCENTE.id});
-  autoArr.forEach(a=>{ localStorage.setItem('auto_'+a.id_estudiante+'_'+a.trimestre, a.nota); });
 }
 
 // ===== NAVEGACIÓN =====
@@ -626,13 +630,8 @@ function showScreen(id){
   if(id==='inicio') renderInicio();
 }
 
-// goScreen: solo navega si hay curso seleccionado (excepto inicio)
 function goScreen(id){
-  if(!cursoCurrent && id!=='inicio'){
-    showToast('⚠️ Primero selecciona un curso desde Inicio');
-    showScreen('inicio');
-    return;
-  }
+  if(!cursoCurrent&&id!=='inicio'){ showToast('⚠️ Primero selecciona un curso desde Inicio'); showScreen('inicio'); return; }
   showScreen(id);
   renderScreen(id);
 }
@@ -655,15 +654,12 @@ function setTrim(t,btn){
 // ===== INICIO =====
 function renderInicio(){
   const grid=document.getElementById('cursos-grid');
-  if(!CURSOS.length){
-    grid.innerHTML='<div class="empty"><div class="ei">📚</div><p>No hay cursos. Agrega el primero.</p></div>';
-    return;
-  }
+  if(!CURSOS.length){ grid.innerHTML='<div class="empty"><div class="ei">📚</div><p>No hay cursos. Agrega el primero.</p></div>'; return; }
   grid.innerHTML=CURSOS.map((c,i)=>{
     const color=COLORES_CURSOS[i%COLORES_CURSOS.length];
     const cnt=ESTUDIANTES.filter(e=>e.curso===c.curso&&e.materia===c.materia).length;
     const isActive=cursoCurrent&&cursoCurrent.id===c.id;
-    return `<div class="cc" style="background:${color};${isActive?'box-shadow:0 0 0 3px #fbbf24,0 8px 20px rgba(0,0,0,.3);':''}position:relative"
+    return `<div class="cc" style="background:${color};${isActive?'box-shadow:0 0 0 3px #fbbf24,0 8px 20px rgba(0,0,0,.3);':''}"
       onclick="seleccionarCurso('${c.id}')"
       oncontextmenu="showCtx(event,'curso','${c.id}');return false"
       ontouchstart="startLongPress(event,'curso','${c.id}')" ontouchend="cancelLongPress()">
@@ -682,7 +678,6 @@ function seleccionarCurso(id){
   const badge=document.getElementById('curso-badge');
   badge.textContent=cursoCurrent.curso+' · '+cursoCurrent.materia;
   badge.style.display='inline-block';
-  // Update all bars
   const txt=cursoCurrent.curso+' — '+cursoCurrent.materia+' ('+cursoCurrent.turno+')';
   document.getElementById('curso-info-text').textContent=txt;
   document.getElementById('asist-curso-text').textContent=txt;
@@ -705,6 +700,21 @@ async function agregarCurso(){
   closeModal('modal-curso');
   renderInicio();
   showToast('Curso agregado ✓');
+}
+
+// NUEVO: editar curso
+async function guardarEditCurso(){
+  const id=document.getElementById('edit-curso-id').value;
+  const c=CURSOS.find(x=>x.id===id);
+  if(!c) return;
+  c.curso=document.getElementById('edit-curso-nombre').value;
+  c.materia=document.getElementById('edit-curso-mat').value;
+  c.turno=document.getElementById('edit-curso-turno').value;
+  await sbUpsert('asignaciones',c);
+  if(cursoCurrent&&cursoCurrent.id===id) seleccionarCurso(id);
+  closeModal('modal-edit-curso');
+  renderInicio();
+  showToast('Curso actualizado ✓');
 }
 
 // ===== ESTUDIANTES =====
@@ -752,16 +762,99 @@ async function agregarEstudiante(){
   showToast('Estudiante agregado ✓');
 }
 
+// ===== IMPORTAR EXCEL/CSV =====
+let importData=[];
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('import-zone').classList.remove('dragover');
+  const file=e.dataTransfer.files[0];
+  if(file) handleImportFile(file);
+}
+
+function handleImportFile(file){
+  if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const reader=new FileReader();
+  reader.onload=function(e){
+    let rows=[];
+    if(ext==='csv'){
+      const text=e.target.result;
+      const lines=text.split('\n').filter(l=>l.trim());
+      const headers=lines[0].split(',').map(h=>h.trim().toUpperCase().replace(/['"]/g,''));
+      for(let i=1;i<lines.length;i++){
+        const cols=lines[i].split(',').map(c=>c.trim().replace(/['"]/g,''));
+        const row={};
+        headers.forEach((h,j)=>{ row[h]=cols[j]||''; });
+        rows.push(row);
+      }
+    } else {
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{defval:''});
+      rows=data.map(r=>{
+        const norm={};
+        Object.keys(r).forEach(k=>{ norm[k.toUpperCase().trim()]=String(r[k]).trim(); });
+        return norm;
+      });
+    }
+    // Detectar columnas flexibles
+    importData=rows.map(r=>{
+      const nombre=r['NOMBRE']||r['APELLIDOS Y NOMBRES']||r['APELLIDOS_NOMBRES']||r['APELLIDO']||'';
+      const rude=r['RUDE']||r['CODIGO_RUDE']||r['CÓDIGO RUDE']||r['COD_RUDE']||r['CÓDIGO']||'';
+      const fecha=r['FECHA_NAC']||r['FECHA NAC']||r['FECHA DE NACIMIENTO']||r['FECHA']||'';
+      return {nombre:nombre.toUpperCase(),rude,fecha};
+    }).filter(r=>r.nombre.length>2);
+    mostrarPreviewImport();
+  };
+  if(ext==='csv') reader.readAsText(file,'UTF-8');
+  else reader.readAsArrayBuffer(file);
+}
+
+function mostrarPreviewImport(){
+  const preview=document.getElementById('import-preview');
+  const tbody=document.getElementById('import-tbody');
+  const count=document.getElementById('import-count');
+  if(!importData.length){ showToast('No se encontraron estudiantes en el archivo'); return; }
+  count.textContent=importData.length+' estudiantes encontrados';
+  tbody.innerHTML=importData.map((e,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${e.nombre}</td><td>${e.rude||'—'}</td><td>${e.fecha||'—'}</td></tr>`).join('');
+  preview.style.display='block';
+  document.getElementById('import-confirm-btn').style.display='inline-flex';
+}
+
+async function confirmarImport(){
+  if(!cursoCurrent){ showToast('Selecciona un curso primero'); return; }
+  showToast('Importando '+importData.length+' estudiantes...');
+  let cnt=0;
+  for(const e of importData){
+    if(!e.nombre) continue;
+    const obj={id:'E_'+Date.now()+'_'+cnt,id_docente:DOCENTE.id,nombre:e.nombre,codigo_rude:e.rude,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha_nac:e.fecha};
+    await sbUpsert('estudiantes',obj);
+    ESTUDIANTES.push(obj);
+    cnt++;
+    await new Promise(r=>setTimeout(r,50)); // small delay to avoid id collision
+  }
+  ESTUDIANTES.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  closeModal('modal-import');
+  resetImport();
+  renderEstudiantes();
+  renderInicio();
+  showToast('✓ '+cnt+' estudiantes importados');
+}
+
+function resetImport(){
+  importData=[];
+  document.getElementById('import-preview').style.display='none';
+  document.getElementById('import-confirm-btn').style.display='none';
+  document.getElementById('import-file').value='';
+}
+
 // ===== ASISTENCIA =====
-let asistTabActual='llamada';
 function showAsistTab(tab,btn){
-  asistTabActual=tab;
   document.getElementById('asist-llamada').style.display=tab==='llamada'?'block':'none';
   document.getElementById('asist-resumen-panel').style.display=tab==='resumen'?'block':'none';
   document.getElementById('tab-llamada').className='btn btn-sm'+(tab==='llamada'?' btn-p':'');
   document.getElementById('tab-resumen').className='btn btn-sm'+(tab==='resumen'?' btn-p':'');
-  if(tab==='llamada') document.getElementById('tab-llamada').style='';
-  else document.getElementById('tab-resumen').style='';
   if(tab==='resumen') renderAsistResumen();
 }
 
@@ -769,12 +862,8 @@ async function renderAsistencia(){
   document.getElementById('fecha-hoy').textContent=new Date().toLocaleDateString('es-BO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   if(!cursoCurrent){ document.getElementById('lista-asist').innerHTML='<div class="empty"><div class="ei">✋</div><p>Selecciona un curso desde Inicio</p></div>'; return; }
   const lista=getEstCurso();
-  const hoy=new Date().toISOString().split('T')[0];
-  // Load today's asistencia from local (not remote, to avoid reload delay)
-  const todayKey='asist_'+cursoCurrent.curso+'_'+cursoCurrent.materia+'_'+hoy;
-  const saved=JSON.parse(localStorage.getItem(todayKey)||'{}');
-  // Only show empty (not pre-filled) — point 12 fix
-  lista.forEach(e=>{ ASIST_TEMP[e.id]=''; }); // always start fresh on render
+  // Siempre arrancar limpio (fix punto 12)
+  lista.forEach(e=>{ ASIST_TEMP[e.id]=''; });
   actualizarContadores();
   const div=document.getElementById('lista-asist');
   if(!lista.length){ div.innerHTML='<div class="empty"><div class="ei">👥</div><p>No hay estudiantes en este curso.</p></div>'; return; }
@@ -809,7 +898,6 @@ function actualizarContadores(){
 function marcarTodos(tipo){
   getEstCurso().forEach(e=>{ ASIST_TEMP[e.id]=tipo; });
   renderAsistencia();
-  // Re-apply marks after re-render
   getEstCurso().forEach(e=>{
     ['P','F','A','L'].forEach(t=>{ const b=document.getElementById('ab_'+t+'_'+e.id); if(b) b.className='ab'; });
     const b=document.getElementById('ab_'+tipo+'_'+e.id); if(b) b.className='ab '+tipo;
@@ -825,15 +913,9 @@ async function guardarAsistencia(){
   showToast('Guardando asistencia...');
   for(const e of lista){
     if(ASIST_TEMP[e.id]){
-      await sbUpsert('asistencia',{
-        id:'AS_'+e.id+'_'+hoy,
-        id_docente:DOCENTE.id,id_estudiante:e.id,
-        curso:cursoCurrent.curso,materia:cursoCurrent.materia,
-        fecha:hoy,estado:ASIST_TEMP[e.id]
-      });
+      await sbUpsert('asistencia',{id:'AS_'+e.id+'_'+hoy,id_docente:DOCENTE.id,id_estudiante:e.id,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha:hoy,estado:ASIST_TEMP[e.id]});
     }
   }
-  // Reset all buttons (point 1 + point 12)
   lista.forEach(e=>{
     ASIST_TEMP[e.id]='';
     ['P','F','A','L'].forEach(t=>{ const b=document.getElementById('ab_'+t+'_'+e.id); if(b) b.className='ab'; });
@@ -845,29 +927,21 @@ async function guardarAsistencia(){
 async function renderAsistResumen(){
   if(!cursoCurrent) return;
   const lista=getEstCurso();
-  // FIX 4: Load ALL asistencia records (not filtered by date) from local cache (includes offline data)
+  // Usar datos locales para incluir offline + todos los días
   const allAsist=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia);
-  // Also try to get from Supabase if online to ensure latest data
-  if(isOnline){
-    try{
-      const {data}=await sb.from('asistencia').select('*').eq('id_docente',DOCENTE.id).eq('curso',cursoCurrent.curso);
-      if(data) saveLocalAll('asistencia',[...getLocalAll('asistencia').filter(a=>a.curso!==cursoCurrent.curso||a.materia!==cursoCurrent.materia),...data]);
-    }catch(e){}
-  }
-  const allAsistFinal=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia);
-  // Get unique dates
-  const fechas=[...new Set(allAsistFinal.map(a=>a.fecha))].sort();
+  const fechas=[...new Set(allAsist.map(a=>a.fecha))];
   const tbody=document.getElementById('tb-asist-resumen');
-  // Update header with date count
-  document.querySelector('#tb-asist-resumen').closest('table').querySelector('thead tr').innerHTML=`
-    <th style="text-align:left;background:var(--azul);color:#fff">Estudiante</th>
-    <th style="background:linear-gradient(135deg,#064e3b,#059669);color:#fff">P</th>
-    <th style="background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff">F</th>
-    <th style="background:linear-gradient(135deg,#78350f,#d97706);color:#fff">A</th>
-    <th style="background:linear-gradient(135deg,#312e81,#6366f1);color:#fff">L</th>
-    <th style="background:linear-gradient(135deg,#111827,#374151);color:#fff">Total días (${fechas.length})</th>`;
+  // Actualizar encabezado con total de días
+  document.getElementById('asist-resumen-thead').innerHTML=`<tr>
+    <th style="text-align:left;background:var(--azul)">Estudiante</th>
+    <th style="background:linear-gradient(135deg,#064e3b,#059669)">P</th>
+    <th style="background:linear-gradient(135deg,#991b1b,#dc2626)">F</th>
+    <th style="background:linear-gradient(135deg,#78350f,#d97706)">A</th>
+    <th style="background:linear-gradient(135deg,#312e81,#6366f1)">L</th>
+    <th style="background:linear-gradient(135deg,#111827,#374151)">Total (${fechas.length} días)</th>
+  </tr>`;
   tbody.innerHTML=lista.map(e=>{
-    const reg=allAsistFinal.filter(a=>a.id_estudiante===e.id);
+    const reg=allAsist.filter(a=>a.id_estudiante===e.id);
     const P=reg.filter(a=>a.estado==='P').length;
     const F=reg.filter(a=>a.estado==='F').length;
     const A=reg.filter(a=>a.estado==='A').length;
@@ -880,7 +954,7 @@ async function renderAsistResumen(){
       <td style="color:#dc2626;font-weight:600">${F}</td>
       <td style="color:#d97706;font-weight:600">${A}</td>
       <td style="color:#6366f1;font-weight:600">${L}</td>
-      <td><strong>${total}</strong> <span style="font-size:10px;color:var(--gris2)">(${pct}% asist.)</span></td>
+      <td><strong>${total}</strong> <span style="font-size:10px;color:var(--gris2)">(${pct}%)</span></td>
     </tr>`;
   }).join('');
 }
@@ -900,7 +974,7 @@ function renderActividades(){
         <div style="font-size:11px;color:var(--gris2)">Trim. ${a.trimestre} · ${a.fecha||'—'}</div>
       </div>
       <button class="btn btn-p btn-sm" onclick="goScreen('notas')">📝 Calificar</button>
-      <button class="btn btn-sm" style="background:var(--gris);color:var(--gris2)" onclick="showCtx(event,'actividad','${a.id}')">⋯</button>
+      <button class="btn btn-sm" style="background:var(--gris);color:var(--gris2)" onclick="event.stopPropagation();showCtx(event,'actividad','${a.id}')">⋯</button>
     </div>`).join('');
 }
 
@@ -917,6 +991,22 @@ async function agregarActividad(){
   closeModal('modal-act');
   renderActividades();
   showToast('Actividad creada ✓');
+}
+
+// NUEVO: editar actividad
+async function guardarEditAct(){
+  const id=document.getElementById('edit-act-id').value;
+  const a=ACTIVIDADES.find(x=>x.id===id);
+  if(!a) return;
+  a.nombre_actividad=document.getElementById('edit-act-nombre').value.trim();
+  a.dimension=document.getElementById('edit-act-dim').value;
+  a.trimestre=document.getElementById('edit-act-trim').value;
+  a.fecha=document.getElementById('edit-act-fecha').value;
+  await sbUpsert('actividades',a);
+  closeModal('modal-edit-act');
+  renderActividades();
+  renderNotas();
+  showToast('Actividad actualizada ✓');
 }
 
 // ===== NOTAS =====
@@ -944,7 +1034,7 @@ function renderNotas(){
       ${thHacer}<th class="th-hacer" style="font-size:10px">⌀HACER→40</th>
       <th class="th-auto" style="font-size:10px">AUTO(5)</th>
       <th class="th-total" style="font-size:10px">TOTAL</th>
-      <th style="background:#374151;color:#fff;font-size:10px">Estado</th>
+      <th style="background:linear-gradient(135deg,#1f2937,#374151);color:#fff;font-size:10px">Estado</th>
     </tr>`;
     tbody.innerHTML=lista.map((e,i)=>{
       const ser=promDim(e.id,serActs);
@@ -1008,7 +1098,7 @@ function promDim(estId,acts){
 async function saveNota(estId,actId,dim,curso,materia,val,inputEl){
   const maxPts={'SER':10,'SABER':100,'HACER':100}[dim]||100;
   const num=parseFloat(val);
-  if(val===''||val===null){ return; }
+  if(val===''||val===null) return;
   if(isNaN(num)||num<0||num>maxPts){
     inputEl.classList.add('invalid');
     showToast('⚠️ Rango válido: 0 a '+maxPts);
@@ -1018,7 +1108,6 @@ async function saveNota(estId,actId,dim,curso,materia,val,inputEl){
   inputEl.classList.remove('invalid');
   if(!NOTAS[estId]) NOTAS[estId]={};
   NOTAS[estId][actId]=num;
-  // Save instantly local, async to Supabase
   await sbUpsert('notas',{id:'N_'+estId+'_'+actId,id_docente:DOCENTE.id,id_estudiante:estId,id_actividad:actId,curso,materia,trimestre:String(trimActual),dimension:dim,nota:num});
 }
 
@@ -1026,8 +1115,7 @@ async function saveAutoEval(estId,val,curso,materia,inputEl){
   const num=parseFloat(val);
   if(isNaN(num)||num<0||num>5){
     if(inputEl){ inputEl.classList.add('invalid'); setTimeout(()=>inputEl.classList.remove('invalid'),2000); }
-    showToast('⚠️ Autoevaluación: 0 a 5');
-    return;
+    showToast('⚠️ Autoevaluación: 0 a 5'); return;
   }
   localStorage.setItem('auto_'+estId+'_'+trimActual,num);
   await sbUpsert('autoevaluacion',{id:'AE_'+estId+'_'+trimActual,id_docente:DOCENTE.id,id_estudiante:estId,curso,materia,trimestre:String(trimActual),nota:num});
@@ -1095,7 +1183,7 @@ async function agregarObservacion(){
   showToast('Observación guardada ✓');
 }
 
-// ===== CONTEXT MENU (long press / right click) =====
+// ===== CONTEXT MENU =====
 let lpTimer=null;
 function startLongPress(e,type,id){ lpTimer=setTimeout(()=>showCtx(e,type,id),600); }
 function cancelLongPress(){ if(lpTimer){ clearTimeout(lpTimer); lpTimer=null; } }
@@ -1104,13 +1192,12 @@ function showCtx(e,type,id){
   cancelLongPress();
   ctxType=type; ctxTarget=id;
   const menu=document.getElementById('ctx-menu');
-  const editItem=document.getElementById('ctx-edit');
-  // Show edit for all types
-  editItem.style.display='flex';
+  // Mostrar editar para todos los tipos
+  document.getElementById('ctx-edit').style.display='flex';
   const x=e.clientX||e.touches?.[0]?.clientX||0;
   const y=e.clientY||e.touches?.[0]?.clientY||0;
-  menu.style.left=Math.min(x, window.innerWidth-170)+'px';
-  menu.style.top=Math.min(y, window.innerHeight-100)+'px';
+  menu.style.left=Math.min(x,window.innerWidth-170)+'px';
+  menu.style.top=Math.min(y,window.innerHeight-100)+'px';
   menu.classList.add('show');
   e.preventDefault();
   e.stopPropagation();
@@ -1150,35 +1237,6 @@ function ctxEdit(){
   }
 }
 
-async function guardarEditCurso(){
-  const id=document.getElementById('edit-curso-id').value;
-  const c=CURSOS.find(x=>x.id===id);
-  if(!c) return;
-  c.curso=document.getElementById('edit-curso-nombre').value;
-  c.materia=document.getElementById('edit-curso-mat').value;
-  c.turno=document.getElementById('edit-curso-turno').value;
-  await sbUpsert('asignaciones',c);
-  if(cursoCurrent?.id===id){ cursoCurrent=c; seleccionarCurso(id); }
-  closeModal('modal-edit-curso');
-  renderInicio();
-  showToast('Curso actualizado ✓');
-}
-
-async function guardarEditAct(){
-  const id=document.getElementById('edit-act-id').value;
-  const a=ACTIVIDADES.find(x=>x.id===id);
-  if(!a) return;
-  a.nombre_actividad=document.getElementById('edit-act-nombre').value.trim();
-  a.dimension=document.getElementById('edit-act-dim').value;
-  a.trimestre=document.getElementById('edit-act-trim').value;
-  a.fecha=document.getElementById('edit-act-fecha').value;
-  await sbUpsert('actividades',a);
-  closeModal('modal-edit-act');
-  renderActividades();
-  renderNotas();
-  showToast('Actividad actualizada ✓');
-}
-
 async function guardarEditEst(){
   const id=document.getElementById('edit-est-id').value;
   const est=ESTUDIANTES.find(e=>e.id===id);
@@ -1195,7 +1253,12 @@ async function guardarEditEst(){
 
 function ctxDelete(){
   document.getElementById('ctx-menu').classList.remove('show');
-  const msgs={'estudiante':'Se eliminará el estudiante y todas sus notas y asistencias.','actividad':'Se eliminará la actividad y todas las calificaciones asociadas.','curso':'Se eliminará el curso y todos sus datos.','observacion':'Se eliminará esta observación.'};
+  const msgs={
+    'estudiante':'El estudiante se ocultará de la app. Sus datos históricos se conservan en Supabase.',
+    'actividad':'Se eliminará la actividad y todas sus calificaciones.',
+    'curso':'Se eliminará el curso.',
+    'observacion':'Se eliminará esta observación.'
+  };
   document.getElementById('confirm-msg').textContent=msgs[ctxType]||'Esta acción no se puede deshacer.';
   document.getElementById('confirm-ok-btn').onclick=confirmarEliminar;
   openModal('modal-confirm');
@@ -1205,17 +1268,17 @@ async function confirmarEliminar(){
   closeModal('modal-confirm');
   showToast('Eliminando...');
   if(ctxType==='estudiante'){
-    // FIX 3: Only remove from local app, keep in Supabase for historical records
+    // Solo ocultar localmente, conservar en Supabase
     deleteLocal('estudiantes',ctxTarget);
     ESTUDIANTES=ESTUDIANTES.filter(e=>e.id!==ctxTarget);
     renderEstudiantes(); renderInicio();
-    showToast('Estudiante ocultado (datos conservados en Supabase) ✓');
+    showToast('Estudiante ocultado ✓ (datos conservados en Supabase)');
     return;
   }
   if(ctxType==='actividad'){
     await sbDelete('actividades',ctxTarget);
     const notasRel=getLocalAll('notas').filter(n=>n.id_actividad===ctxTarget);
-    for(const n of notasRel){ await sbDelete('notas',n.id); }
+    for(const n of notasRel) await sbDelete('notas',n.id);
     Object.keys(NOTAS).forEach(estId=>{ delete NOTAS[estId][ctxTarget]; });
     ACTIVIDADES=ACTIVIDADES.filter(a=>a.id!==ctxTarget);
     renderActividades(); renderNotas();
@@ -1223,7 +1286,7 @@ async function confirmarEliminar(){
   if(ctxType==='curso'){
     await sbDelete('asignaciones',ctxTarget);
     CURSOS=CURSOS.filter(c=>c.id!==ctxTarget);
-    if(cursoCurrent?.id===ctxTarget){ cursoCurrent=null; document.getElementById('curso-badge').style.display='none'; }
+    if(cursoCurrent&&cursoCurrent.id===ctxTarget){ cursoCurrent=null; document.getElementById('curso-badge').style.display='none'; }
     renderInicio();
   }
   if(ctxType==='observacion'){
@@ -1298,4 +1361,3 @@ if(saved){ DOCENTE=JSON.parse(saved); iniciarApp(); }
 </script>
 </body>
 </html>
-
