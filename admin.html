@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrador — Registro Pedagógico</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--azul:#1a3a6b;--azul2:#2563eb;--verde:#059669;--rojo:#dc2626;--gris:#f1f5f9;--borde:#e2e8f0;--dorado:#b45309}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a3a6b,#1e40af);min-height:100vh;padding:16px}
+.container{max-width:700px;margin:0 auto}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+h1{color:#fff;font-size:20px;font-weight:700;text-align:center;margin-bottom:4px;padding-top:10px}
+.sub-h{color:rgba(255,255,255,.7);font-size:12px;text-align:center;margin-bottom:16px}
+h2{font-size:15px;font-weight:600;color:var(--azul);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.fg{margin-bottom:11px}
+label{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+input,select{width:100%;padding:8px 11px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none}
+input:focus{border-color:var(--azul2)}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-p{background:var(--azul2);color:#fff}.btn-p:hover{opacity:.9}
+.btn-g{background:var(--verde);color:#fff}
+.btn-r{background:var(--rojo);color:#fff;padding:5px 10px;font-size:11px}
+.btn-y{background:#d97706;color:#fff;padding:5px 10px;font-size:11px}
+.btn-full{width:100%;padding:10px;font-size:13px}
+/* ADMIN LOGIN */
+#admin-login{max-width:360px;margin:20px auto}
+/* TABLA DOCENTES */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--borde)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--azul);color:#fff;padding:8px 10px;text-align:left;font-size:11px;font-weight:500}
+td{padding:8px 10px;border-bottom:1px solid var(--borde)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.badge-on{background:#dcfce7;color:#065f46}
+.badge-off{background:#fee2e2;color:#991b1b}
+.badge-pend{background:#fef3c7;color:#92400e}
+/* CÓDIGOS */
+.codigo-box{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.codigo-val{font-family:monospace;font-size:15px;font-weight:700;color:var(--azul);letter-spacing:.1em}
+.codigo-st{font-size:10px;margin-top:2px}
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+/* INPUT COPY */
+.copy-row{display:flex;gap:6px;align-items:center}
+.copy-row input{flex:1;font-family:monospace;font-weight:600;background:#f8fafc}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--gris);border-radius:10px;padding:12px;text-align:center}
+.stat-n{font-size:24px;font-weight:700;color:var(--azul)}
+.stat-l{font-size:10px;color:#64748b;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🛡️ Panel de Administrador</h1>
+  <p class="sub-h">Registro Pedagógico 2026 — Franz Tamayo de Chachacomani</p>
+
+  <!-- LOGIN ADMIN -->
+  <div class="card" id="admin-login">
+    <h2>🔐 Acceso Administrador</h2>
+    <div class="fg">
+      <label>Código maestro de administrador</label>
+      <input type="password" id="admin-code" placeholder="Código maestro" autocomplete="off">
+    </div>
+    <button class="btn btn-p btn-full" onclick="loginAdmin()">Ingresar como Administrador</button>
+    <div id="admin-msg" style="margin-top:8px;font-size:12px;color:var(--rojo);text-align:center"></div>
+    <div style="margin-top:12px;text-align:center"><a href="/" style="font-size:12px;color:var(--azul2)">← Volver a la app</a></div>
+  </div>
+
+  <!-- PANEL PRINCIPAL (oculto hasta login) -->
+  <div id="admin-panel" style="display:none">
+
+    <!-- ESTADÍSTICAS -->
+    <div class="stats" id="stats-box">
+      <div class="stat"><div class="stat-n" id="s-total">—</div><div class="stat-l">Total docentes</div></div>
+      <div class="stat"><div class="stat-n" id="s-activos">—</div><div class="stat-l">Activos</div></div>
+      <div class="stat"><div class="stat-n" id="s-codigos">—</div><div class="stat-l">Códigos libres</div></div>
+    </div>
+
+    <!-- CREAR CÓDIGO -->
+    <div class="card">
+      <h2>🔑 Generar Código de Activación</h2>
+      <p style="font-size:12px;color:#64748b;margin-bottom:12px">Genera un código único para entregar a un docente nuevo. Cada código solo puede usarse una vez.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-g" onclick="generarCodigo()">+ Generar código nuevo</button>
+        <button class="btn btn-p" onclick="generarMultiple()">+ Generar 5 códigos</button>
+      </div>
+      <div id="codigos-nuevos" style="margin-top:12px"></div>
+    </div>
+
+    <!-- LISTA CÓDIGOS ACTIVOS -->
+    <div class="card">
+      <h2>📋 Códigos de Activación</h2>
+      <div id="lista-codigos">Cargando...</div>
+    </div>
+
+    <!-- LISTA DOCENTES -->
+    <div class="card">
+      <h2>👥 Docentes Registrados</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Nombre</th><th>Usuario</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tb-docentes"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:16px">
+      <button class="btn" style="background:rgba(255,255,255,.2);color:#fff" onclick="cerrarAdmin()">⏻ Cerrar sesión admin</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL='https://dmhkidkzriiorctxmwzv.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtaGtpZGt6cmlpb3JjdHhtd3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDEyNjAsImV4cCI6MjA4OTI3NzI2MH0.XkRFktuBo051m-CLsso4dhPcj2oOzUZEHRLyC4jGMRg';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+const ADMIN_CODE_KEY='ADMIN-FT2026'; // mismo que insertaste en Supabase
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+async function loginAdmin(){
+  const code=document.getElementById('admin-code').value.trim().toUpperCase();
+  // Verificar contra Supabase
+  const {data}=await sb.from('codigos_acceso').select('*').eq('codigo',code).eq('id','ADMIN_MASTER').single();
+  if(!data){ document.getElementById('admin-msg').textContent='Código incorrecto'; return; }
+  sessionStorage.setItem('admin_auth','1');
+  document.getElementById('admin-login').style.display='none';
+  document.getElementById('admin-panel').style.display='block';
+  await cargarTodo();
+}
+
+async function cargarTodo(){
+  await cargarStats();
+  await cargarCodigos();
+  await cargarDocentes();
+}
+
+async function cargarStats(){
+  const {data:docs}=await sb.from('docentes').select('id,activo,activado').neq('id','ADMIN');
+  const {data:cods}=await sb.from('codigos_acceso').select('*').eq('usado',false).neq('id','ADMIN_MASTER');
+  document.getElementById('s-total').textContent=(docs||[]).length;
+  document.getElementById('s-activos').textContent=(docs||[]).filter(d=>d.activo&&d.activado).length;
+  document.getElementById('s-codigos').textContent=(cods||[]).length;
+}
+
+async function cargarCodigos(){
+  const {data}=await sb.from('codigos_acceso').select('*').neq('id','ADMIN_MASTER').order('created_at',{ascending:false});
+  const div=document.getElementById('lista-codigos');
+  if(!data||!data.length){div.innerHTML='<p style="font-size:12px;color:#64748b">No hay códigos generados aún.</p>';return;}
+  div.innerHTML=data.map(c=>`
+    <div class="codigo-box">
+      <div>
+        <div class="codigo-val">${c.codigo}</div>
+        <div class="codigo-st ${c.usado?'':''}">
+          ${c.usado
+            ?'<span style="color:var(--gris2);font-size:10px">✓ Usado</span>'
+            :'<span style="color:var(--verde);font-size:10px;font-weight:600">● Disponible</span>'}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${!c.usado?`<button class="btn" style="background:#f1f5f9;color:#374151;font-size:11px;padding:5px 10px" onclick="copiarCodigo('${c.codigo}')">📋 Copiar</button>`:''}
+        ${!c.usado?`<button class="btn btn-r" onclick="eliminarCodigo('${c.id}')">🗑</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+async function cargarDocentes(){
+  const {data}=await sb.from('docentes').select('*').neq('id','ADMIN').order('nombre');
+  const tbody=document.getElementById('tb-docentes');
+  if(!data||!data.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#64748b;padding:16px">No hay docentes registrados</td></tr>';return;}
+  tbody.innerHTML=data.map((d,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${d.nombre}</strong><br><span style="font-size:10px;color:#64748b">${d.unidad_educativa||''}</span></td>
+      <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px">${d.usuario||'(sin usuario)'}</code></td>
+      <td>
+        ${d.activado
+          ?`<span class="badge badge-on">✓ Activo</span>`
+          :`<span class="badge badge-pend">⏳ Sin activar</span>`}
+        ${!d.activo?'<br><span class="badge badge-off">Bloqueado</span>':''}
+      </td>
+      <td style="white-space:nowrap">
+        ${d.activo
+          ?`<button class="btn btn-r" onclick="toggleDocente('${d.id}',false)">Bloquear</button>`
+          :`<button class="btn btn-g" style="padding:5px 10px;font-size:11px" onclick="toggleDocente('${d.id}',true)">Activar</button>`}
+        <button class="btn btn-y" style="margin-left:4px" onclick="resetPass('${d.id}','${d.nombre}')">Reset pass</button>
+      </td>
+    </tr>`).join('');
+}
+
+function generarCodigoStr(){
+  const letras='ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const nums='0123456789';
+  const part1=Array.from({length:2},()=>letras[Math.floor(Math.random()*letras.length)]).join('');
+  const part2=Array.from({length:4},()=>nums[Math.floor(Math.random()*nums.length)]).join('');
+  return 'FT-'+part1+part2;
+}
+
+async function generarCodigo(){
+  const codigo=generarCodigoStr();
+  const id='COD_'+Date.now();
+  const {error}=await sb.from('codigos_acceso').insert({id,codigo,usado:false});
+  if(error){showToast('Error: '+error.message);return;}
+  showToast('Código generado ✓');
+  document.getElementById('codigos-nuevos').innerHTML=`
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px;margin-top:8px">
+      <div style="font-size:11px;color:#065f46;margin-bottom:6px;font-weight:600">✓ Nuevo código listo para entregar:</div>
+      <div class="copy-row">
+        <input type="text" value="${codigo}" readonly id="new-cod-input">
+        <button class="btn btn-g" onclick="copiarCodigo('${codigo}')">📋 Copiar</button>
+      </div>
+    </div>`;
+  await cargarTodo();
+}
+
+async function generarMultiple(){
+  const codigos=[];
+  for(let i=0;i<5;i++){
+    const codigo=generarCodigoStr()+'_'+i;
+    const id='COD_'+Date.now()+'_'+i;
+    await sb.from('codigos_acceso').insert({id,codigo:generarCodigoStr(),usado:false});
+    codigos.push(codigo);
+  }
+  showToast('5 códigos generados ✓');
+  await cargarTodo();
+}
+
+function copiarCodigo(cod){
+  navigator.clipboard.writeText(cod).then(()=>showToast('Código copiado: '+cod)).catch(()=>{
+    const el=document.getElementById('new-cod-input');
+    if(el){el.select();document.execCommand('copy');showToast('Copiado ✓');}
+  });
+}
+
+async function eliminarCodigo(id){
+  if(!confirm('¿Eliminar este código?')) return;
+  await sb.from('codigos_acceso').delete().eq('id',id);
+  showToast('Código eliminado');
+  await cargarCodigos();
+  await cargarStats();
+}
+
+async function toggleDocente(id,estado){
+  const accion=estado?'activar':'bloquear';
+  if(!confirm('¿'+accion.charAt(0).toUpperCase()+accion.slice(1)+' este docente?')) return;
+  await sb.from('docentes').update({activo:estado}).eq('id',id);
+  showToast('Docente '+(estado?'activado':'bloqueado')+' ✓');
+  await cargarDocentes();
+  await cargarStats();
+}
+
+async function resetPass(id,nombre){
+  const nuevaPass=prompt('Nueva contraseña para '+nombre+' (mín. 6 caracteres):');
+  if(!nuevaPass||nuevaPass.length<6){alert('Contraseña muy corta');return;}
+  await sb.from('docentes').update({contrasena:btoa(nuevaPass)}).eq('id',id);
+  showToast('Contraseña actualizada ✓');
+}
+
+function cerrarAdmin(){
+  sessionStorage.removeItem('admin_auth');
+  location.reload();
+}
+
+// Auto-login si ya está autenticado en esta sesión
+if(sessionStorage.getItem('admin_auth')==='1'){
+  document.getElementById('admin-login').style.display='none';
+  document.getElementById('admin-panel').style.display='block';
+  cargarTodo();
+}
+</script>
+</body>
+</html>
