@@ -156,11 +156,43 @@ tr:last-child td{border-bottom:none}
     <div class="logo-big">🎓</div>
     <h1>Registro Pedagógico 2026</h1>
     <p class="sub">Sistema de Evaluación — Ley 070</p>
-    <div class="fg"><label>Nombre completo del docente</label><input id="l-nombre" placeholder="APELLIDO NOMBRE"></div>
-    <div class="fg"><label>Email Gmail</label><input id="l-email" type="email" placeholder="docente@gmail.com"></div>
-    <div class="fg"><label>Unidad Educativa</label><input id="l-ue" value="Franz Tamayo de Chachacomani"></div>
-    <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px;border-radius:10px" onclick="iniciarSesion()">Ingresar al Sistema</button>
-    <div id="login-msg" style="margin-top:8px;font-size:12px;color:var(--rojo);text-align:center"></div>
+
+    <!-- PANEL: Login normal (usuario + contraseña) -->
+    <div id="panel-login">
+      <div class="fg"><label>Usuario</label><input id="l-usuario" placeholder="Ej: acalcina" autocomplete="username" autocapitalize="none"></div>
+      <div class="fg" style="position:relative">
+        <label>Contraseña</label>
+        <input id="l-pass" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+        <span onclick="togglePass('l-pass')" style="position:absolute;right:10px;top:30px;cursor:pointer;font-size:16px">👁</span>
+      </div>
+      <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px;border-radius:10px;margin-bottom:10px" onclick="loginUsuario()">Ingresar</button>
+      <button onclick="showPanel('panel-activar')" style="background:none;border:none;color:var(--azul2);font-size:12px;cursor:pointer;width:100%;text-align:center">¿Primera vez? Activar cuenta con código</button>
+    </div>
+
+    <!-- PANEL: Activación primera vez -->
+    <div id="panel-activar" style="display:none">
+      <div style="background:#fef3c7;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#92400e">
+        🔑 Ingresa el código de activación que te entregó el administrador
+      </div>
+      <div class="fg"><label>Código de Activación</label><input id="l-codigo" placeholder="Ej: FT2026-001" autocapitalize="characters"></div>
+      <div class="fg"><label>Nombre completo</label><input id="l-nombre" placeholder="APELLIDO NOMBRE" autocapitalize="characters"></div>
+      <div class="fg"><label>Unidad Educativa</label><input id="l-ue" value="Franz Tamayo de Chachacomani"></div>
+      <div class="fg"><label>Crear usuario (sin espacios)</label><input id="l-usuario-nuevo" placeholder="Ej: acalcina" autocapitalize="none"></div>
+      <div class="fg" style="position:relative">
+        <label>Crear contraseña (mín. 6 caracteres)</label>
+        <input id="l-pass-nuevo" type="password" placeholder="Tu contraseña">
+        <span onclick="togglePass('l-pass-nuevo')" style="position:absolute;right:10px;top:30px;cursor:pointer;font-size:16px">👁</span>
+      </div>
+      <div class="fg" style="position:relative">
+        <label>Confirmar contraseña</label>
+        <input id="l-pass-confirm" type="password" placeholder="Repite tu contraseña">
+        <span onclick="togglePass('l-pass-confirm')" style="position:absolute;right:10px;top:30px;cursor:pointer;font-size:16px">👁</span>
+      </div>
+      <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px;border-radius:10px;margin-bottom:10px" onclick="activarCuenta()">Activar cuenta</button>
+      <button onclick="showPanel('panel-login')" style="background:none;border:none;color:var(--gris2);font-size:12px;cursor:pointer;width:100%;text-align:center">← Volver al login</button>
+    </div>
+
+    <div id="login-msg" style="margin-top:8px;font-size:12px;color:var(--rojo);text-align:center;font-weight:500"></div>
   </div>
 </div>
 
@@ -620,21 +652,79 @@ function getLocalAll(t,f={}){ try{ const d=JSON.parse(localStorage.getItem(lk(t)
 function deleteLocal(t,id){ const all=getLocalAll(t).filter(x=>x.id!==id); localStorage.setItem(lk(t),JSON.stringify(all)); }
 
 // ===== LOGIN =====
-async function iniciarSesion(){
-  const nombre=document.getElementById('l-nombre').value.trim().toUpperCase();
-  const email=document.getElementById('l-email').value.trim().toLowerCase();
-  const ue=document.getElementById('l-ue').value.trim();
-  if(!nombre||!email){ document.getElementById('login-msg').textContent='Completa nombre y email'; return; }
-  showToast('Conectando...');
-  const id='D_'+email.replace(/[@.]/g,'_').replace(/[^a-z0-9_]/gi,'');
-  const docObj={id,nombre,email,unidad_educativa:ue};
-  await sbUpsert('docentes',docObj);
-  DOCENTE=docObj;
+function showPanel(id){
+  ['panel-login','panel-activar'].forEach(p=>document.getElementById(p).style.display='none');
+  document.getElementById(id).style.display='block';
+  document.getElementById('login-msg').textContent='';
+}
+
+function showLoginMsg(msg,ok=false){
+  const el=document.getElementById('login-msg');
+  el.textContent=msg;
+  el.style.color=ok?'var(--verde)':'var(--rojo)';
+}
+
+function togglePass(id){
+  const el=document.getElementById(id);
+  el.type=el.type==='password'?'text':'password';
+}
+
+async function loginUsuario(){
+  const usuario=document.getElementById('l-usuario').value.trim().toLowerCase();
+  const pass=document.getElementById('l-pass').value;
+  if(!usuario||!pass){ showLoginMsg('Ingresa usuario y contraseña'); return; }
+  showLoginMsg('Verificando...','ok');
+  const {data,error}=await sb.from('docentes').select('*').eq('usuario',usuario).eq('activo',true).single();
+  if(error||!data){ showLoginMsg('Usuario no encontrado o cuenta inactiva'); return; }
+  if(data.contrasena!==btoa(pass)){ showLoginMsg('Contraseña incorrecta'); return; }
+  DOCENTE=data;
   localStorage.setItem('docente',JSON.stringify(DOCENTE));
   iniciarApp();
 }
 
+async function activarCuenta(){
+  const codigo=document.getElementById('l-codigo').value.trim().toUpperCase();
+  const nombre=document.getElementById('l-nombre').value.trim().toUpperCase();
+  const ue=document.getElementById('l-ue').value.trim();
+  const usuario=document.getElementById('l-usuario-nuevo').value.trim().toLowerCase().replace(/\s/g,'');
+  const pass=document.getElementById('l-pass-nuevo').value;
+  const passConf=document.getElementById('l-pass-confirm').value;
+  if(!codigo||!nombre||!usuario||!pass){ showLoginMsg('Completa todos los campos'); return; }
+  if(pass.length<6){ showLoginMsg('La contraseña debe tener al menos 6 caracteres'); return; }
+  if(pass!==passConf){ showLoginMsg('Las contraseñas no coinciden'); return; }
+  if(/\s/.test(usuario)){ showLoginMsg('El usuario no puede tener espacios'); return; }
+  showLoginMsg('Verificando código...','ok');
+  // Verificar código de activación
+  const {data:cod}=await sb.from('codigos_acceso').select('*').eq('codigo',codigo).eq('usado',false).single();
+  if(!cod){ showLoginMsg('Código inválido o ya utilizado'); return; }
+  // Verificar que el usuario no exista
+  const {data:existing}=await sb.from('docentes').select('id').eq('usuario',usuario).single();
+  if(existing){ showLoginMsg('Ese usuario ya existe, elige otro'); return; }
+  showLoginMsg('Creando cuenta...','ok');
+  const id='D_'+usuario+'_'+Date.now();
+  const docObj={id,nombre,usuario,contrasena:btoa(pass),unidad_educativa:ue,activo:true,activado:true,codigo_activacion:codigo};
+  const {error}=await sb.from('docentes').insert(docObj);
+  if(error){ showLoginMsg('Error al crear cuenta: '+error.message); return; }
+  // NO marcar código como usado — código compartido para múltiples docentes
+  // El admin manualmente pone usado=true cuando quiere cerrar el acceso
+  DOCENTE=docObj;
+  localStorage.setItem('docente',JSON.stringify(DOCENTE));
+  showLoginMsg('✓ Cuenta creada exitosamente','ok');
+  setTimeout(()=>iniciarApp(),800);
+}
+
 async function iniciarApp(){
+  // Verificar que el docente sigue activo en Supabase
+  if(isOnline && DOCENTE.usuario){
+    try{
+      const {data}=await sb.from('docentes').select('activo').eq('id',DOCENTE.id).single();
+      if(data && !data.activo){ 
+        localStorage.clear(); 
+        location.reload(); 
+        return; 
+      }
+    }catch(e){}
+  }
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('doc-nombre').textContent=DOCENTE.nombre.split(' ').slice(0,2).join(' ');
@@ -897,6 +987,15 @@ function resetImport(){
 }
 
 // ===== ASISTENCIA =====
+// Helper: fecha local del dispositivo en formato YYYY-MM-DD (sin depender de UTC ni internet)
+function fechaLocalHoy(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+
 function showAsistTab(tab,btn){
   document.getElementById('asist-llamada').style.display=tab==='llamada'?'block':'none';
   document.getElementById('asist-resumen-panel').style.display=tab==='resumen'?'block':'none';
@@ -958,9 +1057,8 @@ async function guardarAsistencia(){
   if(!cursoCurrent){ showToast('Selecciona un curso primero'); return; }
   const lista=getEstCurso();
   if(!lista.length){ showToast('No hay estudiantes'); return; }
-  // Mostrar modal de fecha y opción de llamada
-  const now=new Date(); const offset=-4*60; const local=new Date(now.getTime()+offset*60000);
-  const hoy=local.toISOString().split('T')[0];
+  // Fecha local del dispositivo del docente (correcta sin depender de UTC)
+  const hoy=fechaLocalHoy();
   document.getElementById('asist-fecha-input').value=hoy;
   // Verificar si ya existe asistencia para este curso y fecha
   const yaExiste=getLocalAll('asistencia').some(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia&&a.fecha===hoy);
@@ -978,8 +1076,8 @@ async function guardarAsistencia(){
 }
 
 async function confirmarGuardarAsistencia(){
-  const fecha=document.getElementById('asist-fecha-input').value;
-  if(!fecha){ showToast('Selecciona una fecha'); return; }
+  // Si el input está vacío usar fecha local del dispositivo
+  const fecha=document.getElementById('asist-fecha-input').value||fechaLocalHoy();
   const reemplazar=document.getElementById('asist-opt-reemplazar').checked;
   let fechaId=fecha;
   if(!reemplazar){
@@ -1476,7 +1574,14 @@ function abrirExportador(){
 
 // ===== INIT =====
 const saved=localStorage.getItem('docente');
-if(saved){ DOCENTE=JSON.parse(saved); iniciarApp(); }
+if(saved){ 
+  try{ 
+    DOCENTE=JSON.parse(saved); 
+    // Solo entrar si el docente tiene usuario (nuevo sistema) o es sesión legacy
+    if(DOCENTE && (DOCENTE.usuario || DOCENTE.id)) iniciarApp(); 
+    else { localStorage.clear(); }
+  }catch(e){ localStorage.clear(); }
+}
 </script>
 </body>
 </html>
