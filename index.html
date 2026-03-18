@@ -53,7 +53,7 @@ th.th-saber{background:linear-gradient(135deg,#581c87,#7c3aed)}
 th.th-hacer{background:linear-gradient(135deg,#064e3b,#059669)}
 th.th-auto{background:linear-gradient(135deg,#78350f,#d97706);color:#fff}
 th.th-total{background:linear-gradient(135deg,#111827,#374151)}
-th.th-vert{writing-mode:vertical-rl;transform:rotate(180deg);max-height:100px;min-width:28px;max-width:36px;padding:6px 4px !important;font-size:10px !important;overflow:hidden;word-break:break-all;vertical-align:bottom}
+th.th-vert{writing-mode:vertical-rl;transform:rotate(180deg);max-height:110px;min-width:26px;max-width:34px;padding:5px 3px !important;font-size:9px !important;overflow:hidden;word-break:break-word;white-space:normal;vertical-align:bottom;line-height:1.2}
 th.th-nombre{text-align:left;position:sticky;left:0;z-index:3;background:var(--azul)}
 td{padding:7px 9px;border-bottom:1px solid var(--borde);text-align:center}
 td.td-nombre{text-align:left;font-weight:500;position:sticky;left:0;background:#fff;z-index:1;min-width:160px}
@@ -865,7 +865,8 @@ function showAsistTab(tab,btn){
 }
 
 async function renderAsistencia(){
-  document.getElementById('fecha-hoy').textContent=new Date().toLocaleDateString('es-BO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const _now=new Date(); const _local=new Date(_now.getTime()+(-4*60)*60000);
+  document.getElementById('fecha-hoy').textContent=_local.toLocaleDateString('es-BO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   if(!cursoCurrent){ document.getElementById('lista-asist').innerHTML='<div class="empty"><div class="ei">✋</div><p>Selecciona un curso desde Inicio</p></div>'; return; }
   const lista=getEstCurso();
   // Siempre arrancar limpio (fix punto 12)
@@ -915,7 +916,9 @@ async function guardarAsistencia(){
   if(!cursoCurrent){ showToast('Selecciona un curso primero'); return; }
   const lista=getEstCurso();
   if(!lista.length){ showToast('No hay estudiantes'); return; }
-  const hoy=new Date().toISOString().split('T')[0];
+  // Fecha local Bolivia (UTC-4)
+  const now=new Date(); const offset=-4*60; const local=new Date(now.getTime()+offset*60000);
+  const hoy=local.toISOString().split('T')[0];
   showToast('Guardando asistencia...');
   for(const e of lista){
     if(ASIST_TEMP[e.id]){
@@ -935,6 +938,8 @@ async function renderAsistResumen(){
   const lista=getEstCurso();
   if(isOnline){ try{ const {data}=await sb.from('asistencia').select('*').eq('id_docente',DOCENTE.id); if(data) saveLocalAll('asistencia',data); }catch(e){} }
   const allAsist=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia);
+  // Cada fecha puede aparecer varias veces si hubo múltiples llamadas — mostrar todas como columnas separadas
+  const todasFechas=allAsist.map(a=>a.fecha+'-'+a.id_estudiante).map(x=>x.split('-')[0]);
   const fechas=[...new Set(allAsist.map(a=>a.fecha))].sort();
   const thead=document.getElementById('asist-resumen-thead');
   const tbody=document.getElementById('tb-asist-resumen');
@@ -1145,16 +1150,27 @@ function calcTotal(ser,saber,hacer,auto){
 
 function setDim(dim,btn,cls){
   dimActual=dim;
-  document.querySelectorAll('.dt').forEach(t=>{ t.className='dt'; t.style.borderColor='var(--borde)'; t.style.color='var(--gris2)'; });
+  document.querySelectorAll('.dt').forEach(t=>{ t.className='dt'; t.style.cssText=''; });
   btn.className='dt active-'+cls;
+  btn.style.cssText='';
   renderNotas();
 }
 
 // ===== OBSERVACIONES =====
 async function renderObservaciones(){
   if(!cursoCurrent){ document.getElementById('lista-obs').innerHTML='<div class="empty"><div class="ei">💬</div><p>Selecciona un curso desde Inicio</p></div>'; return; }
-  // Refresh from Supabase if online, always use local cache for display
-  if(isOnline){ try{ const {data}=await sb.from('observaciones').select('*').eq('id_docente',DOCENTE.id); if(data) saveLocalAll('observaciones',data); }catch(e){} }
+  // Refresh from Supabase if online, merge with local pending
+  if(isOnline){
+    try{
+      const {data}=await sb.from('observaciones').select('*').eq('id_docente',DOCENTE.id);
+      if(data){
+        // Merge: keep local records not yet in Supabase (pendingQueue)
+        const remoteIds=new Set(data.map(x=>x.id));
+        const localPending=getLocalAll('observaciones').filter(x=>!remoteIds.has(x.id));
+        saveLocalAll('observaciones',[...data,...localPending]);
+      }
+    }catch(e){}
+  }
   const obs=getLocalAll('observaciones');
   const lista=obs.filter(o=>o.curso===cursoCurrent.curso&&o.materia===cursoCurrent.materia).reverse();
   const div=document.getElementById('lista-obs');
@@ -1194,7 +1210,9 @@ async function agregarObservacion(){
   const obj={id:'O_'+Date.now(),id_docente:DOCENTE.id,id_estudiante:estId,nombre_estudiante:est?.nombre||'',curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha:new Date().toLocaleDateString('es-BO'),observacion:texto,visible_padre:vis,tipo};
   await sbUpsert('observaciones',obj);
   closeModal('modal-obs');
-  renderObservaciones();
+  // Clear form
+  document.getElementById('fo-texto').value='';
+  await renderObservaciones();
   showToast('Observación guardada ✓');
 }
 
