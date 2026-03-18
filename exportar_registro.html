@@ -102,7 +102,9 @@ select:disabled{background:#f8fafc;color:#94a3b8}
   </div>
 
   <div class="back-link">
-    <a href="/" onclick="history.back();return false">← Volver a la app</a>
+    <a href="javascript:void(0)" onclick="window.close();if(window.history.length>1)window.history.back();" style="font-size:12px;color:var(--azul2);text-decoration:none">← Volver a la app</a>
+    &nbsp;|&nbsp;
+    <a href="/" style="font-size:12px;color:var(--azul2);text-decoration:none">Ir al inicio</a>
   </div>
 </div>
 
