@@ -3,51 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exportar Registro Pedagógico</title>
+<title>Exportar Registro Pedagógico 2026</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
-:root{--azul:#1a3a6b;--verde:#059669;--rojo:#dc2626;--gris:#f1f5f9;--borde:#e2e8f0}
+:root{--azul:#1a3a6b;--azul2:#2563eb;--verde:#059669;--rojo:#dc2626;--gris:#f1f5f9;--borde:#e2e8f0;--dorado:#b45309}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:var(--gris);min-height:100vh;padding:16px}
-.card{background:#fff;border-radius:16px;padding:20px;max-width:500px;margin:0 auto;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-h1{color:var(--azul);font-size:18px;margin-bottom:4px}
-.sub{font-size:12px;color:#64748b;margin-bottom:20px}
-.fg{margin-bottom:14px}
-label{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
-select,input{width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:#fff}
-select:focus,input:focus{border-color:var(--azul)}
-.btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:6px}
-.btn-p{background:var(--azul);color:#fff}
-.btn-p:hover{opacity:.9}
-.btn-p:disabled{background:#94a3b8;cursor:not-allowed}
-.btn-g{background:var(--verde);color:#fff;margin-top:10px}
-.progress{display:none;margin-top:14px;background:#f1f5f9;border-radius:8px;padding:12px}
-.prog-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:8px 0}
-.prog-fill{height:100%;background:var(--azul);border-radius:3px;transition:width .3s;width:0%}
-.prog-msg{font-size:12px;color:#64748b}
-.log{max-height:120px;overflow-y:auto;margin-top:8px;font-size:11px;color:#475569;line-height:1.6}
-.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;margin-left:6px}
-.badge-ok{background:#dcfce7;color:#065f46}
-.badge-err{background:#fee2e2;color:#dc2626}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a3a6b,#1e40af);min-height:100vh;padding:16px;display:flex;align-items:flex-start;justify-content:center}
+.card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3);margin-top:10px}
+.logo{text-align:center;margin-bottom:16px}
+.logo-icon{width:56px;height:56px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 8px}
+h1{font-size:17px;font-weight:700;color:var(--azul);text-align:center}
+.sub{font-size:11px;color:#64748b;text-align:center;margin-bottom:20px}
+.docente-badge{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:10px 14px;margin-bottom:16px;display:none}
+.docente-badge .name{font-size:14px;font-weight:700;color:var(--azul)}
+.docente-badge .ue{font-size:11px;color:#64748b;margin-top:2px}
+.fg{margin-bottom:12px}
+label{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+select,input{width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:#fff;transition:border .15s}
+select:focus,input:focus{border-color:var(--azul2)}
+select:disabled{background:#f8fafc;color:#94a3b8}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-p{background:var(--azul2);color:#fff;margin-bottom:8px}
+.btn-p:hover{background:var(--azul)}
+.btn-g{background:var(--verde);color:#fff;margin-bottom:8px}
+.btn-g:hover{opacity:.9}
+.btn-g:disabled,.btn-p:disabled{background:#94a3b8;cursor:not-allowed;opacity:.7}
+.btn-sm{background:var(--gris);color:#64748b;font-size:12px;padding:8px;margin-top:4px;border-radius:8px;border:none;cursor:pointer;width:100%}
+.progress{background:#f8fafc;border-radius:10px;padding:14px;margin-top:12px;border:1px solid var(--borde)}
+.prog-title{font-size:12px;font-weight:600;color:var(--azul);margin-bottom:8px}
+.prog-bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--azul2),var(--verde));border-radius:4px;transition:width .4s;width:0%}
+.prog-msg{font-size:11px;color:#64748b;margin-top:6px}
+.log-box{max-height:100px;overflow-y:auto;margin-top:8px;background:#fff;border-radius:6px;padding:8px;border:1px solid var(--borde)}
+.log-line{font-size:10px;color:#475569;line-height:1.7;font-family:monospace}
+.divider{border:none;border-top:1px solid var(--borde);margin:16px 0}
+.back-link{text-align:center;margin-top:12px}
+.back-link a{font-size:12px;color:var(--azul2);text-decoration:none}
 </style>
 </head>
 <body>
 <div class="card">
-  <h1>📊 Exportar Registro Oficial</h1>
-  <p class="sub">Genera el Excel con formato del Ministerio de Educación Bolivia</p>
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <h1>Exportar Registro Oficial</h1>
+    <p class="sub">Genera el Excel con formato Ministerio de Educación Bolivia</p>
+  </div>
 
-  <div class="fg">
+  <!-- Badge docente detectado automáticamente -->
+  <div class="docente-badge" id="docente-badge">
+    <div class="name" id="badge-nombre">—</div>
+    <div class="ue" id="badge-ue">—</div>
+  </div>
+
+  <div class="fg" id="fg-email" style="display:none">
     <label>Email del docente</label>
     <input type="email" id="inp-email" placeholder="docente@gmail.com">
+    <button class="btn-sm" onclick="buscarDocente()">🔍 Buscar</button>
   </div>
+
   <div class="fg">
     <label>Curso</label>
-    <select id="inp-curso"><option value="">— Primero ingresa el email —</option></select>
+    <select id="inp-curso" disabled onchange="filtrarMaterias()">
+      <option value="">— Cargando... —</option>
+    </select>
   </div>
   <div class="fg">
-    <label>Materia / Área</label>
-    <select id="inp-materia"><option value="">— Selecciona curso primero —</option></select>
+    <label>Área / Materia</label>
+    <select id="inp-materia" disabled>
+      <option value="">— Selecciona curso —</option>
+    </select>
   </div>
   <div class="fg">
     <label>Trimestre</label>
@@ -62,13 +87,22 @@ select:focus,input:focus{border-color:var(--azul)}
     <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
   </div>
 
-  <button class="btn btn-p" id="btn-cargar" onclick="cargarDatos()">🔍 Cargar datos del docente</button>
-  <button class="btn btn-g" id="btn-export" onclick="exportarExcel()" style="display:none">📥 Descargar Excel Registro</button>
+  <hr class="divider">
 
-  <div class="progress" id="progress">
-    <div class="prog-msg" id="prog-msg">Iniciando...</div>
+  <button class="btn btn-g" id="btn-export" onclick="exportarExcel()" disabled>
+    📥 Descargar Registro Excel (.xlsx)
+  </button>
+  <button class="btn btn-sm" onclick="mostrarCampoEmail()">🔄 Cambiar cuenta</button>
+
+  <div class="progress" id="progress" style="display:none">
+    <div class="prog-title" id="prog-title">Preparando...</div>
     <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
-    <div class="log" id="log"></div>
+    <div class="prog-msg" id="prog-msg"></div>
+    <div class="log-box" id="log-box"></div>
+  </div>
+
+  <div class="back-link">
+    <a href="/" onclick="history.back();return false">← Volver a la app</a>
   </div>
 </div>
 
@@ -77,362 +111,403 @@ const SUPA_URL='https://dmhkidkzriiorctxmwzv.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtaGtpZGt6cmlpb3JjdHhtd3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDEyNjAsImV4cCI6MjA4OTI3NzI2MH0.XkRFktuBo051m-CLsso4dhPcj2oOzUZEHRLyC4jGMRg';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
-let DOCENTE=null, CURSOS=[], ESTUDIANTES=[], ACTIVIDADES=[], NOTAS={}, AUTOEVALS={};
+let DOCENTE=null, CURSOS=[];
 
-function log(msg){ const d=document.getElementById('log'); d.innerHTML+=msg+'<br>'; d.scrollTop=d.scrollHeight; }
-function prog(pct,msg){ document.getElementById('prog-fill').style.width=pct+'%'; document.getElementById('prog-msg').textContent=msg; }
+function log(msg){ const d=document.getElementById('log-box'); d.innerHTML+=`<div class="log-line">${msg}</div>`; d.scrollTop=d.scrollHeight; }
+function prog(pct,title,msg){ document.getElementById('prog-fill').style.width=pct+'%'; document.getElementById('prog-title').textContent=title; document.getElementById('prog-msg').textContent=msg||''; }
 
-async function cargarDatos(){
-  const email=document.getElementById('inp-email').value.trim().toLowerCase();
-  if(!email){ alert('Ingresa el email del docente'); return; }
-  document.getElementById('progress').style.display='block';
-  prog(10,'Buscando docente...');
-  const id='D_'+email.replace(/[@.]/g,'_').replace(/[^a-z0-9_]/gi,'');
-  log('🔍 Buscando docente con id: '+id);
-  const {data:doc}=await sb.from('docentes').select('*').eq('id',id).single();
-  if(!doc){ log('❌ Docente no encontrado'); prog(0,'Error'); return; }
-  DOCENTE=doc;
-  log('✓ Docente: '+doc.nombre);
-  prog(30,'Cargando cursos...');
-  const {data:cursos}=await sb.from('asignaciones').select('*').eq('id_docente',id);
-  CURSOS=cursos||[];
-  log('✓ '+CURSOS.length+' curso(s) encontrado(s)');
-  // Llenar selector cursos
-  const sc=document.getElementById('inp-curso');
-  sc.innerHTML='<option value="">— Selecciona —</option>';
-  [...new Set(CURSOS.map(c=>c.curso))].forEach(c=>{ sc.innerHTML+=`<option value="${c}">${c}</option>`; });
-  sc.onchange=()=>{
-    const curso=sc.value;
-    const sm=document.getElementById('inp-materia');
-    sm.innerHTML='<option value="">— Selecciona —</option>';
-    CURSOS.filter(c=>c.curso===curso).forEach(c=>{ sm.innerHTML+=`<option value="${c.materia}">${c.materia}</option>`; });
-  };
-  prog(100,'✓ Datos cargados — selecciona curso y materia');
-  document.getElementById('btn-export').style.display='block';
+// ===== AUTO-DETECTAR DOCENTE desde localStorage de la app =====
+async function init(){
+  const saved=localStorage.getItem('docente');
+  if(saved){
+    try{
+      const doc=JSON.parse(saved);
+      DOCENTE=doc;
+      mostrarDocente(doc);
+      await cargarCursos(doc.id);
+      return;
+    }catch(e){}
+  }
+  // Si no hay sesión guardada, mostrar campo email
+  document.getElementById('fg-email').style.display='block';
 }
 
+function mostrarDocente(doc){
+  document.getElementById('docente-badge').style.display='block';
+  document.getElementById('badge-nombre').textContent='👤 '+doc.nombre;
+  document.getElementById('badge-ue').textContent='📍 '+(doc.unidad_educativa||'');
+  document.getElementById('inp-ue').value=doc.unidad_educativa||'Franz Tamayo de Chachacomani';
+}
+
+function mostrarCampoEmail(){
+  document.getElementById('fg-email').style.display='block';
+  document.getElementById('inp-email').focus();
+}
+
+async function buscarDocente(){
+  const email=document.getElementById('inp-email').value.trim().toLowerCase();
+  if(!email){ alert('Ingresa el email'); return; }
+  const id='D_'+email.replace(/[@.]/g,'_').replace(/[^a-z0-9_]/gi,'');
+  const {data}=await sb.from('docentes').select('*').eq('id',id).single();
+  if(!data){ alert('Docente no encontrado. Verifica el email.'); return; }
+  DOCENTE=data;
+  mostrarDocente(data);
+  await cargarCursos(id);
+  document.getElementById('fg-email').style.display='none';
+}
+
+async function cargarCursos(id){
+  const {data}=await sb.from('asignaciones').select('*').eq('id_docente',id);
+  CURSOS=data||[];
+  const sc=document.getElementById('inp-curso');
+  sc.disabled=false;
+  sc.innerHTML='<option value="">— Selecciona curso —</option>';
+  [...new Set(CURSOS.map(c=>c.curso))].sort().forEach(c=>{
+    sc.innerHTML+=`<option value="${c}">${c}</option>`;
+  });
+  document.getElementById('btn-export').disabled=false;
+}
+
+function filtrarMaterias(){
+  const curso=document.getElementById('inp-curso').value;
+  const sm=document.getElementById('inp-materia');
+  sm.disabled=!curso;
+  sm.innerHTML='<option value="">— Selecciona materia —</option>';
+  CURSOS.filter(c=>c.curso===curso).forEach(c=>{
+    sm.innerHTML+=`<option value="${c.materia}">${c.materia}</option>`;
+  });
+  sm.disabled=false;
+}
+
+// ===== EXPORTAR =====
 async function exportarExcel(){
   const curso=document.getElementById('inp-curso').value;
   const materia=document.getElementById('inp-materia').value;
   const trim=document.getElementById('inp-trim').value;
   const ue=document.getElementById('inp-ue').value;
+  if(!DOCENTE){ alert('No hay docente identificado'); return; }
   if(!curso||!materia){ alert('Selecciona curso y materia'); return; }
 
   document.getElementById('progress').style.display='block';
-  document.getElementById('log').innerHTML='';
-  prog(5,'Cargando estudiantes...');
+  document.getElementById('log-box').innerHTML='';
+  prog(5,'Cargando estudiantes...','Conectando con Supabase');
 
   const id=DOCENTE.id;
   const {data:ests}=await sb.from('estudiantes').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia);
-  ESTUDIANTES=(ests||[]).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  const ESTUDIANTES=(ests||[]).sort((a,b)=>a.nombre.localeCompare(b.nombre));
   log('✓ Estudiantes: '+ESTUDIANTES.length);
-  prog(20,'Cargando actividades...');
+  prog(20,'Cargando actividades...','');
 
   const {data:acts}=await sb.from('actividades').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia).eq('trimestre',trim);
-  ACTIVIDADES=acts||[];
-  log('✓ Actividades: '+ACTIVIDADES.length);
-  prog(40,'Cargando notas...');
+  const ACTIVIDADES=acts||[];
+  log('✓ Actividades: '+ACTIVIDADES.length+' (SER:'+ACTIVIDADES.filter(a=>a.dimension==='SER').length+' SABER:'+ACTIVIDADES.filter(a=>a.dimension==='SABER').length+' HACER:'+ACTIVIDADES.filter(a=>a.dimension==='HACER').length+')');
+  prog(40,'Cargando notas...','');
 
   const {data:notasArr}=await sb.from('notas').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia).eq('trimestre',trim);
-  NOTAS={};
+  const NOTAS={};
   (notasArr||[]).forEach(n=>{ if(!NOTAS[n.id_estudiante]) NOTAS[n.id_estudiante]={}; NOTAS[n.id_estudiante][n.id_actividad]=parseFloat(n.nota); });
-  log('✓ Notas cargadas: '+(notasArr||[]).length+' registros');
-  prog(60,'Cargando autoevaluaciones...');
+  log('✓ Notas: '+(notasArr||[]).length+' registros');
+  prog(60,'Cargando autoevaluaciones...','');
 
   const {data:autoArr}=await sb.from('autoevaluacion').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia).eq('trimestre',trim);
-  AUTOEVALS={};
+  const AUTOEVALS={};
   (autoArr||[]).forEach(a=>{ AUTOEVALS[a.id_estudiante]=parseFloat(a.nota); });
   log('✓ Autoevaluaciones: '+(autoArr||[]).length);
-  prog(75,'Generando Excel...');
+  prog(75,'Generando Excel con formato oficial...','');
 
   try{
-    await generarExcel1T(curso,materia,trim,ue);
-    prog(100,'✓ Excel generado exitosamente');
-    log('✅ Descarga iniciada');
+    await generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,materia,trim,ue});
+    prog(100,'✅ Excel listo','Descarga iniciada');
+    log('📁 Archivo generado exitosamente');
   }catch(e){
-    log('❌ Error: '+e.message);
-    prog(0,'Error al generar Excel');
+    prog(0,'❌ Error','');
+    log('ERROR: '+e.message);
     console.error(e);
   }
 }
 
-async function generarExcel1T(curso,materia,trim,ue){
+function promDim(estId,acts,NOTAS){
+  const ns=acts.map(a=>NOTAS[estId]?.[a.id]).filter(n=>n!==undefined&&n!==null&&!isNaN(n));
+  if(!ns.length) return null;
+  return ns.reduce((s,n)=>s+n,0)/ns.length;
+}
+
+async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,materia,trim,ue}){
   const wb=new ExcelJS.Workbook();
   wb.creator='Registro Pedagógico 2026';
-  wb.created=new Date();
+  const trimNombres={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
 
   const ws=wb.addWorksheet('Registro 1T',{
-    pageSetup:{paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0}
+    pageSetup:{
+      paperSize:9, // A4
+      orientation:'landscape',
+      fitToPage:true,fitToWidth:1,fitToHeight:0,
+      margins:{left:0.4,right:0.4,top:0.4,bottom:0.4,header:0,footer:0}
+    }
   });
 
-  // ===== COLORES =====
-  const C_SER     = 'FFD9E1F2'; // azul pálido
-  const C_SABER   = 'FFE8A9F5'; // violeta pálido
-  const C_HACER   = 'FF77EDCE'; // verde pálido
-  const C_NOMBRE  = 'FFF3F599'; // amarillo pálido
-  const C_HEADER  = 'FF1A3A6B'; // azul oscuro
-  const C_PROM_SER= 'FFB4C6E7'; // azul medio
-  const C_PROM_SAB= 'FFD4A4F0'; // violeta medio
-  const C_PROM_HAC= 'FF4ADDB8'; // verde medio
-  const C_TOTAL   = 'FFFFD966'; // amarillo
-  const C_AUTO    = 'FFFCE4D6'; // naranja pálido
-  const C_ESTADO  = 'FFE2EFDA'; // verde muy pálido
+  // ===== COLORES (exactos del original) =====
+  const C={
+    SER_BG:   'FFD9E1F2', // azul pálido SER
+    SAB_BG:   'FFE8A9F5', // violeta SABER
+    HAC_BG:   'FF77EDCE', // verde HACER
+    SER_MED:  'FFB4C6E7', // azul medio promedio SER
+    SAB_MED:  'FFD09EF0', // violeta medio promedio SABER
+    HAC_MED:  'FF4ADDB8', // verde medio promedio HACER
+    NOMBRE:   'FFF3F599', // amarillo apellidos
+    LABEL:    'FFF2CF50', // amarillo encabezado MAESTRA
+    TOTAL:    'FFFFD966', // amarillo valoración total
+    AUTO:     'FFFCE4D6', // naranja auto eval
+    PROM:     'FFFFE699', // amarillo prom final
+    APROBADO: 'FFD1FAE5', // verde estado
+    REPROBADO:'FFFEE2E2', // rojo estado
+    HDR_AZUL: 'FF1A3A6B', // azul oscuro encabezado
+    HDR_MED:  'FF2563EB', // azul medio
+    GRIS:     'FFF1F5F9', // gris alternado
+    WHITE:    'FFFFFFFF',
+  };
 
-  // ===== SEPARAR ACTIVIDADES POR DIMENSIÓN =====
   const serActs   = ACTIVIDADES.filter(a=>a.dimension==='SER');
   const saberActs = ACTIVIDADES.filter(a=>a.dimension==='SABER');
   const hacerActs = ACTIVIDADES.filter(a=>a.dimension==='HACER');
-  // Máximo del formato original: SER=4, SABER=10, HACER=17 — usar máximo 4,10,17 o las que haya
-  const maxSer  = Math.max(serActs.length, 1);
-  const maxSaber= Math.max(saberActs.length, 1);
-  const maxHacer= Math.max(hacerActs.length, 1);
 
-  // ===== CALCULAR COLUMNAS =====
-  // Col 1=Nº, 2=Apellidos, 3-4=merge nombre
-  // SER: col 5 a 5+maxSer-1, PROM_SER: 5+maxSer
-  // SABER: siguiente, PROM_SABER: ...
-  // HACER: siguiente, PROM_HACER: ...
-  // TOTAL, AUTO, PROM_FINAL, ESTADO
-  const COL_NUM=1, COL_NOM=2;
-  const COL_SER_START=5;
-  const COL_SER_END=COL_SER_START+maxSer-1;
-  const COL_PROM_SER=COL_SER_END+1;
-  const COL_SAB_START=COL_PROM_SER+1;
-  const COL_SAB_END=COL_SAB_START+maxSaber-1;
-  const COL_PROM_SAB=COL_SAB_END+1;
-  const COL_HAC_START=COL_PROM_SAB+1;
-  const COL_HAC_END=COL_HAC_START+maxHacer-1;
-  const COL_PROM_HAC=COL_HAC_END+1;
-  const COL_TOTAL=COL_PROM_HAC+1;
-  const COL_AUTO=COL_TOTAL+1;
-  const COL_PROM_FINAL=COL_AUTO+1;
-  const COL_ESTADO=COL_PROM_FINAL+1;
-  const TOTAL_COLS=COL_ESTADO;
+  // ===== LAYOUT DE COLUMNAS =====
+  // C1=Nº, C2-C4=Nombre(merge), C5 en adelante SER cols
+  const C1=1, C_NOM_S=2, C_NOM_E=4;
+  const C_SER_S=5, C_SER_E=Math.max(5, 4+serActs.length);
+  const C_PSER=C_SER_E+1;
+  const C_SAB_S=C_PSER+1, C_SAB_E=Math.max(C_SAB_S, C_PSER+saberActs.length);
+  const C_PSAB=C_SAB_E+1;
+  const C_HAC_S=C_PSAB+1, C_HAC_E=Math.max(C_HAC_S, C_PSAB+hacerActs.length);
+  const C_PHAC=C_HAC_E+1;
+  const C_TOTAL=C_PHAC+1, C_AUTO=C_TOTAL+1, C_PROM=C_AUTO+1, C_EST=C_PROM+1;
+  const NCOLS=C_EST;
 
-  // ===== ANCHOS DE COLUMNA =====
-  ws.getColumn(COL_NUM).width=4;
-  ws.getColumn(COL_NOM).width=28;
-  for(let c=3;c<=4;c++) ws.getColumn(c).width=3;
-  for(let c=COL_SER_START;c<=COL_SER_END;c++) ws.getColumn(c).width=9;
-  ws.getColumn(COL_PROM_SER).width=9;
-  for(let c=COL_SAB_START;c<=COL_SAB_END;c++) ws.getColumn(c).width=9;
-  ws.getColumn(COL_PROM_SAB).width=9;
-  for(let c=COL_HAC_START;c<=COL_HAC_END;c++) ws.getColumn(c).width=9;
-  ws.getColumn(COL_PROM_HAC).width=9;
-  ws.getColumn(COL_TOTAL).width=9;
-  ws.getColumn(COL_AUTO).width=9;
-  ws.getColumn(COL_PROM_FINAL).width=9;
-  ws.getColumn(COL_ESTADO).width=12;
+  // ===== ANCHOS =====
+  ws.getColumn(C1).width=4.5;
+  for(let c=C_NOM_S;c<=C_NOM_E;c++) ws.getColumn(c).width=c===C_NOM_S?22:3;
+  for(let c=C_SER_S;c<=C_SER_E;c++) ws.getColumn(c).width=7;
+  ws.getColumn(C_PSER).width=7.5;
+  for(let c=C_SAB_S;c<=C_SAB_E;c++) ws.getColumn(c).width=7;
+  ws.getColumn(C_PSAB).width=7.5;
+  for(let c=C_HAC_S;c<=C_HAC_E;c++) ws.getColumn(c).width=7;
+  ws.getColumn(C_PHAC).width=7.5;
+  ws.getColumn(C_TOTAL).width=7.5;
+  ws.getColumn(C_AUTO).width=7.5;
+  ws.getColumn(C_PROM).width=7.5;
+  ws.getColumn(C_EST).width=11;
 
-  // ===== HELPER FUNCIONES =====
-  function setCell(r,c,val,opts={}){
+  // ===== HELPERS =====
+  const border={style:'thin',color:{argb:'FF000000'}};
+  const allBorder={top:border,left:border,bottom:border,right:border};
+
+  function fill(argb){ return {type:'pattern',pattern:'solid',fgColor:{argb}}; }
+  function font(bold,size,color='FF000000'){ return {bold,size,name:'Calibri',color:{argb:color}}; }
+  function align(h,v,rot,wrap){ return {horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap}; }
+
+  function sc(r,c,val,bg,fnt,aln,brd=true){
     const cell=ws.getCell(r,c);
-    cell.value=val;
-    cell.alignment={vertical:'middle',horizontal:opts.align||'center',wrapText:true};
-    if(opts.bg) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:opts.bg}};
-    if(opts.bold||opts.header) cell.font={bold:true,size:opts.size||9,color:{argb:opts.color||(opts.header?'FFFFFFFF':'FF000000')},name:'Calibri'};
-    else cell.font={size:opts.size||9,color:{argb:opts.color||'FF000000'},name:'Calibri'};
-    if(opts.border||opts.allborder){
-      const bs={style:'thin',color:{argb:'FF000000'}};
-      cell.border={top:bs,left:bs,bottom:bs,right:bs};
-    }
+    if(val!==null&&val!==undefined) cell.value=val;
+    if(bg) cell.fill=fill(bg);
+    if(fnt) cell.font=fnt;
+    if(aln) cell.alignment=aln;
+    if(brd) cell.border=allBorder;
     return cell;
   }
 
-  function mergeSet(r,c1,c2,val,opts={}){
-    if(c1<c2) ws.mergeCells(r,c1,r,c2);
-    setCell(r,c1,val,opts);
+  function merge(r,c1,c2,val,bg,fnt,aln){
+    if(c1<c2){ try{ws.mergeCells(r,c1,r,c2);}catch(e){} }
+    return sc(r,c1,val,bg,fnt,aln);
   }
 
-  function colLetter(n){ // 1=A, 2=B...
-    let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26); } return s;
+  function mergeBlock(r1,r2,c1,c2,val,bg,fnt,aln){
+    if(r1!==r2||c1!==c2){ try{ws.mergeCells(r1,c1,r2,c2);}catch(e){} }
+    const cell=ws.getCell(r1,c1);
+    if(val!==null&&val!==undefined) cell.value=val;
+    if(bg) cell.fill=fill(bg);
+    if(fnt) cell.font=fnt;
+    if(aln) cell.alignment=aln;
+    cell.border=allBorder;
+    return cell;
   }
 
-  // ===== FILA 1: TÍTULO UE =====
-  ws.getRow(1).height=18;
-  mergeSet(1,1,TOTAL_COLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(),{bg:'FF1A3A6B',bold:true,size:11,color:'FFFFFFFF',align:'center',border:true});
+  // ===== FILA 1: UE =====
+  ws.getRow(1).height=22;
+  merge(1,1,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(),
+    C.HDR_AZUL, font(true,14,'FFFFFFFF'), align('center','middle',0,false));
 
-  // ===== FILA 2: SUBTÍTULO =====
-  ws.getRow(2).height=15;
-  mergeSet(2,1,TOTAL_COLS,'REGISTRO DE EVALUACIÓN — GESTIÓN 2026',{bg:'FF2563EB',bold:true,size:10,color:'FFFFFFFF',align:'center',border:true});
+  // ===== FILA 2: REGISTRO DE EVALUACIÓN =====
+  ws.getRow(2).height=20;
+  merge(2,1,NCOLS,'REGISTRO DE EVALUACIÓN — GESTIÓN 2026',
+    C.HDR_MED, font(false,13,'FFFFFFFF'), align('center','middle',0,false));
 
-  // ===== FILA 3: DOCENTE Y CURSO =====
-  ws.getRow(3).height=16;
-  mergeSet(3,1,4,'MAESTRA(O):',{bold:true,size:9,align:'left',bg:'FFDCE6F1',border:true});
-  mergeSet(3,5,COL_TOTAL-1,DOCENTE.nombre,{size:9,align:'left',bg:'FFFFFFFF',border:true});
-  mergeSet(3,COL_TOTAL,COL_TOTAL+1,'CURSO:',{bold:true,size:9,bg:'FFDCE6F1',border:true});
-  mergeSet(3,COL_TOTAL+2,TOTAL_COLS,curso,{bold:true,size:10,bg:'FFFFFFFF',border:true});
+  // ===== FILA 3: MAESTRA + CURSO =====
+  ws.getRow(3).height=20;
+  merge(3,C1,C_NOM_E,'MAESTRA(O):', C.LABEL, font(true,11), align('right','middle'));
+  merge(3,C_SER_S,C_PHAC, DOCENTE.nombre, C.WHITE, font(false,11), align('left','middle'));
+  sc(3,C_TOTAL,'CURSO:', C.LABEL, font(true,10), align('center','middle'));
+  merge(3,C_AUTO,C_EST, curso, C.WHITE, font(true,12), align('center','middle'));
 
   // ===== FILA 4: ASIGNATURA =====
-  ws.getRow(4).height=16;
-  mergeSet(4,1,4,'ASIGNATURA:',{bold:true,size:9,align:'left',bg:'FFDCE6F1',border:true});
-  mergeSet(4,5,TOTAL_COLS,materia.toUpperCase(),{bold:true,size:10,align:'left',bg:'FFFFFFFF',border:true});
+  ws.getRow(4).height=20;
+  merge(4,C1,C_NOM_E,'ASIGNATURA:', null, font(true,11), align('right','middle'));
+  merge(4,C_SER_S,C_EST, materia.toUpperCase(), C.WHITE, font(true,12), align('left','middle'));
 
-  // ===== FILA 5: TRIMESTRE =====
-  ws.getRow(5).height=14;
-  const trimNombres={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
-  mergeSet(5,1,4,'',{bg:'FFDCE6F1',border:true});
-  mergeSet(5,COL_SER_START,COL_PROM_HAC,trimNombres[trim],{bold:true,size:10,bg:'FFD9E1F2',border:true});
-  mergeSet(5,COL_TOTAL,COL_TOTAL,'EVAL.\nTOTAL',{bold:true,size:8,bg:C_TOTAL,border:true});
-  mergeSet(5,COL_AUTO,COL_AUTO,'AUTO\nEVAL.',{bold:true,size:8,bg:C_AUTO,border:true});
-  mergeSet(5,COL_PROM_FINAL,COL_PROM_FINAL,'PROM.\nFINAL',{bold:true,size:8,bg:'FFFFE699',border:true});
-  mergeSet(5,COL_ESTADO,COL_ESTADO,'ESTADO',{bold:true,size:8,bg:C_ESTADO,border:true});
+  // ===== FILA 5: TRIMESTRE + col headers top =====
+  ws.getRow(5).height=18;
+  merge(5,C1,C_NOM_E,'', C.GRIS, null, null);
+  merge(5,C_SER_S,C_PHAC, trimNombres[trim], C.SER_BG, font(true,11), align('center','middle'));
+  sc(5,C_TOTAL,'EVAL.\nTOTAL', C.TOTAL, font(true,8), align('center','middle',0,true));
+  sc(5,C_AUTO,'AUTO\nEVAL.', C.AUTO, font(true,8), align('center','middle',0,true));
+  sc(5,C_PROM,'PROM.\nFINAL', C.PROM, font(true,8), align('center','middle',0,true));
+  sc(5,C_EST,'ESTADO', 'FFE2EFDA', font(true,8), align('center','middle',0,true));
 
-  // ===== FILA 6: SER / SABER / HACER labels =====
-  ws.getRow(6).height=14;
-  mergeSet(6,1,4,'Valoración del Docente',{bold:true,size:9,bg:'FFE2EFDA',border:true});
-  mergeSet(6,COL_SER_START,COL_PROM_SER,'SER — 10 pts',{bold:true,size:9,bg:C_SER,border:true});
-  mergeSet(6,COL_SAB_START,COL_PROM_SAB,'SABER — 45 pts',{bold:true,size:9,bg:C_SABER,border:true});
-  mergeSet(6,COL_HAC_START,COL_PROM_HAC,'HACER — 40 pts',{bold:true,size:9,bg:C_HACER,border:true});
-  setCell(6,COL_TOTAL,'',{bg:C_TOTAL,border:true});
-  setCell(6,COL_AUTO,'',{bg:C_AUTO,border:true});
-  setCell(6,COL_PROM_FINAL,'',{bg:'FFFFE699',border:true});
-  setCell(6,COL_ESTADO,'',{bg:C_ESTADO,border:true});
+  // ===== FILA 6: SER / SABER / HACER =====
+  ws.getRow(6).height=16;
+  merge(6,C1,C_NOM_E,'Valoración del Docente', 'FFE2EFDA', font(false,9), align('center','middle'));
+  merge(6,C_SER_S,C_PSER,'SER — 10 pts', C.SER_BG, font(true,10), align('center','middle'));
+  merge(6,C_SAB_S,C_PSAB,'SABER — 45 pts', C.SAB_BG, font(true,10), align('center','middle'));
+  merge(6,C_HAC_S,C_PHAC,'HACER — 40 pts', C.HAC_BG, font(true,10), align('center','middle'));
+  sc(6,C_TOTAL,'', C.TOTAL, null, null);
+  sc(6,C_AUTO,'', C.AUTO, null, null);
+  sc(6,C_PROM,'', C.PROM, null, null);
+  sc(6,C_EST,'', 'FFE2EFDA', null, null);
 
-  // ===== FILA 7: encabezados actividades (texto vertical) =====
-  ws.getRow(7).height=70;
-  mergeSet(7,1,4,'Nº  |  APELLIDOS Y NOMBRES',{bold:true,size:9,bg:C_NOMBRE,border:true,align:'center'});
+  // ===== FILA 7: ENCABEZADOS ACTIVIDADES (texto vertical rotado 90°) =====
+  ws.getRow(7).height=90;
+  merge(7,C1,C_NOM_E,'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true,10), align('center','bottom',0,true));
 
   // SER actividades
-  for(let i=0;i<maxSer;i++){
-    const col=COL_SER_START+i;
-    const act=serActs[i];
-    const cell=setCell(7,col,act?act.nombre_actividad:'—',{bold:false,size:8,bg:C_SER,border:true});
-    cell.alignment={textRotation:90,vertical:'bottom',horizontal:'center',wrapText:false};
-  }
-  setCell(7,COL_PROM_SER,'PROMEDIO\nSER',{bold:true,size:8,bg:C_PROM_SER,border:true});
+  serActs.forEach((a,i)=>{
+    sc(7,C_SER_S+i, a.nombre_actividad, C.SER_BG, font(false,8), align('center','bottom',90,false));
+  });
+  if(serActs.length===0) sc(7,C_SER_S,'(sin actividades)', C.SER_BG, font(false,7), align('center','bottom',90,false));
+  sc(7,C_PSER,'PROMEDIO\nSER', C.SER_MED, font(true,8), align('center','bottom',0,true));
 
   // SABER actividades
-  for(let i=0;i<maxSaber;i++){
-    const col=COL_SAB_START+i;
-    const act=saberActs[i];
-    const cell=setCell(7,col,act?act.nombre_actividad:'—',{bold:false,size:8,bg:C_SABER,border:true});
-    cell.alignment={textRotation:90,vertical:'bottom',horizontal:'center',wrapText:false};
-  }
-  setCell(7,COL_PROM_SAB,'PROMEDIO\nSABER',{bold:true,size:8,bg:C_PROM_SAB,border:true});
+  saberActs.forEach((a,i)=>{
+    sc(7,C_SAB_S+i, a.nombre_actividad, C.SAB_BG, font(false,8), align('center','bottom',90,false));
+  });
+  if(saberActs.length===0) sc(7,C_SAB_S,'(sin actividades)', C.SAB_BG, font(false,7), align('center','bottom',90,false));
+  sc(7,C_PSAB,'PROMEDIO\nSABER', C.SAB_MED, font(true,8), align('center','bottom',0,true));
 
   // HACER actividades
-  for(let i=0;i<maxHacer;i++){
-    const col=COL_HAC_START+i;
-    const act=hacerActs[i];
-    const cell=setCell(7,col,act?act.nombre_actividad:'—',{bold:false,size:8,bg:C_HACER,border:true});
-    cell.alignment={textRotation:90,vertical:'bottom',horizontal:'center',wrapText:false};
-  }
-  setCell(7,COL_PROM_HAC,'PROMEDIO\nHACER',{bold:true,size:8,bg:C_PROM_HAC,border:true});
+  hacerActs.forEach((a,i)=>{
+    sc(7,C_HAC_S+i, a.nombre_actividad, C.HAC_BG, font(false,8), align('center','bottom',90,false));
+  });
+  if(hacerActs.length===0) sc(7,C_HAC_S,'(sin actividades)', C.HAC_BG, font(false,7), align('center','bottom',90,false));
+  sc(7,C_PHAC,'PROMEDIO\nHACER', C.HAC_MED, font(true,8), align('center','bottom',0,true));
 
-  setCell(7,COL_TOTAL,'VALORACIÓN\nTOTAL',{bold:true,size:8,bg:C_TOTAL,border:true});
-  setCell(7,COL_AUTO,'AUTO\nEVAL. (5)',{bold:true,size:8,bg:C_AUTO,border:true});
-  setCell(7,COL_PROM_FINAL,'PROM.\nTRIM.',{bold:true,size:8,bg:'FFFFE699',border:true});
-  setCell(7,COL_ESTADO,'ESTADO',{bold:true,size:8,bg:C_ESTADO,border:true});
+  sc(7,C_TOTAL,'VALORACIÓN\nTOTAL', C.TOTAL, font(true,8), align('center','bottom',0,true));
+  sc(7,C_AUTO,'AUTO\nEVAL.(5)', C.AUTO, font(true,8), align('center','bottom',0,true));
+  sc(7,C_PROM,'PROM.\nTRIM.', C.PROM, font(true,8), align('center','bottom',0,true));
+  sc(7,C_EST,'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true,8), align('center','bottom',0,true));
 
-  // ===== FILAS DE ESTUDIANTES =====
-  function promDim(estId,acts){
-    if(!acts.length) return null;
-    const ns=acts.map(a=>NOTAS[estId]?.[a.id]).filter(n=>n!==undefined&&n!==null);
-    if(!ns.length) return null;
-    return ns.reduce((s,n)=>s+n,0)/ns.length;
-  }
-
-  for(let i=0;i<ESTUDIANTES.length;i++){
-    const e=ESTUDIANTES[i];
+  // ===== FILAS ESTUDIANTES =====
+  let aprobados=0;
+  ESTUDIANTES.forEach((e,i)=>{
     const row=8+i;
-    ws.getRow(row).height=14;
+    ws.getRow(row).height=15;
+    const rowBg=i%2===0?C.WHITE:C.GRIS;
 
-    const bg=i%2===0?'FFFFFFFF':'FFF7F9FC';
-
-    // Nº + Nombre
-    setCell(row,COL_NUM,i+1,{bold:true,size:9,bg:bg,border:true});
-    const nc=ws.getCell(row,COL_NOM);
-    nc.value=e.nombre;
-    nc.alignment={vertical:'middle',horizontal:'left',wrapText:false};
-    nc.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};
-    nc.font={bold:true,size:9,name:'Calibri'};
-    const bst={style:'thin',color:{argb:'FF000000'}};
-    nc.border={top:bst,left:bst,bottom:bst,right:bst};
-    // Merge nombre cols 2-4
-    try{ ws.mergeCells(row,2,row,4); }catch(e){}
+    // Nº
+    sc(row,C1, i+1, rowBg, font(true,9), align('center','middle'));
+    // Nombre (merge cols 2-4)
+    merge(row,C_NOM_S,C_NOM_E, e.nombre, rowBg, font(true,9), align('left','middle'));
 
     // SER notas
-    for(let j=0;j<maxSer;j++){
-      const col=COL_SER_START+j;
-      const act=serActs[j];
-      const nota=act?NOTAS[e.id]?.[act.id]:null;
-      setCell(row,col,nota!==undefined&&nota!==null?nota:'',{size:9,bg:i%2===0?'FFEFF6FF':'FFE8F4FF',border:true});
-    }
-    const pSer=promDim(e.id,serActs);
-    setCell(row,COL_PROM_SER,pSer!==null?parseFloat(pSer.toFixed(2)):'',{bold:true,size:9,bg:C_PROM_SER,border:true});
+    serActs.forEach((a,j)=>{
+      const n=NOTAS[e.id]?.[a.id];
+      sc(row,C_SER_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFEFF6FF':'FFE1EFFE', font(false,9), align('center','middle'));
+    });
+    if(serActs.length===0) sc(row,C_SER_S,'', i%2===0?'FFEFF6FF':'FFE1EFFE', null, align('center','middle'));
+    const pSer=promDim(e.id,serActs,NOTAS);
+    sc(row,C_PSER, pSer!==null?parseFloat(pSer.toFixed(2)):'', C.SER_MED, font(true,9), align('center','middle'));
 
-    // SABER notas (sobre 100, se convierte ×0.45)
-    for(let j=0;j<maxSaber;j++){
-      const col=COL_SAB_START+j;
-      const act=saberActs[j];
-      const nota=act?NOTAS[e.id]?.[act.id]:null;
-      setCell(row,col,nota!==undefined&&nota!==null?nota:'',{size:9,bg:i%2===0?'FFF5F3FF':'FFEDE9FE',border:true});
-    }
-    const pSab=promDim(e.id,saberActs);
+    // SABER notas (ingresadas sobre 100)
+    saberActs.forEach((a,j)=>{
+      const n=NOTAS[e.id]?.[a.id];
+      sc(row,C_SAB_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF5F3FF':'FFEDE9FE', font(false,9), align('center','middle'));
+    });
+    if(saberActs.length===0) sc(row,C_SAB_S,'', i%2===0?'FFF5F3FF':'FFEDE9FE', null, align('center','middle'));
+    const pSab=promDim(e.id,saberActs,NOTAS);
     const pSabConv=pSab!==null?parseFloat((pSab*0.45).toFixed(2)):null;
-    setCell(row,COL_PROM_SAB,pSabConv!==null?pSabConv:'',{bold:true,size:9,bg:C_PROM_SAB,border:true});
+    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,9), align('center','middle'));
 
-    // HACER notas (sobre 100, se convierte ×0.40)
-    for(let j=0;j<maxHacer;j++){
-      const col=COL_HAC_START+j;
-      const act=hacerActs[j];
-      const nota=act?NOTAS[e.id]?.[act.id]:null;
-      setCell(row,col,nota!==undefined&&nota!==null?nota:'',{size:9,bg:i%2===0?'FFF0FDF4':'FFE6FAF2',border:true});
-    }
-    const pHac=promDim(e.id,hacerActs);
+    // HACER notas (ingresadas sobre 100)
+    hacerActs.forEach((a,j)=>{
+      const n=NOTAS[e.id]?.[a.id];
+      sc(row,C_HAC_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF0FDF4':'FFE6FAF2', font(false,9), align('center','middle'));
+    });
+    if(hacerActs.length===0) sc(row,C_HAC_S,'', i%2===0?'FFF0FDF4':'FFE6FAF2', null, align('center','middle'));
+    const pHac=promDim(e.id,hacerActs,NOTAS);
     const pHacConv=pHac!==null?parseFloat((pHac*0.40).toFixed(2)):null;
-    setCell(row,COL_PROM_HAC,pHacConv!==null?pHacConv:'',{bold:true,size:9,bg:C_PROM_HAC,border:true});
+    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,9), align('center','middle'));
 
-    // TOTAL = SER_prom + SABER×0.45 + HACER×0.40
+    // TOTAL SER + SABER×0.45 + HACER×0.40
     const total=(pSer!==null||pSabConv!==null||pHacConv!==null)?
       parseFloat(((pSer||0)+(pSabConv||0)+(pHacConv||0)).toFixed(2)):null;
-    setCell(row,COL_TOTAL,total!==null?total:'',{bold:true,size:9,bg:C_TOTAL,border:true});
+    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,9), align('center','middle'));
 
-    // AUTOEVALUACIÓN
-    const auto=AUTOEVALS[e.id]||null;
-    setCell(row,COL_AUTO,auto!==null?auto:'',{size:9,bg:C_AUTO,border:true});
+    // AUTOEVALUACIÓN (sobre 5)
+    const auto=AUTOEVALS[e.id]!==undefined?AUTOEVALS[e.id]:null;
+    sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(false,9), align('center','middle'));
 
-    // PROMEDIO FINAL = total + auto
+    // PROMEDIO FINAL = total + autoevaluación
     const promFinal=total!==null?parseFloat((total+(auto||0)).toFixed(2)):null;
-    setCell(row,COL_PROM_FINAL,promFinal!==null?promFinal:'',{bold:true,size:9,bg:'FFFFE699',border:true});
+    sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,10), align('center','middle'));
 
     // ESTADO
-    let estado='', estColor='FF000000', estBg=C_ESTADO;
+    let estado='', estBg=C.WHITE, estColor='FF000000';
     if(promFinal!==null){
-      if(promFinal>=51){ estado='APROBADO'; estColor='FF065F46'; estBg='FFD1FAE5'; }
-      else{ estado='REPROBADO'; estColor='FF991B1B'; estBg='FFFEE2E2'; }
+      if(promFinal>=51){ estado='APROBADO'; estBg=C.APROBADO; estColor='FF065F46'; aprobados++; }
+      else{ estado='REPROBADO'; estBg=C.REPROBADO; estColor='FF991B1B'; }
     }
-    setCell(row,COL_ESTADO,estado,{bold:true,size:9,bg:estBg,color:estColor,border:true});
-  }
+    sc(row,C_EST, estado, estBg, font(true,9,estColor), align('center','middle'));
+  });
 
   // ===== FILA TOTALES =====
   const rowTot=8+ESTUDIANTES.length;
   ws.getRow(rowTot).height=14;
-  mergeSet(rowTot,1,4,'TOTAL ESTUDIANTES: '+ESTUDIANTES.length,{bold:true,size:9,bg:'FFDCE6F1',border:true,align:'left'});
-  // Contar aprobados
-  let aprobados=0;
-  ESTUDIANTES.forEach(e=>{
-    const pSer=promDim(e.id,serActs);
-    const pSab=promDim(e.id,saberActs);
-    const pHac=promDim(e.id,hacerActs);
-    const auto=AUTOEVALS[e.id]||0;
-    const t=(pSer||0)+(pSab!==null?pSab*0.45:0)+(pHac!==null?pHac*0.40:0)+auto;
-    if(t>=51) aprobados++;
-  });
-  mergeSet(rowTot,COL_ESTADO,COL_ESTADO,'Aprobados: '+aprobados+'/'+ ESTUDIANTES.length,{bold:true,size:9,bg:'FFD1FAE5',border:true});
+  merge(rowTot,C1,C_NOM_E, 'TOTAL: '+ESTUDIANTES.length+' estudiantes',
+    'FFDCE6F1', font(true,9), align('left','middle'));
+  merge(rowTot,C_SER_S,C_PHAC,'',C.GRIS,null,null);
+  sc(rowTot,C_TOTAL,'',C.GRIS,null,null);
+  sc(rowTot,C_AUTO,'',C.GRIS,null,null);
+  sc(rowTot,C_PROM,'',C.GRIS,null,null);
+  sc(rowTot,C_EST,'Aprobados: '+aprobados+'/'+ESTUDIANTES.length,
+    C.APROBADO, font(true,9,'FF065F46'), align('center','middle',0,true));
+
+  // ===== FILA FIRMA =====
+  const rowFirma=rowTot+2;
+  ws.getRow(rowFirma).height=30;
+  merge(rowFirma,C1,Math.floor(NCOLS/2)-1,'',C.WHITE,null,null);
+  merge(rowFirma,Math.floor(NCOLS/2),NCOLS,'',C.WHITE,null,null);
+  ws.getRow(rowFirma+1).height=12;
+  merge(rowFirma+1,C1,Math.floor(NCOLS/2)-1,'_______________________________',C.WHITE,font(false,9),align('center','top'));
+  merge(rowFirma+1,Math.floor(NCOLS/2),NCOLS,'_______________________________',C.WHITE,font(false,9),align('center','top'));
+  ws.getRow(rowFirma+2).height=12;
+  merge(rowFirma+2,C1,Math.floor(NCOLS/2)-1,'Firma del Docente',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
+  merge(rowFirma+2,Math.floor(NCOLS/2),NCOLS,'Sello y Firma de Dirección',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
 
   // ===== DESCARGAR =====
+  log('📐 Generando archivo...');
   const buffer=await wb.xlsx.writeBuffer();
   const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`Registro_${curso}_${materia.replace(/[/:]/g,'-')}_Trim${trim}_2026.xlsx`;
+  const fname=`Registro_${curso}_${materia.replace(/[/:,\s]/g,'-')}_Trim${trim}_2026.xlsx`;
+  a.download=fname;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  log('📁 Archivo: Registro_'+curso+'_Trim'+trim+'_2026.xlsx');
+  log('📁 '+fname);
 }
+
+// ===== INICIAR =====
+init();
 </script>
 </body>
 </html>
