@@ -25,7 +25,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--gris);color:var(--texto)
 .hi p{font-size:10px;opacity:.8}
 .hdoc{margin-left:auto;text-align:right;font-size:10px;opacity:.9}
 .curso-activo-badge{background:rgba(255,255,255,.2);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;margin-top:2px;display:inline-block}
-.nav{background:var(--azul);border-top:1px solid rgba(255,255,255,.15);display:flex;overflow-x:auto}
+.nav{background:#111827;border-top:1px solid rgba(255,255,255,.1);display:flex;overflow-x:auto}
 .nb{flex:1;min-width:52px;padding:7px 3px;background:none;border:none;color:rgba(255,255,255,.65);font-size:9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .2s;white-space:nowrap}
 .nb.active{color:#fbbf24;border-bottom:2px solid #fbbf24}
 .ni{font-size:16px}
@@ -342,18 +342,27 @@ tr:last-child td{border-bottom:none}
   <div class="fg"><label>Área / Materia</label>
     <select id="fc-mat">
       <optgroup label="Comunidad y Sociedad">
-        <option>Comunicación y Lenguajes</option><option>Lengua Extranjera</option>
-        <option>Ciencias Sociales</option><option>Educación Física y Deportes</option>
-        <option>Educación Musical</option><option>Artes Plásticas y Visuales</option>
-        <option>Valores Espirituales y Religiones</option>
+        <option>Comunicación y Lenguajes: Lengua Castellana y Originaria</option>
+        <option>Lengua Extranjera</option>
+        <option>Ciencias Sociales</option>
+        <option>Educación Física y Deportes</option>
+        <option>Educación Musical</option>
+        <option>Artes Plásticas y Visuales</option>
       </optgroup>
       <optgroup label="Vida Tierra y Territorio">
-        <option>Ciencias Naturales: Biología-Geografía</option><option>Física</option>
-        <option>Química</option><option>Cosmovisiones y Filosofía</option>
+        <option>Ciencias Naturales</option>
+        <option>Ciencias Naturales: Biología - Geografía</option>
+        <option>Ciencias Naturales: Física</option>
+        <option>Ciencias Naturales: Química</option>
       </optgroup>
       <optgroup label="Ciencia Tecnología y Producción">
-        <option>Matemática</option><option>Técnica Tecnológica General</option>
+        <option>Matemática</option>
+        <option>Técnica Tecnológica</option>
         <option>Técnica Tecnológica Especializada</option>
+      </optgroup>
+      <optgroup label="Cosmos y Pensamiento">
+        <option>Cosmovisiones, Filosofía y Sicología</option>
+        <option>Valores, Espiritualidad y Religiones</option>
       </optgroup>
     </select>
   </div>
@@ -399,18 +408,27 @@ tr:last-child td{border-bottom:none}
   <div class="fg"><label>Área / Materia</label>
     <select id="edit-curso-mat">
       <optgroup label="Comunidad y Sociedad">
-        <option>Comunicación y Lenguajes</option><option>Lengua Extranjera</option>
-        <option>Ciencias Sociales</option><option>Educación Física y Deportes</option>
-        <option>Educación Musical</option><option>Artes Plásticas y Visuales</option>
-        <option>Valores Espirituales y Religiones</option>
+        <option>Comunicación y Lenguajes: Lengua Castellana y Originaria</option>
+        <option>Lengua Extranjera</option>
+        <option>Ciencias Sociales</option>
+        <option>Educación Física y Deportes</option>
+        <option>Educación Musical</option>
+        <option>Artes Plásticas y Visuales</option>
       </optgroup>
       <optgroup label="Vida Tierra y Territorio">
-        <option>Ciencias Naturales: Biología-Geografía</option><option>Física</option>
-        <option>Química</option><option>Cosmovisiones y Filosofía</option>
+        <option>Ciencias Naturales</option>
+        <option>Ciencias Naturales: Biología - Geografía</option>
+        <option>Ciencias Naturales: Física</option>
+        <option>Ciencias Naturales: Química</option>
       </optgroup>
       <optgroup label="Ciencia Tecnología y Producción">
-        <option>Matemática</option><option>Técnica Tecnológica General</option>
+        <option>Matemática</option>
+        <option>Técnica Tecnológica</option>
         <option>Técnica Tecnológica Especializada</option>
+      </optgroup>
+      <optgroup label="Cosmos y Pensamiento">
+        <option>Cosmovisiones, Filosofía y Sicología</option>
+        <option>Valores, Espiritualidad y Religiones</option>
       </optgroup>
     </select>
   </div>
@@ -493,6 +511,35 @@ tr:last-child td{border-bottom:none}
   <div class="fa">
     <button class="btn" onclick="closeModal('modal-import');resetImport()">Cancelar</button>
     <button class="btn btn-p" id="import-confirm-btn" style="display:none" onclick="confirmarImport()">✓ Importar todos</button>
+  </div>
+</div></div>
+
+<div class="mo" id="modal-asist-guardar"><div class="md" style="max-width:360px">
+  <h2>💾 Guardar Asistencia</h2>
+  <div class="fg">
+    <label>Fecha de la llamada</label>
+    <input type="date" id="asist-fecha-input">
+    <div style="font-size:11px;color:var(--gris2);margin-top:4px">Puedes cambiar la fecha si necesitas registrar una clase anterior</div>
+  </div>
+  <div id="asist-dup-msg" style="display:none;background:#fef3c7;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:#92400e">
+    ⚠️ Ya existe una asistencia registrada para esta fecha en este curso.
+  </div>
+  <div class="fg">
+    <label>Tipo de registro</label>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="radio" name="asist-tipo" id="asist-opt-reemplazar" value="reemplazar" checked>
+        <span><strong>Reemplazar</strong> — actualiza la asistencia existente del día</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="radio" name="asist-tipo" id="asist-opt-nueva" value="nueva">
+        <span><strong>Nueva llamada</strong> — crea una segunda columna con sufijo L2, L3...</span>
+      </label>
+    </div>
+  </div>
+  <div class="fa">
+    <button class="btn" onclick="closeModal('modal-asist-guardar')">Cancelar</button>
+    <button class="btn btn-p" onclick="confirmarGuardarAsistencia()">✓ Confirmar</button>
   </div>
 </div></div>
 
@@ -585,7 +632,7 @@ async function iniciarSesion(){
   const ue=document.getElementById('l-ue').value.trim();
   if(!nombre||!email){ document.getElementById('login-msg').textContent='Completa nombre y email'; return; }
   showToast('Conectando...');
-  const id='D_'+email.replace(/[^a-z0-9]/gi,'_');
+  const id='D_'+email.replace(/[@.]/g,'_').replace(/[^a-z0-9_]/gi,'');
   const docObj={id,nombre,email,unidad_educativa:ue};
   await sbUpsert('docentes',docObj);
   DOCENTE=docObj;
@@ -912,17 +959,48 @@ function marcarTodos(tipo){
   actualizarContadores();
 }
 
+let asistFechaSeleccionada=null;
+
 async function guardarAsistencia(){
   if(!cursoCurrent){ showToast('Selecciona un curso primero'); return; }
   const lista=getEstCurso();
   if(!lista.length){ showToast('No hay estudiantes'); return; }
-  // Fecha local Bolivia (UTC-4)
+  // Mostrar modal de fecha y opción de llamada
   const now=new Date(); const offset=-4*60; const local=new Date(now.getTime()+offset*60000);
   const hoy=local.toISOString().split('T')[0];
+  document.getElementById('asist-fecha-input').value=hoy;
+  // Verificar si ya existe asistencia para este curso y fecha
+  const yaExiste=getLocalAll('asistencia').some(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia&&a.fecha===hoy);
+  const msgDup=document.getElementById('asist-dup-msg');
+  const optReemplazar=document.getElementById('asist-opt-reemplazar');
+  const optNueva=document.getElementById('asist-opt-nueva');
+  if(yaExiste){
+    msgDup.style.display='block';
+    optReemplazar.checked=true;
+  } else {
+    msgDup.style.display='none';
+    optReemplazar.checked=true;
+  }
+  openModal('modal-asist-guardar');
+}
+
+async function confirmarGuardarAsistencia(){
+  const lista=getEstCurso();
+  const fecha=document.getElementById('asist-fecha-input').value;
+  if(!fecha){ showToast('Selecciona una fecha'); return; }
+  const reemplazar=document.getElementById('asist-opt-reemplazar').checked;
+  // Si nueva llamada: agregar sufijo secuencial para diferenciar
+  let fechaId=fecha;
+  if(!reemplazar){
+    const existentes=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia&&a.fecha.startsWith(fecha));
+    const llamadasHoy=new Set(existentes.map(a=>a.fecha)).size;
+    fechaId=fecha+(llamadasHoy>0?'_L'+(llamadasHoy+1):'');
+  }
+  closeModal('modal-asist-guardar');
   showToast('Guardando asistencia...');
   for(const e of lista){
     if(ASIST_TEMP[e.id]){
-      await sbUpsert('asistencia',{id:'AS_'+e.id+'_'+hoy,id_docente:DOCENTE.id,id_estudiante:e.id,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha:hoy,estado:ASIST_TEMP[e.id]});
+      await sbUpsert('asistencia',{id:'AS_'+e.id+'_'+fechaId,id_docente:DOCENTE.id,id_estudiante:e.id,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha:fechaId,estado:ASIST_TEMP[e.id]});
     }
   }
   lista.forEach(e=>{
@@ -930,7 +1008,7 @@ async function guardarAsistencia(){
     ['P','F','A','L'].forEach(t=>{ const b=document.getElementById('ab_'+t+'_'+e.id); if(b) b.className='ab'; });
   });
   actualizarContadores();
-  showToast('✓ Asistencia guardada');
+  showToast('✓ Asistencia guardada — '+fechaId);
 }
 
 async function renderAsistResumen(){
