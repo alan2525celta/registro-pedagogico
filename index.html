@@ -177,6 +177,7 @@ tr:last-child td{border-bottom:none}
         <div style="font-weight:700;font-size:13px;color:#fbbf24;letter-spacing:.02em" id="doc-nombre">Docente</div>
         <div id="curso-badge" class="curso-activo-badge" style="display:none"></div>
         <div style="font-size:9px;opacity:.7">Trim. <span id="trim-actual">1</span></div>
+        <button onclick="cerrarSesion()" style="margin-top:3px;background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:5px;padding:2px 7px;font-size:9px;cursor:pointer">⏻ Salir</button>
       </div>
     </div>
     <nav class="nav">
@@ -284,7 +285,7 @@ tr:last-child td{border-bottom:none}
     <div id="screen-notas" class="screen">
       <div class="sh">
         <div class="st">Registro de Notas</div>
-        <button class="btn btn-p btn-sm" onclick="exportarExcel()">📊 Excel</button>
+        <button class="btn btn-p btn-sm" onclick="abrirExportador()">📊 Reg. Oficial</button>
       </div>
       <div id="notas-curso-bar" style="background:var(--azul);color:#fff;border-radius:8px;padding:7px 12px;margin-bottom:10px;font-size:12px;display:flex;justify-content:space-between;align-items:center">
         <span id="notas-curso-text">Selecciona un curso desde Inicio</span>
@@ -1459,6 +1460,18 @@ function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ===== CERRAR SESIÓN =====
+function cerrarSesion(){
+  if(!confirm('¿Cerrar sesión? Se borrarán los datos locales de este dispositivo.')) return;
+  localStorage.clear();
+  location.reload();
+}
+
+// ===== ABRIR EXPORTADOR =====
+function abrirExportador(){
+  window.open('/exportar_registro.html','_blank');
 }
 
 // ===== INIT =====
