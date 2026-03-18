@@ -471,13 +471,6 @@ tr:last-child td{border-bottom:none}
 <div class="mo" id="modal-obs"><div class="md">
   <h2>💬 Nueva Observación</h2>
   <div class="fg"><label>Estudiante</label><select id="fo-est"></select></div>
-  <div class="fg"><label>Tipo</label>
-    <select id="fo-tipo">
-      <option value="ACADEMICA">Académica</option><option value="CONDUCTUAL">Conductual</option>
-      <option value="ASISTENCIA">Asistencia</option><option value="LOGRO">Logro destacado</option>
-      <option value="GENERAL">General</option>
-    </select>
-  </div>
   <div class="fg"><label>Descripción</label><textarea id="fo-texto" rows="3" placeholder="Describe la observación..."></textarea></div>
   <div class="fg"><label>Visibilidad para el padre de familia</label>
     <select id="fo-vis">
@@ -912,8 +905,7 @@ function showAsistTab(tab,btn){
 }
 
 async function renderAsistencia(){
-  const _now=new Date(); const _local=new Date(_now.getTime()+(-4*60)*60000);
-  document.getElementById('fecha-hoy').textContent=_local.toLocaleDateString('es-BO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('fecha-hoy').textContent=new Date().toLocaleDateString('es-BO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   if(!cursoCurrent){ document.getElementById('lista-asist').innerHTML='<div class="empty"><div class="ei">✋</div><p>Selecciona un curso desde Inicio</p></div>'; return; }
   const lista=getEstCurso();
   // Siempre arrancar limpio (fix punto 12)
@@ -985,18 +977,21 @@ async function guardarAsistencia(){
 }
 
 async function confirmarGuardarAsistencia(){
-  const lista=getEstCurso();
   const fecha=document.getElementById('asist-fecha-input').value;
   if(!fecha){ showToast('Selecciona una fecha'); return; }
   const reemplazar=document.getElementById('asist-opt-reemplazar').checked;
-  // Si nueva llamada: agregar sufijo secuencial para diferenciar
   let fechaId=fecha;
   if(!reemplazar){
-    const existentes=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia&&a.fecha.startsWith(fecha));
+    const existentes=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia&&(a.fecha===fecha||a.fecha.startsWith(fecha+'_L')));
     const llamadasHoy=new Set(existentes.map(a=>a.fecha)).size;
-    fechaId=fecha+(llamadasHoy>0?'_L'+(llamadasHoy+1):'');
+    fechaId=fecha+'_L'+(llamadasHoy+1);
   }
   closeModal('modal-asist-guardar');
+  await ejecutarGuardarAsistencia(fechaId, reemplazar);
+}
+
+async function ejecutarGuardarAsistencia(fechaId, esReemplazo){
+  const lista=getEstCurso();
   showToast('Guardando asistencia...');
   for(const e of lista){
     if(ASIST_TEMP[e.id]){
@@ -1008,7 +1003,7 @@ async function confirmarGuardarAsistencia(){
     ['P','F','A','L'].forEach(t=>{ const b=document.getElementById('ab_'+t+'_'+e.id); if(b) b.className='ab'; });
   });
   actualizarContadores();
-  showToast('✓ Asistencia guardada — '+fechaId);
+  showToast(esReemplazo?'✓ Asistencia guardada':'✓ Nueva llamada guardada ('+fechaId+')');
 }
 
 async function renderAsistResumen(){
@@ -1259,7 +1254,6 @@ async function renderObservaciones(){
       <div class="oh">
         <div>
           <span class="oe">${o.nombre_estudiante}</span>
-          <span style="font-size:10px;background:var(--gris);border-radius:4px;padding:1px 6px;margin-left:6px">${o.tipo||'GENERAL'}</span>
         </div>
         <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
           <span class="of">${o.fecha}</span>
@@ -1283,9 +1277,10 @@ async function agregarObservacion(){
   const est=ESTUDIANTES.find(e=>e.id===estId);
   const texto=document.getElementById('fo-texto').value.trim();
   const vis=document.getElementById('fo-vis').value;
-  const tipo=document.getElementById('fo-tipo').value;
   if(!estId||!texto){ showToast('Completa todos los campos'); return; }
-  const obj={id:'O_'+Date.now(),id_docente:DOCENTE.id,id_estudiante:estId,nombre_estudiante:est?.nombre||'',curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha:new Date().toLocaleDateString('es-BO'),observacion:texto,visible_padre:vis,tipo};
+  // fecha en formato YYYY-MM-DD para Supabase
+  const fechaObs=new Date(new Date().getTime()-new Date().getTimezoneOffset()*60000).toISOString().split('T')[0];
+  const obj={id:'O_'+Date.now(),id_docente:DOCENTE.id,id_estudiante:estId,nombre_estudiante:est?.nombre||'',curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha:fechaObs,observacion:texto,visible_padre:vis};
   await sbUpsert('observaciones',obj);
   closeModal('modal-obs');
   // Clear form
