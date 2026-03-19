@@ -159,7 +159,7 @@ tr:last-child td{border-bottom:none}
 
     <!-- PANEL: Login normal (usuario + contraseña) -->
     <div id="panel-login">
-      <div class="fg"><label>Usuario</label><input id="l-usuario" placeholder="Ej: acalcina" autocomplete="username" autocapitalize="none"></div>
+      <div class="fg"><label>Usuario</label><input id="l-usuario" placeholder="Ej: jperez" autocomplete="username" autocapitalize="none"></div>
       <div class="fg" style="position:relative">
         <label>Contraseña</label>
         <input id="l-pass" type="password" placeholder="Tu contraseña" autocomplete="current-password">
@@ -177,7 +177,7 @@ tr:last-child td{border-bottom:none}
       <div class="fg"><label>Código de Activación</label><input id="l-codigo" placeholder="Ej: FT2026-001" autocapitalize="characters"></div>
       <div class="fg"><label>Nombre completo</label><input id="l-nombre" placeholder="APELLIDO NOMBRE" autocapitalize="characters"></div>
       <div class="fg"><label>Unidad Educativa</label><input id="l-ue" value="Franz Tamayo de Chachacomani"></div>
-      <div class="fg"><label>Crear usuario (sin espacios)</label><input id="l-usuario-nuevo" placeholder="Ej: acalcina" autocapitalize="none"></div>
+      <div class="fg"><label>Crear usuario (sin espacios)</label><input id="l-usuario-nuevo" placeholder="Ej: jperez" autocapitalize="none"></div>
       <div class="fg" style="position:relative">
         <label>Crear contraseña (mín. 6 caracteres)</label>
         <input id="l-pass-nuevo" type="password" placeholder="Tu contraseña">
@@ -702,7 +702,7 @@ async function activarCuenta(){
   if(existing){ showLoginMsg('Ese usuario ya existe, elige otro'); return; }
   showLoginMsg('Creando cuenta...','ok');
   const id='D_'+usuario+'_'+Date.now();
-  const docObj={id,nombre,usuario,contrasena:btoa(pass),unidad_educativa:ue,activo:true,activado:true,codigo_activacion:codigo};
+  const docObj={id,nombre,usuario,contrasena:btoa(pass),unidad_educativa:ue,activo:true,activado:true,codigo_activacion:codigo,email:''};
   const {error}=await sb.from('docentes').insert(docObj);
   if(error){ showLoginMsg('Error al crear cuenta: '+error.message); return; }
   // NO marcar código como usado — código compartido para múltiples docentes
