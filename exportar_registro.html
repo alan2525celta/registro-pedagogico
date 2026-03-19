@@ -234,17 +234,32 @@ function promDim(estId,acts,NOTAS){
   return ns.reduce((s,n)=>s+n,0)/ns.length;
 }
 
-async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,materia,trim,ue}){
+async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,materia,trim,ue}){ /* v2 */
   const wb=new ExcelJS.Workbook();
   wb.creator='Registro Pedagógico 2026';
   const trimNombres={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
 
   const ws=wb.addWorksheet('Registro 1T',{
     pageSetup:{
-      paperSize:9, // A4
+      paperSize:1,           // Carta (Letter)
       orientation:'landscape',
-      fitToPage:true,fitToWidth:1,fitToHeight:0,
-      margins:{left:0.4,right:0.4,top:0.4,bottom:0.4,header:0,footer:0}
+      fitToPage:true,
+      fitToWidth:1,          // 1 página de ancho exacto
+      fitToHeight:0,         // alto automático (varias páginas si necesario)
+      horizontalCentered:true,
+      verticalCentered:false,
+      margins:{
+        left:0.2,            // 0.5 cm aprox en pulgadas
+        right:0.2,
+        top:0.31,
+        bottom:0.31,
+        header:0.12,
+        footer:0.12
+      }
+    },
+    headerFooter:{
+      oddHeader:'&C&"Arial,Bold"&11REGISTRO DE EVALUACIÓN — GESTIÓN 2026',
+      oddFooter:'&L&"Arial"&8'+materia+'  |  '+curso+'&C&"Arial"&8Página &P de &N&R&"Arial"&8'+new Date().toLocaleDateString('es-BO')
     }
   });
 
@@ -285,19 +300,25 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
   const C_TOTAL=C_PHAC+1, C_AUTO=C_TOTAL+1, C_PROM=C_AUTO+1, C_EST=C_PROM+1;
   const NCOLS=C_EST;
 
+  // ===== REPETIR FILAS ENCABEZADO EN CADA PÁGINA IMPRESA =====
+  ws.views = [{state:'frozen', xSplit:0, ySplit:7}]; // congelar primeras 7 filas en pantalla
+  // Nota: ExcelJS no soporta PrintTitleRows directamente, se aplica via pageSetup
+  ws.pageSetup.printTitlesRow = '1:7'; // repetir filas 1-7 en cada página
+
   // ===== ANCHOS =====
-  ws.getColumn(C1).width=4.5;
-  for(let c=C_NOM_S;c<=C_NOM_E;c++) ws.getColumn(c).width=c===C_NOM_S?22:3;
-  for(let c=C_SER_S;c<=C_SER_E;c++) ws.getColumn(c).width=7;
-  ws.getColumn(C_PSER).width=7.5;
-  for(let c=C_SAB_S;c<=C_SAB_E;c++) ws.getColumn(c).width=7;
-  ws.getColumn(C_PSAB).width=7.5;
-  for(let c=C_HAC_S;c<=C_HAC_E;c++) ws.getColumn(c).width=7;
-  ws.getColumn(C_PHAC).width=7.5;
-  ws.getColumn(C_TOTAL).width=7.5;
-  ws.getColumn(C_AUTO).width=7.5;
-  ws.getColumn(C_PROM).width=7.5;
-  ws.getColumn(C_EST).width=11;
+  ws.getColumn(C1).width=4;
+  ws.getColumn(C_NOM_S).width=30; // Nombre más ancho
+  for(let c=C_NOM_S+1;c<=C_NOM_E;c++) ws.getColumn(c).width=2;
+  for(let c=C_SER_S;c<=C_SER_E;c++) ws.getColumn(c).width=5.5;
+  ws.getColumn(C_PSER).width=6.5;
+  for(let c=C_SAB_S;c<=C_SAB_E;c++) ws.getColumn(c).width=5.5;
+  ws.getColumn(C_PSAB).width=6.5;
+  for(let c=C_HAC_S;c<=C_HAC_E;c++) ws.getColumn(c).width=5.5;
+  ws.getColumn(C_PHAC).width=6.5;
+  ws.getColumn(C_TOTAL).width=6.5;
+  ws.getColumn(C_AUTO).width=6;
+  ws.getColumn(C_PROM).width=6.5;
+  ws.getColumn(C_EST).width=10;
 
   // ===== HELPERS =====
   const border={style:'thin',color:{argb:'FF000000'}};
@@ -376,7 +397,7 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
   sc(6,C_EST,'', 'FFE2EFDA', null, null);
 
   // ===== FILA 7: ENCABEZADOS ACTIVIDADES (texto vertical rotado 90°) =====
-  ws.getRow(7).height=90;
+  ws.getRow(7).height=110; // más alto para nombres largos de actividades
   merge(7,C1,C_NOM_E,'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true,10), align('center','bottom',0,true));
 
   // SER actividades
@@ -409,13 +430,13 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
   let aprobados=0;
   ESTUDIANTES.forEach((e,i)=>{
     const row=8+i;
-    ws.getRow(row).height=15;
+    ws.getRow(row).height=17;
     const rowBg=i%2===0?C.WHITE:C.GRIS;
 
     // Nº
-    sc(row,C1, i+1, rowBg, font(true,9), align('center','middle'));
+    sc(row,C1, i+1, rowBg, font(true,10), align('center','middle'));
     // Nombre (merge cols 2-4)
-    merge(row,C_NOM_S,C_NOM_E, e.nombre, rowBg, font(true,9), align('left','middle'));
+    merge(row,C_NOM_S,C_NOM_E, e.nombre, rowBg, font(true,10), align('left','middle'));
 
     // SER notas
     serActs.forEach((a,j)=>{
@@ -424,7 +445,7 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
     });
     if(serActs.length===0) sc(row,C_SER_S,'', i%2===0?'FFEFF6FF':'FFE1EFFE', null, align('center','middle'));
     const pSer=promDim(e.id,serActs,NOTAS);
-    sc(row,C_PSER, pSer!==null?parseFloat(pSer.toFixed(2)):'', C.SER_MED, font(true,9), align('center','middle'));
+    sc(row,C_PSER, pSer!==null?Math.round(pSer):'', C.SER_MED, font(true,10), align('center','middle'));
 
     // SABER notas (ingresadas sobre 100)
     saberActs.forEach((a,j)=>{
@@ -433,8 +454,8 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
     });
     if(saberActs.length===0) sc(row,C_SAB_S,'', i%2===0?'FFF5F3FF':'FFEDE9FE', null, align('center','middle'));
     const pSab=promDim(e.id,saberActs,NOTAS);
-    const pSabConv=pSab!==null?parseFloat((pSab*0.45).toFixed(2)):null;
-    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,9), align('center','middle'));
+    const pSabConv=pSab!==null?Math.round(pSab*0.45):null;
+    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,10), align('center','middle'));
 
     // HACER notas (ingresadas sobre 100)
     hacerActs.forEach((a,j)=>{
@@ -443,21 +464,21 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
     });
     if(hacerActs.length===0) sc(row,C_HAC_S,'', i%2===0?'FFF0FDF4':'FFE6FAF2', null, align('center','middle'));
     const pHac=promDim(e.id,hacerActs,NOTAS);
-    const pHacConv=pHac!==null?parseFloat((pHac*0.40).toFixed(2)):null;
-    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,9), align('center','middle'));
+    const pHacConv=pHac!==null?Math.round(pHac*0.40):null;
+    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,10), align('center','middle'));
 
     // TOTAL SER + SABER×0.45 + HACER×0.40
     const total=(pSer!==null||pSabConv!==null||pHacConv!==null)?
-      parseFloat(((pSer||0)+(pSabConv||0)+(pHacConv||0)).toFixed(2)):null;
-    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,9), align('center','middle'));
+      Math.round((pSer||0)+(pSabConv||0)+(pHacConv||0)):null;
+    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,10), align('center','middle'));
 
     // AUTOEVALUACIÓN (sobre 5)
     const auto=AUTOEVALS[e.id]!==undefined?AUTOEVALS[e.id]:null;
     sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(false,9), align('center','middle'));
 
     // PROMEDIO FINAL = total + autoevaluación
-    const promFinal=total!==null?parseFloat((total+(auto||0)).toFixed(2)):null;
-    sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,10), align('center','middle'));
+    const promFinal=total!==null?Math.round(total+(auto||0)):null;
+    sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,11), align('center','middle'));
 
     // ESTADO
     let estado='', estBg=C.WHITE, estColor='FF000000';
@@ -491,6 +512,16 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
   ws.getRow(rowFirma+2).height=12;
   merge(rowFirma+2,C1,Math.floor(NCOLS/2)-1,'Firma del Docente',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
   merge(rowFirma+2,Math.floor(NCOLS/2),NCOLS,'Sello y Firma de Dirección',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
+
+  // ===== CONFIGURAR ÁREA DE IMPRESIÓN AUTOMÁTICA =====
+  // Solo incluir celdas con datos (hasta última fila de estudiantes + totales + firma)
+  const lastDataRow = 8 + ESTUDIANTES.length + 4; // filas header + estudiantes + totales + firma
+  ws.pageSetup.printArea = 'A1:'+colLetter(NCOLS)+lastDataRow;
+
+  // Cuadrícula visible en impresión
+  ws.pageSetup.showGridLines = true;
+  ws.pageSetup.blackAndWhite = false;
+  ws.pageSetup.draft = false;
 
   // ===== DESCARGAR =====
   log('📐 Generando archivo...');
