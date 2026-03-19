@@ -264,8 +264,8 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
       }
     },
     headerFooter:{
-      oddHeader:'&C&"Arial,Bold"&11REGISTRO DE EVALUACIÓN — GESTIÓN 2026',
-      oddFooter:'&L&"Arial"&8'+materia+'  |  '+curso+'&C&"Arial"&8Página &P de &N&R&"Arial"&8'+new Date().toLocaleDateString('es-BO')
+      oddHeader:'', // Sin encabezado - el título ya está en la fila 1 de la hoja
+      oddFooter:'&L&"Arial,Regular"&8'+materia+'  |  Curso: '+curso+'&C&"Arial,Regular"&9Página &P de &N&R&"Arial,Regular"&8'+new Date().toLocaleDateString('es-BO')
     }
   });
 
