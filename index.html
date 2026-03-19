@@ -1042,9 +1042,10 @@ function actualizarContadores(){
 }
 
 function marcarTodos(tipo){
-  getEstCurso().forEach(e=>{ ASIST_TEMP[e.id]=tipo; });
-  renderAsistencia();
+  // No llamar renderAsistencia() porque limpia ASIST_TEMP
+  // Solo actualizar botones y estado directamente
   getEstCurso().forEach(e=>{
+    ASIST_TEMP[e.id]=tipo;
     ['P','F','A','L'].forEach(t=>{ const b=document.getElementById('ab_'+t+'_'+e.id); if(b) b.className='ab'; });
     const b=document.getElementById('ab_'+tipo+'_'+e.id); if(b) b.className='ab '+tipo;
   });
@@ -1239,9 +1240,9 @@ function renderNotas(){
       const hacerCols=hacerActs.map(a=>`<td style="background:#f0fdf4">${fmt(NOTAS[e.id]?.[a.id])}</td>`).join('');
       return `<tr id="nrow_${e.id}" onclick="selectRow('${e.id}')" style="cursor:pointer">
         <td class="td-nombre">${i+1}. ${e.nombre}</td>
-        ${serCols}<td style="font-weight:600;background:#dbeafe">${ser!==null?ser.toFixed(1):'—'}</td>
-        ${saberCols}<td style="font-weight:600;background:#ede9fe">${saber!==null?(saber*0.45).toFixed(1):'—'}</td>
-        ${hacerCols}<td style="font-weight:600;background:#d1fae5">${hacer!==null?(hacer*0.40).toFixed(1):'—'}</td>
+        ${serCols}<td style="font-weight:600;background:#dbeafe">${ser!==null?Math.round(ser):'—'}</td>
+        ${saberCols}<td style="font-weight:600;background:#ede9fe">${saber!==null?Math.round(saber*0.45):'—'}</td>
+        ${hacerCols}<td style="font-weight:600;background:#d1fae5">${hacer!==null?Math.round(hacer*0.40):'—'}</td>
         <td style="background:#fef3c7"><input class="ni2" type="number" min="0" max="5" step="0.5" value="${auto||''}" placeholder="0-5" onclick="event.stopPropagation()" onchange="saveAutoEval('${e.id}',this.value,'${cursoCurrent.curso}','${cursoCurrent.materia}',this)"></td>
         <td><span class="tb ${cls}">${total}</span></td>
         <td style="font-size:11px;font-weight:600;color:${total!=='-'&&parseFloat(total)>=51?'var(--verde)':'var(--rojo)'}">${estado}</td>
@@ -1269,7 +1270,7 @@ function renderNotas(){
         const prom=promDim(e.id,acts);
         return `<tr id="nrow_${e.id}" onclick="selectRow('${e.id}')" style="cursor:pointer">
           <td class="td-nombre">${i+1}. ${e.nombre}</td>${cols}
-          <td><span class="tb ${prom!==null?'tok':'tem'}">${prom!==null?prom.toFixed(1):'—'}</span></td>
+          <td><span class="tb ${prom!==null?'tok':'tem'}">${prom!==null?Math.round(prom):'—'}</span></td>
         </tr>`;
       }).join('');
     }
@@ -1317,7 +1318,7 @@ function calcTotal(ser,saber,hacer,auto){
   const sa=saber!==null?saber*0.45:0;
   const h=hacer!==null?hacer*0.40:0;
   const a=auto||0;
-  return (s+sa+h+a).toFixed(1);
+  return Math.round(s+sa+h+a);
 }
 
 function setDim(dim,btn,cls){
