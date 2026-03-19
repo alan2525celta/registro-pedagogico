@@ -112,7 +112,7 @@ tr:hover td{background:#f8fafc}
       <h2>👥 Docentes Registrados</h2>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>#</th><th>Nombre</th><th>Usuario</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>#</th><th>Nombre</th><th>Usuario</th><th>Contraseña</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="tb-docentes"></tbody>
         </table>
       </div>
@@ -191,6 +191,12 @@ async function cargarDocentes(){
       <td>${i+1}</td>
       <td><strong>${d.nombre}</strong><br><span style="font-size:10px;color:#64748b">${d.unidad_educativa||''}</span></td>
       <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px">${d.usuario||'(sin usuario)'}</code></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:5px">
+          <code style="background:#fef3c7;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;letter-spacing:.05em;color:#92400e">${d.contrasena?atob(d.contrasena):'—'}</code>
+          <button onclick="navigator.clipboard.writeText('${d.contrasena?atob(d.contrasena):""}')" style="background:none;border:none;cursor:pointer;font-size:12px" title="Copiar">📋</button>
+        </div>
+      </td>
       <td>
         ${d.activado
           ?`<span class="badge badge-on">✓ Activo</span>`
