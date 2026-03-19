@@ -229,9 +229,15 @@ async function exportarExcel(){
 }
 
 function promDim(estId,acts,NOTAS){
-  const ns=acts.map(a=>NOTAS[estId]?.[a.id]).filter(n=>n!==undefined&&n!==null&&!isNaN(n));
-  if(!ns.length) return null;
-  return ns.reduce((s,n)=>s+n,0)/ns.length;
+  if(!acts.length) return null;
+  // Vacíos cuentan como 0 — divide entre el total de actividades del criterio
+  const hayAlguna=acts.some(a=>{ const n=NOTAS[estId]?.[a.id]; return n!==undefined&&n!==null&&n!==''&&!isNaN(n); });
+  if(!hayAlguna) return null;
+  const suma=acts.reduce((s,a)=>{
+    const n=NOTAS[estId]?.[a.id];
+    return s+(n!==undefined&&n!==null&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);
+  },0);
+  return suma/acts.length; // divide entre TOTAL actividades del criterio
 }
 
 async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,materia,trim,ue}){ /* v2 */
