@@ -1281,9 +1281,14 @@ function fmt(v){ return v!==undefined&&v!==null&&v!==''?v:'—'; }
 
 function promDim(estId,acts){
   if(!acts.length) return null;
-  const notas=acts.map(a=>NOTAS[estId]?.[a.id]).filter(n=>n!==undefined&&n!==null&&n!=='');
-  if(!notas.length) return null;
-  return notas.reduce((s,n)=>s+parseFloat(n),0)/notas.length;
+  // Vacíos cuentan como 0 — divide entre el total de actividades del criterio
+  const hayAlguna=acts.some(a=>NOTAS[estId]?.[a.id]!==undefined&&NOTAS[estId]?.[a.id]!==null&&NOTAS[estId]?.[a.id]!=='');
+  if(!hayAlguna) return null; // si no hay ninguna nota, no mostrar promedio
+  const suma=acts.reduce((s,a)=>{
+    const n=NOTAS[estId]?.[a.id];
+    return s+(n!==undefined&&n!==null&&n!==''?parseFloat(n):0);
+  },0);
+  return suma/acts.length; // divide entre TOTAL de actividades, no solo las llenadas
 }
 
 async function saveNota(estId,actId,dim,curso,materia,val,inputEl){
