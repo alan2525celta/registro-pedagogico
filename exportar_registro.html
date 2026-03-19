@@ -247,11 +247,10 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
 
   const ws=wb.addWorksheet('Registro 1T',{
     pageSetup:{
-      paperSize:1,           // Carta (Letter)
+      paperSize:9,           // A4
       orientation:'landscape',
-      fitToPage:true,
-      fitToWidth:1,          // 1 página de ancho exacto
-      fitToHeight:0,         // alto automático (varias páginas si necesario)
+      fitToPage:false,
+      scale:65,              // 65% — ajusta toda la hoja en ancho A4
       horizontalCentered:true,
       verticalCentered:false,
       margins:{
@@ -315,11 +314,11 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
   ws.getColumn(C1).width=4;
   ws.getColumn(C_NOM_S).width=30; // Nombre más ancho
   for(let c=C_NOM_S+1;c<=C_NOM_E;c++) ws.getColumn(c).width=2;
-  for(let c=C_SER_S;c<=C_SER_E;c++) ws.getColumn(c).width=5.5;
+  for(let c=C_SER_S;c<=C_SER_E;c++) ws.getColumn(c).width=7;
   ws.getColumn(C_PSER).width=6.5;
-  for(let c=C_SAB_S;c<=C_SAB_E;c++) ws.getColumn(c).width=5.5;
+  for(let c=C_SAB_S;c<=C_SAB_E;c++) ws.getColumn(c).width=7;
   ws.getColumn(C_PSAB).width=6.5;
-  for(let c=C_HAC_S;c<=C_HAC_E;c++) ws.getColumn(c).width=5.5;
+  for(let c=C_HAC_S;c<=C_HAC_E;c++) ws.getColumn(c).width=7;
   ws.getColumn(C_PHAC).width=6.5;
   ws.getColumn(C_TOTAL).width=6.5;
   ws.getColumn(C_AUTO).width=6;
@@ -403,28 +402,28 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
   sc(6,C_EST,'', 'FFE2EFDA', null, null);
 
   // ===== FILA 7: ENCABEZADOS ACTIVIDADES (texto vertical rotado 90°) =====
-  ws.getRow(7).height=110; // más alto para nombres largos de actividades
+  ws.getRow(7).height=135; // altura para nombres de actividades en vertical con wrapText
   merge(7,C1,C_NOM_E,'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true,10), align('center','bottom',0,true));
 
   // SER actividades
   serActs.forEach((a,i)=>{
-    sc(7,C_SER_S+i, a.nombre_actividad, C.SER_BG, font(false,8), align('center','bottom',90,false));
+    sc(7,C_SER_S+i, a.nombre_actividad, C.SER_BG, font(false,9), align('center','bottom',90,true));
   });
-  if(serActs.length===0) sc(7,C_SER_S,'(sin actividades)', C.SER_BG, font(false,7), align('center','bottom',90,false));
+  if(serActs.length===0) sc(7,C_SER_S,'(sin actividades)', C.SER_BG, font(false,8), align('center','bottom',90,true));
   sc(7,C_PSER,'PROMEDIO\nSER', C.SER_MED, font(true,8), align('center','bottom',0,true));
 
   // SABER actividades
   saberActs.forEach((a,i)=>{
-    sc(7,C_SAB_S+i, a.nombre_actividad, C.SAB_BG, font(false,8), align('center','bottom',90,false));
+    sc(7,C_SAB_S+i, a.nombre_actividad, C.SAB_BG, font(false,9), align('center','bottom',90,true));
   });
-  if(saberActs.length===0) sc(7,C_SAB_S,'(sin actividades)', C.SAB_BG, font(false,7), align('center','bottom',90,false));
+  if(saberActs.length===0) sc(7,C_SAB_S,'(sin actividades)', C.SAB_BG, font(false,8), align('center','bottom',90,true));
   sc(7,C_PSAB,'PROMEDIO\nSABER', C.SAB_MED, font(true,8), align('center','bottom',0,true));
 
   // HACER actividades
   hacerActs.forEach((a,i)=>{
-    sc(7,C_HAC_S+i, a.nombre_actividad, C.HAC_BG, font(false,8), align('center','bottom',90,false));
+    sc(7,C_HAC_S+i, a.nombre_actividad, C.HAC_BG, font(false,9), align('center','bottom',90,true));
   });
-  if(hacerActs.length===0) sc(7,C_HAC_S,'(sin actividades)', C.HAC_BG, font(false,7), align('center','bottom',90,false));
+  if(hacerActs.length===0) sc(7,C_HAC_S,'(sin actividades)', C.HAC_BG, font(false,8), align('center','bottom',90,true));
   sc(7,C_PHAC,'PROMEDIO\nHACER', C.HAC_MED, font(true,8), align('center','bottom',0,true));
 
   sc(7,C_TOTAL,'VALORACIÓN\nTOTAL', C.TOTAL, font(true,8), align('center','bottom',0,true));
