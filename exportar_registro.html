@@ -516,7 +516,9 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,mat
   // ===== CONFIGURAR ÁREA DE IMPRESIÓN AUTOMÁTICA =====
   // Solo incluir celdas con datos (hasta última fila de estudiantes + totales + firma)
   const lastDataRow = 8 + ESTUDIANTES.length + 4; // filas header + estudiantes + totales + firma
-  ws.pageSetup.printArea = 'A1:'+colLetter(NCOLS)+lastDataRow;
+  // Convertir número de columna a letra Excel
+  function numToCol(n){ let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26); } return s; }
+  ws.pageSetup.printArea = 'A1:'+numToCol(NCOLS)+lastDataRow;
 
   // Cuadrícula visible en impresión
   ws.pageSetup.showGridLines = true;
