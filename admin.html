@@ -57,7 +57,7 @@ tr:hover td{background:#f8fafc}
 <body>
 <div class="container">
   <h1>🛡️ Panel de Administrador</h1>
-  <p class="sub-h">Registro Pedagógico 2026 — Franz Tamayo de Chachacomani</p>
+  <p class="sub-h">Registro Pedagógico 2026 — Panel de Administración</p>
 
   <!-- LOGIN ADMIN -->
   <div class="card" id="admin-login">
@@ -84,12 +84,21 @@ tr:hover td{background:#f8fafc}
     <!-- CREAR CÓDIGO -->
     <div class="card">
       <h2>🔑 Generar Código de Activación</h2>
-      <p style="font-size:12px;color:#64748b;margin-bottom:12px">Genera un código único para entregar a un docente nuevo. Cada código solo puede usarse una vez.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-g" onclick="generarCodigo()">+ Generar código nuevo</button>
-        <button class="btn btn-p" onclick="generarMultiple()">+ Generar 5 códigos</button>
+      <p style="font-size:12px;color:#64748b;margin-bottom:12px">Define las iniciales de tu Unidad Educativa para identificar los códigos generados.</p>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+        <div style="flex:1;min-width:140px">
+          <label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase">Prefijo (2-4 letras de tu UE)</label>
+          <input type="text" id="inp-prefijo" placeholder="Ej: LAN, SMB, JFK" maxlength="4"
+            style="width:100%;padding:8px 11px;border:1.5px solid var(--borde);border-radius:8px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.1em"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')">
+          <div style="font-size:10px;color:#94a3b8;margin-top:3px">Solo letras, sin números ni espacios</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-g" onclick="generarCodigo()">+ Generar 1</button>
+          <button class="btn btn-p" onclick="generarMultiple()">+ Generar 5</button>
+        </div>
       </div>
-      <div id="codigos-nuevos" style="margin-top:12px"></div>
+      <div id="codigos-nuevos"></div>
     </div>
 
     <!-- LISTA CÓDIGOS ACTIVOS -->
@@ -126,9 +135,12 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 async function loginAdmin(){
   const code=document.getElementById('admin-code').value.trim().toUpperCase();
-  // Verificar contra Supabase
-  const {data}=await sb.from('codigos_acceso').select('*').eq('codigo',code).eq('id','ADMIN_MASTER').single();
-  if(!data){ document.getElementById('admin-msg').textContent='Código incorrecto'; return; }
+  // Verificar: solo chequeamos que el código coincida con ADMIN_MASTER, sin importar campo 'usado'
+  const {data}=await sb.from('codigos_acceso').select('*').eq('id','ADMIN_MASTER').single();
+  if(!data||data.codigo!==code){ 
+    document.getElementById('admin-msg').textContent='Código incorrecto'; 
+    return; 
+  }
   sessionStorage.setItem('admin_auth','1');
   document.getElementById('admin-login').style.display='none';
   document.getElementById('admin-panel').style.display='block';
@@ -195,11 +207,12 @@ async function cargarDocentes(){
 }
 
 function generarCodigoStr(){
-  const letras='ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const prefijo=(document.getElementById('inp-prefijo')?.value||'UE').trim().toUpperCase()||'UE';
   const nums='0123456789';
+  const letras='ABCDEFGHJKLMNPQRSTUVWXYZ';
   const part1=Array.from({length:2},()=>letras[Math.floor(Math.random()*letras.length)]).join('');
   const part2=Array.from({length:4},()=>nums[Math.floor(Math.random()*nums.length)]).join('');
-  return 'FT-'+part1+part2;
+  return prefijo+'-'+part1+part2;
 }
 
 async function generarCodigo(){
@@ -220,12 +233,11 @@ async function generarCodigo(){
 }
 
 async function generarMultiple(){
-  const codigos=[];
   for(let i=0;i<5;i++){
-    const codigo=generarCodigoStr()+'_'+i;
+    const codigo=generarCodigoStr();
     const id='COD_'+Date.now()+'_'+i;
-    await sb.from('codigos_acceso').insert({id,codigo:generarCodigoStr(),usado:false});
-    codigos.push(codigo);
+    await new Promise(r=>setTimeout(r,60)); // evitar colisión de IDs
+    await sb.from('codigos_acceso').insert({id,codigo,usado:false});
   }
   showToast('5 códigos generados ✓');
   await cargarTodo();
