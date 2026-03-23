@@ -50,49 +50,57 @@ select:disabled{background:#f8fafc;color:#94a3b8}
     <p class="sub">Genera el Excel con formato Ministerio de Educación Bolivia</p>
   </div>
 
-  <!-- Badge docente detectado automáticamente -->
-  <div class="docente-badge" id="docente-badge">
-    <div class="name" id="badge-nombre">—</div>
-    <div class="ue" id="badge-ue">—</div>
+  <!-- LOGIN: se muestra si no hay sesión activa -->
+  <div id="panel-login">
+    <div class="fg">
+      <label>Usuario</label>
+      <input type="text" id="inp-usuario" placeholder="Ej: jperez" autocomplete="username" autocapitalize="none">
+    </div>
+    <div class="fg" style="position:relative">
+      <label>Contraseña</label>
+      <input type="password" id="inp-pass" placeholder="Tu contraseña" autocomplete="current-password">
+      <span onclick="togglePass()" style="position:absolute;right:10px;top:30px;cursor:pointer;font-size:16px">👁</span>
+    </div>
+    <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px;border-radius:10px;margin-bottom:6px" onclick="loginDocente()">Ingresar</button>
+    <div id="login-msg" style="font-size:12px;color:var(--rojo);text-align:center;margin-bottom:8px"></div>
   </div>
 
-  <div class="fg" id="fg-email" style="display:none">
-    <label>Email del docente</label>
-    <input type="email" id="inp-email" placeholder="docente@gmail.com">
-    <button class="btn-sm" onclick="buscarDocente()">🔍 Buscar</button>
+  <!-- PANEL EXPORTAR: se muestra tras login exitoso -->
+  <div id="panel-exportar" style="display:none">
+    <div class="docente-badge" id="docente-badge" style="display:block">
+      <div class="name" id="badge-nombre">—</div>
+      <div class="ue" id="badge-ue">—</div>
+    </div>
+    <div class="fg">
+      <label>Curso</label>
+      <select id="inp-curso" onchange="filtrarMaterias()">
+        <option value="">— Selecciona curso —</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Área / Materia</label>
+      <select id="inp-materia">
+        <option value="">— Selecciona curso primero —</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Trimestre</label>
+      <select id="inp-trim">
+        <option value="1">1er Trimestre</option>
+        <option value="2">2do Trimestre</option>
+        <option value="3">3er Trimestre</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Unidad Educativa</label>
+      <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
+    </div>
+    <hr class="divider">
+    <button class="btn btn-g" id="btn-export" onclick="exportarExcel()">
+      📥 Descargar Registro Excel (.xlsx)
+    </button>
+    <button class="btn btn-sm" onclick="cerrarSesion()">🔄 Cambiar cuenta</button>
   </div>
-
-  <div class="fg">
-    <label>Curso</label>
-    <select id="inp-curso" disabled onchange="filtrarMaterias()">
-      <option value="">— Cargando... —</option>
-    </select>
-  </div>
-  <div class="fg">
-    <label>Área / Materia</label>
-    <select id="inp-materia" disabled>
-      <option value="">— Selecciona curso —</option>
-    </select>
-  </div>
-  <div class="fg">
-    <label>Trimestre</label>
-    <select id="inp-trim">
-      <option value="1">1er Trimestre</option>
-      <option value="2">2do Trimestre</option>
-      <option value="3">3er Trimestre</option>
-    </select>
-  </div>
-  <div class="fg">
-    <label>Unidad Educativa</label>
-    <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
-  </div>
-
-  <hr class="divider">
-
-  <button class="btn btn-g" id="btn-export" onclick="exportarExcel()" disabled>
-    📥 Descargar Registro Excel (.xlsx)
-  </button>
-  <button class="btn btn-sm" onclick="mostrarCampoEmail()">🔄 Cambiar cuenta</button>
 
   <div class="progress" id="progress" style="display:none">
     <div class="prog-title" id="prog-title">Preparando...</div>
@@ -118,44 +126,68 @@ let DOCENTE=null, CURSOS=[];
 function log(msg){ const d=document.getElementById('log-box'); d.innerHTML+=`<div class="log-line">${msg}</div>`; d.scrollTop=d.scrollHeight; }
 function prog(pct,title,msg){ document.getElementById('prog-fill').style.width=pct+'%'; document.getElementById('prog-title').textContent=title; document.getElementById('prog-msg').textContent=msg||''; }
 
-// ===== AUTO-DETECTAR DOCENTE desde localStorage de la app =====
+// ===== LOGIN CON USUARIO + CONTRASEÑA (mismo sistema que index.html) =====
 async function init(){
+  // Intentar sesión guardada en localStorage
   const saved=localStorage.getItem('docente');
   if(saved){
     try{
       const doc=JSON.parse(saved);
-      DOCENTE=doc;
-      mostrarDocente(doc);
-      await cargarCursos(doc.id);
-      return;
+      if(doc && doc.id && doc.usuario){
+        DOCENTE=doc;
+        mostrarPanelExportar(doc);
+        await cargarCursos(doc.id);
+        return;
+      }
     }catch(e){}
   }
-  // Si no hay sesión guardada, mostrar campo email
-  document.getElementById('fg-email').style.display='block';
+  // Sin sesión: mostrar login
+  document.getElementById('panel-login').style.display='block';
+  document.getElementById('panel-exportar').style.display='none';
 }
 
-function mostrarDocente(doc){
-  document.getElementById('docente-badge').style.display='block';
+async function loginDocente(){
+  const usuario=document.getElementById('inp-usuario').value.trim().toLowerCase();
+  const pass=document.getElementById('inp-pass').value;
+  const msgEl=document.getElementById('login-msg');
+  if(!usuario||!pass){ msgEl.textContent='Ingresa usuario y contraseña'; return; }
+  msgEl.textContent='Verificando...';
+  msgEl.style.color='#059669';
+  try{
+    const {data,error}=await sb.from('docentes').select('*').eq('usuario',usuario).eq('activo',true).single();
+    if(error||!data){ msgEl.textContent='Usuario no encontrado o cuenta inactiva'; msgEl.style.color='var(--rojo)'; return; }
+    if(data.contrasena!==btoa(pass)){ msgEl.textContent='Contraseña incorrecta'; msgEl.style.color='var(--rojo)'; return; }
+    DOCENTE=data;
+    localStorage.setItem('docente',JSON.stringify(DOCENTE));
+    msgEl.textContent='';
+    mostrarPanelExportar(data);
+    await cargarCursos(data.id);
+  }catch(e){
+    msgEl.textContent='Error de conexión: '+e.message;
+    msgEl.style.color='var(--rojo)';
+  }
+}
+
+function togglePass(){
+  const el=document.getElementById('inp-pass');
+  el.type=el.type==='password'?'text':'password';
+}
+
+function mostrarPanelExportar(doc){
+  document.getElementById('panel-login').style.display='none';
+  document.getElementById('panel-exportar').style.display='block';
   document.getElementById('badge-nombre').textContent='👤 '+doc.nombre;
   document.getElementById('badge-ue').textContent='📍 '+(doc.unidad_educativa||'');
   document.getElementById('inp-ue').value=doc.unidad_educativa||'Franz Tamayo de Chachacomani';
 }
 
-function mostrarCampoEmail(){
-  document.getElementById('fg-email').style.display='block';
-  document.getElementById('inp-email').focus();
-}
-
-async function buscarDocente(){
-  const email=document.getElementById('inp-email').value.trim().toLowerCase();
-  if(!email){ alert('Ingresa el email'); return; }
-  const id='D_'+email.replace(/[@.]/g,'_').replace(/[^a-z0-9_]/gi,'');
-  const {data}=await sb.from('docentes').select('*').eq('id',id).single();
-  if(!data){ alert('Docente no encontrado. Verifica el email.'); return; }
-  DOCENTE=data;
-  mostrarDocente(data);
-  await cargarCursos(id);
-  document.getElementById('fg-email').style.display='none';
+function cerrarSesion(){
+  localStorage.removeItem('docente');
+  DOCENTE=null; CURSOS=[];
+  document.getElementById('panel-login').style.display='block';
+  document.getElementById('panel-exportar').style.display='none';
+  document.getElementById('inp-usuario').value='';
+  document.getElementById('inp-pass').value='';
 }
 
 async function cargarCursos(id){
