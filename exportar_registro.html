@@ -50,57 +50,49 @@ select:disabled{background:#f8fafc;color:#94a3b8}
     <p class="sub">Genera el Excel con formato Ministerio de Educación Bolivia</p>
   </div>
 
-  <!-- LOGIN: se muestra si no hay sesión activa -->
-  <div id="panel-login">
-    <div class="fg">
-      <label>Usuario</label>
-      <input type="text" id="inp-usuario" placeholder="Ej: jperez" autocomplete="username" autocapitalize="none">
-    </div>
-    <div class="fg" style="position:relative">
-      <label>Contraseña</label>
-      <input type="password" id="inp-pass" placeholder="Tu contraseña" autocomplete="current-password">
-      <span onclick="togglePass()" style="position:absolute;right:10px;top:30px;cursor:pointer;font-size:16px">👁</span>
-    </div>
-    <button class="btn btn-p" style="width:100%;padding:10px;font-size:14px;border-radius:10px;margin-bottom:6px" onclick="loginDocente()">Ingresar</button>
-    <div id="login-msg" style="font-size:12px;color:var(--rojo);text-align:center;margin-bottom:8px"></div>
+  <!-- Badge docente detectado automáticamente -->
+  <div class="docente-badge" id="docente-badge">
+    <div class="name" id="badge-nombre">—</div>
+    <div class="ue" id="badge-ue">—</div>
   </div>
 
-  <!-- PANEL EXPORTAR: se muestra tras login exitoso -->
-  <div id="panel-exportar" style="display:none">
-    <div class="docente-badge" id="docente-badge" style="display:block">
-      <div class="name" id="badge-nombre">—</div>
-      <div class="ue" id="badge-ue">—</div>
-    </div>
-    <div class="fg">
-      <label>Curso</label>
-      <select id="inp-curso" onchange="filtrarMaterias()">
-        <option value="">— Selecciona curso —</option>
-      </select>
-    </div>
-    <div class="fg">
-      <label>Área / Materia</label>
-      <select id="inp-materia">
-        <option value="">— Selecciona curso primero —</option>
-      </select>
-    </div>
-    <div class="fg">
-      <label>Trimestre</label>
-      <select id="inp-trim">
-        <option value="1">1er Trimestre</option>
-        <option value="2">2do Trimestre</option>
-        <option value="3">3er Trimestre</option>
-      </select>
-    </div>
-    <div class="fg">
-      <label>Unidad Educativa</label>
-      <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
-    </div>
-    <hr class="divider">
-    <button class="btn btn-g" id="btn-export" onclick="exportarExcel()">
-      📥 Descargar Registro Excel (.xlsx)
-    </button>
-    <button class="btn btn-sm" onclick="cerrarSesion()">🔄 Cambiar cuenta</button>
+  <div class="fg" id="fg-email" style="display:none">
+    <label>Email del docente</label>
+    <input type="email" id="inp-email" placeholder="docente@gmail.com">
+    <button class="btn-sm" onclick="buscarDocente()">🔍 Buscar</button>
   </div>
+
+  <div class="fg">
+    <label>Curso</label>
+    <select id="inp-curso" disabled onchange="filtrarMaterias()">
+      <option value="">— Cargando... —</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>Área / Materia</label>
+    <select id="inp-materia" disabled>
+      <option value="">— Selecciona curso —</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>Trimestre</label>
+    <select id="inp-trim">
+      <option value="1">1er Trimestre</option>
+      <option value="2">2do Trimestre</option>
+      <option value="3">3er Trimestre</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>Unidad Educativa</label>
+    <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
+  </div>
+
+  <hr class="divider">
+
+  <button class="btn btn-g" id="btn-export" onclick="exportarExcel()" disabled>
+    📥 Descargar Registro Excel (.xlsx)
+  </button>
+  <button class="btn btn-sm" onclick="mostrarCampoEmail()">🔄 Cambiar cuenta</button>
 
   <div class="progress" id="progress" style="display:none">
     <div class="prog-title" id="prog-title">Preparando...</div>
@@ -126,68 +118,44 @@ let DOCENTE=null, CURSOS=[];
 function log(msg){ const d=document.getElementById('log-box'); d.innerHTML+=`<div class="log-line">${msg}</div>`; d.scrollTop=d.scrollHeight; }
 function prog(pct,title,msg){ document.getElementById('prog-fill').style.width=pct+'%'; document.getElementById('prog-title').textContent=title; document.getElementById('prog-msg').textContent=msg||''; }
 
-// ===== LOGIN CON USUARIO + CONTRASEÑA (mismo sistema que index.html) =====
+// ===== AUTO-DETECTAR DOCENTE desde localStorage de la app =====
 async function init(){
-  // Intentar sesión guardada en localStorage
   const saved=localStorage.getItem('docente');
   if(saved){
     try{
       const doc=JSON.parse(saved);
-      if(doc && doc.id && doc.usuario){
-        DOCENTE=doc;
-        mostrarPanelExportar(doc);
-        await cargarCursos(doc.id);
-        return;
-      }
+      DOCENTE=doc;
+      mostrarDocente(doc);
+      await cargarCursos(doc.id);
+      return;
     }catch(e){}
   }
-  // Sin sesión: mostrar login
-  document.getElementById('panel-login').style.display='block';
-  document.getElementById('panel-exportar').style.display='none';
+  // Si no hay sesión guardada, mostrar campo email
+  document.getElementById('fg-email').style.display='block';
 }
 
-async function loginDocente(){
-  const usuario=document.getElementById('inp-usuario').value.trim().toLowerCase();
-  const pass=document.getElementById('inp-pass').value;
-  const msgEl=document.getElementById('login-msg');
-  if(!usuario||!pass){ msgEl.textContent='Ingresa usuario y contraseña'; return; }
-  msgEl.textContent='Verificando...';
-  msgEl.style.color='#059669';
-  try{
-    const {data,error}=await sb.from('docentes').select('*').eq('usuario',usuario).eq('activo',true).single();
-    if(error||!data){ msgEl.textContent='Usuario no encontrado o cuenta inactiva'; msgEl.style.color='var(--rojo)'; return; }
-    if(data.contrasena!==btoa(pass)){ msgEl.textContent='Contraseña incorrecta'; msgEl.style.color='var(--rojo)'; return; }
-    DOCENTE=data;
-    localStorage.setItem('docente',JSON.stringify(DOCENTE));
-    msgEl.textContent='';
-    mostrarPanelExportar(data);
-    await cargarCursos(data.id);
-  }catch(e){
-    msgEl.textContent='Error de conexión: '+e.message;
-    msgEl.style.color='var(--rojo)';
-  }
-}
-
-function togglePass(){
-  const el=document.getElementById('inp-pass');
-  el.type=el.type==='password'?'text':'password';
-}
-
-function mostrarPanelExportar(doc){
-  document.getElementById('panel-login').style.display='none';
-  document.getElementById('panel-exportar').style.display='block';
+function mostrarDocente(doc){
+  document.getElementById('docente-badge').style.display='block';
   document.getElementById('badge-nombre').textContent='👤 '+doc.nombre;
   document.getElementById('badge-ue').textContent='📍 '+(doc.unidad_educativa||'');
   document.getElementById('inp-ue').value=doc.unidad_educativa||'Franz Tamayo de Chachacomani';
 }
 
-function cerrarSesion(){
-  localStorage.removeItem('docente');
-  DOCENTE=null; CURSOS=[];
-  document.getElementById('panel-login').style.display='block';
-  document.getElementById('panel-exportar').style.display='none';
-  document.getElementById('inp-usuario').value='';
-  document.getElementById('inp-pass').value='';
+function mostrarCampoEmail(){
+  document.getElementById('fg-email').style.display='block';
+  document.getElementById('inp-email').focus();
+}
+
+async function buscarDocente(){
+  const email=document.getElementById('inp-email').value.trim().toLowerCase();
+  if(!email){ alert('Ingresa el email'); return; }
+  const id='D_'+email.replace(/[@.]/g,'_').replace(/[^a-z0-9_]/gi,'');
+  const {data}=await sb.from('docentes').select('*').eq('id',id).single();
+  if(!data){ alert('Docente no encontrado. Verifica el email.'); return; }
+  DOCENTE=data;
+  mostrarDocente(data);
+  await cargarCursos(id);
+  document.getElementById('fg-email').style.display='none';
 }
 
 async function cargarCursos(id){
@@ -259,7 +227,7 @@ async function exportarExcel(){
   prog(75,'Generando Excel con formato oficial...','');
 
   try{
-    await generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,curso,materia,trim,ue,asistenciaData});
+    await generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenciaData,curso,materia,trim,ue});
     prog(100,'✅ Excel listo','Descarga iniciada');
     log('📁 Archivo generado exitosamente');
   }catch(e){
@@ -288,14 +256,14 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
 
   const ws=wb.addWorksheet('Registro 1T',{
     pageSetup:{
-      paperSize:9,           // A4
+      paperSize:9,
       orientation:'landscape',
       fitToPage:false,
       scale:65,
       horizontalCentered:true,
       verticalCentered:false,
       margins:{
-        left:0.2,
+        left:0.2,            // 0.5 cm aprox en pulgadas
         right:0.2,
         top:0.31,
         bottom:0.31,
@@ -303,7 +271,10 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
         footer:0.12
       }
     },
-    headerFooter:{ oddHeader:'', oddFooter:'' }
+    headerFooter:{
+      oddHeader:'',
+      oddFooter:''
+    }
   });
 
   // ===== COLORES (exactos del original) =====
@@ -568,9 +539,9 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
   ws.pageSetup.blackAndWhite = false;
   ws.pageSetup.draft = false;
 
-  // ===== HOJA AS.1 ASISTENCIA =====
+  // ===== HOJA AS.1 =====
   await generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,DOCENTE});
-  log('✓ Hoja AS.1 (Asistencia) generada');
+  log('✓ Hoja AS.1 generada');
 
   // ===== DESCARGAR =====
   log('📐 Generando archivo...');
@@ -591,11 +562,9 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
 
 // ===== HOJA AS.1 — CUADRO DE ASISTENCIA =====
 async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,DOCENTE}){
-  function colLetra(n){ let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26); } return s; }
-  const trimNombres={'1':'1ER. TRIMESTRE','2':'2DO. TRIMESTRE','3':'3ER. TRIMESTRE'};
+  function colLetra(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
+  const trimNom={'1':'1ER. TRIMESTRE','2':'2DO. TRIMESTRE','3':'3ER. TRIMESTRE'};
   const ws=wb.addWorksheet('AS.1');
-
-  // Page setup igual al formato objetivo
   ws.pageSetup.orientation='landscape';
   ws.pageSetup.paperSize=9;
   ws.pageSetup.scale=80;
@@ -603,189 +572,133 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
   ws.pageSetup.margins={left:0,right:0,top:0.39,bottom:0.2,header:0.12,footer:0.12};
   ws.headerFooter={oddHeader:'',oddFooter:''};
 
-  // Obtener fechas únicas ordenadas de asistencia
   const todasFechas=[...new Set(Object.values(asistenciaData).flatMap(d=>Object.keys(d)))].sort();
-  // Máximo 36 columnas de días (D=col4 a AM=col39)
   const fechas=todasFechas.slice(0,36);
 
-  // ===== HELPERS =====
-  const borde={style:'thin',color:{argb:'FF000000'}};
-  const allBorder={top:borde,left:borde,bottom:borde,right:borde};
-  function fill(argb){return{type:'pattern',pattern:'solid',fgColor:{argb}};}
-  function font(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
-  function align(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
-  function sc(r,c,val,bg,fnt,aln,brd=true){
-    const cell=ws.getCell(r,c);
-    if(val!==null&&val!==undefined) cell.value=val;
-    if(bg) cell.fill=fill(bg);
-    if(fnt) cell.font=fnt;
-    if(aln) cell.alignment=aln;
-    if(brd) cell.border=allBorder;
+  const brd={style:'thin',color:{argb:'FF000000'}};
+  const allB={top:brd,left:brd,bottom:brd,right:brd};
+  function fill(a){return{type:'pattern',pattern:'solid',fgColor:{argb:a}};}
+  function fnt(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
+  function aln(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
+  function sc(r,col,val,bg,fn,al,borde=true){
+    const cell=ws.getCell(r,col);
+    if(val!==null&&val!==undefined)cell.value=val;
+    if(bg)cell.fill=fill(bg);
+    if(fn)cell.font=fn;
+    if(al)cell.alignment=al;
+    if(borde)cell.border=allB;
     return cell;
   }
-  function merge(r,c1,c2,val,bg,fnt,aln){
+  function mg(r,c1,c2,val,bg,fn,al){
     if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
-    return sc(r,c1,val,bg,fnt,aln);
+    return sc(r,c1,val,bg,fn,al);
   }
 
-  // ===== COLORES =====
-  const HDR_AZUL='FF1A3A6B';
-  const HDR_MED='FF2563EB';
-  const LABEL='FFF2CF50';   // amarillo encabezado
-  const PRES='FFFFC000';    // naranja/amarillo P
-  const LIC='FF92D050';     // verde L
-  const ATR='FFFDE9D9';     // naranja suave A
-  const FAL='FFFFC7CE';     // rojo suave F
-  const WHITE='FFFFFFFF';
-  const GRIS='FFF1F5F9';
+  const AZ='FF1A3A6B',AM='FF2563EB',LA='FFF2CF50',PR='FFFFC000',LC='FF92D050',AT='FFFDE9D9',FA='FFFFC7CE',WH='FFFFFFFF',GR='FFF1F5F9';
+  const CN=1,NS=2,NE=3,DS=4,DE=39,CP=40,CL=41,CA=42,CF=43,CT=44;
 
-  // Total columnas: A(1) B-C(2-3) nombre | D..D+35 fechas | AN(P) AO(L) AP(A) AQ(F) AR(TOTAL)
-  // Col indices: A=1, B=2, C=3, D=4..AM=39, AN=40, AO=41, AP=42, AQ=43, AR=44
-  const C_NRO=1, C_NOM_S=2, C_NOM_E=3;
-  const C_DIAS_S=4, C_DIAS_E=39; // 36 columnas de días D..AM
-  const C_P=40, C_L=41, C_A=42, C_F=43, C_TOTAL=44;
-  const NCOLS=44;
+  ws.getColumn(CN).width=3.5;
+  ws.getColumn(NS).width=16;
+  ws.getColumn(NE).width=15;
+  for(let i=DS;i<=DE;i++)ws.getColumn(i).width=2.7;
+  ws.getColumn(CP).width=3.7;ws.getColumn(CL).width=4;ws.getColumn(CA).width=4;ws.getColumn(CF).width=4;ws.getColumn(CT).width=5.7;
 
-  // ===== ANCHOS =====
-  ws.getColumn(C_NRO).width=3.5;
-  ws.getColumn(C_NOM_S).width=16;
-  ws.getColumn(C_NOM_E).width=15;
-  for(let c=C_DIAS_S;c<=C_DIAS_E;c++) ws.getColumn(c).width=2.7;
-  ws.getColumn(C_P).width=3.7;
-  ws.getColumn(C_L).width=4;
-  ws.getColumn(C_A).width=4;
-  ws.getColumn(C_F).width=4;
-  ws.getColumn(C_TOTAL).width=5.7;
-
-  // ===== FILA 1: UE + TRIMESTRE + AÑO =====
+  // Fila 1
   ws.getRow(1).height=15;
-  merge(1,C_NRO,3,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(),HDR_AZUL,font(true,10,'FFFFFFFF'),align('left','middle'));
-  merge(1,5,30,trimNombres[trim],HDR_MED,font(true,11,'FFFFFFFF'),align('center','middle'));
-  merge(1,38,C_TOTAL,'2026',HDR_MED,font(true,11,'FFFFFFFF'),align('center','middle'));
+  mg(1,CN,3,'UNIDAD EDUCATIVA TECNICO HUMANISTICA: '+ue.toUpperCase(),AZ,fnt(true,10,'FFFFFFFF'),aln('left','middle'));
+  mg(1,5,30,trimNom[trim],AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
+  mg(1,38,CT,'2026',AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
 
-  // ===== FILA 2: CUADRO DE ASISTENCIA =====
+  // Fila 2
   ws.getRow(2).height=14;
-  merge(2,C_NRO,C_TOTAL,'CUADRO DE ASISTENCIA',HDR_AZUL,font(true,12,'FFFFFFFF'),align('center','middle'));
+  mg(2,CN,CT,'CUADRO DE ASISTENCIA',AZ,fnt(true,12,'FFFFFFFF'),aln('center','middle'));
 
-  // ===== FILA 3: MAESTRA + CURSO =====
+  // Fila 3
   ws.getRow(3).height=27;
-  merge(3,C_NRO,1,'MAESTRA(O):',LABEL,font(true,9),align('right','middle'));
-  merge(3,C_NOM_S,30,DOCENTE.nombre,WHITE,font(false,10),align('left','middle'));
-  merge(3,38,C_TOTAL,'CURSO: '+curso,LABEL,font(true,10),align('center','middle'));
+  mg(3,CN,1,'MAESTRA(O):',LA,fnt(true,9),aln('right','middle'));
+  mg(3,NS,30,DOCENTE.nombre,WH,fnt(false,10),aln('left','middle'));
+  mg(3,38,CT,'CURSO: '+curso,LA,fnt(true,10),aln('center','middle'));
 
-  // ===== FILA 4: ASIGNATURA =====
+  // Fila 4
   ws.getRow(4).height=19.5;
-  merge(4,C_NRO,1,'ASIGNATURA:',LABEL,font(true,9),align('right','middle'));
-  merge(4,C_NOM_S,C_TOTAL,materia.toUpperCase(),WHITE,font(false,10),align('left','middle'));
+  mg(4,CN,1,'ASIGNATURA:',LA,fnt(true,9),aln('right','middle'));
+  mg(4,NS,CT,materia.toUpperCase(),WH,fnt(false,10),aln('left','middle'));
 
-  // ===== FILA 5: separador vacío =====
+  // Fila 5 separador
   ws.getRow(5).height=4.5;
 
-  // ===== FILA 6: N° | APELLIDOS | ASISTENCIA: =====
+  // Fila 6: encabezados
   ws.getRow(6).height=25;
-  sc(6,C_NRO,'N°',HDR_AZUL,font(true,9,'FFFFFFFF'),align('center','middle'));
-  merge(6,C_NOM_S,C_NOM_E,'APELLIDOS Y NOMBRES',HDR_AZUL,font(true,9,'FFFFFFFF'),align('center','middle'));
-  merge(6,C_DIAS_S,C_DIAS_E,'ASISTENCIA: '+fechas.length+' días registrados',HDR_MED,font(true,9,'FFFFFFFF'),align('center','middle'));
-  sc(6,C_P,'P',PRES,font(true,9),align('center','middle'));
-  sc(6,C_L,'L',LIC,font(true,9),align('center','middle'));
-  sc(6,C_A,'A',ATR,font(true,9),align('center','middle'));
-  sc(6,C_F,'F',FAL,font(true,9),align('center','middle'));
-  merge(6,C_TOTAL,C_TOTAL,'TOTAL
-DÍAS',HDR_AZUL,font(true,8,'FFFFFFFF'),align('center','middle',0,true));
+  sc(6,CN,'N°',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  mg(6,NS,NE,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  mg(6,DS,DE,'ASISTENCIA — '+fechas.length+' dias registrados',AM,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  sc(6,CP,'P',PR,fnt(true,9),aln('center','middle'));
+  sc(6,CL,'L',LC,fnt(true,9),aln('center','middle'));
+  sc(6,CA,'A',AT,fnt(true,9),aln('center','middle'));
+  sc(6,CF,'F',FA,fnt(true,9),aln('center','middle'));
+  mg(6,CT,CT,'TOTAL\nDIAS',AZ,fnt(true,8,'FFFFFFFF'),aln('center','middle',0,true));
 
-  // ===== FILA 7: encabezados de leyenda P/L/A/F =====
+  // Fila 7: leyenda rotada
   ws.getRow(7).height=12.75;
-  // vacío bajo N° y nombre
-  sc(7,C_NRO,'',GRIS,null,null);
-  merge(7,C_NOM_S,C_NOM_E,'',GRIS,null,null);
-  // fechas vacías (los datos van en fila 8 rotadas)
-  for(let c=C_DIAS_S;c<=C_DIAS_E;c++) sc(7,c,'',GRIS,null,null);
-  sc(7,C_P,'P / PRESENTE',PRES,font(true,8),align('center','middle',90,true));
-  sc(7,C_L,'L / LICENCIA',LIC,font(true,8),align('center','middle',90,true));
-  sc(7,C_A,'A / ATRASO',ATR,font(true,8),align('center','middle',90,true));
-  sc(7,C_F,'F / FALTA',FAL,font(true,8),align('center','middle',90,true));
-  sc(7,C_TOTAL,'',HDR_AZUL,null,null);
+  sc(7,CN,'',GR,null,null);
+  mg(7,NS,NE,'',GR,null,null);
+  for(let i=DS;i<=DE;i++)sc(7,i,'',GR,null,null);
+  sc(7,CP,'P / PRESENTE',PR,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CL,'L / LICENCIA',LC,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CA,'A / ATRASO',AT,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CF,'F / FALTA',FA,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CT,'',AZ,null,null);
 
-  // ===== FILA 8: fechas rotadas 90° =====
+  // Fila 8: fechas rotadas
   ws.getRow(8).height=58.5;
-  sc(8,C_NRO,'',GRIS,null,align('center','bottom'));
-  merge(8,C_NOM_S,C_NOM_E,'',GRIS,null,null);
+  sc(8,CN,'',GR,null,aln('center','bottom'));
+  mg(8,NS,NE,'',GR,null,null);
   fechas.forEach((f,i)=>{
-    // Mostrar solo MM/DD para legibilidad
-    const partes=f.split('-');
-    const label=partes.length===3?partes[2]+'/'+partes[1]:f;
-    const col=C_DIAS_S+i;
-    const bgFecha=i%2===0?'FFD9E1F2':'FFE8F4FD';
-    sc(8,col,label,bgFecha,font(false,9),align('center','bottom',90,false));
+    const p=f.split('-');
+    const lbl=p.length===3?p[2]+'/'+p[1]:f;
+    const bg=i%2===0?'FFD9E1F2':'FFE8F4FD';
+    sc(8,DS+i,lbl,bg,fnt(false,9),aln('center','bottom',90,false));
   });
-  // Rellenar días sin fecha con borde vacío
-  for(let i=fechas.length;i<36;i++){
-    sc(8,C_DIAS_S+i,'',GRIS,null,align('center','bottom'));
-  }
-  sc(8,C_P,'',PRES,null,null);
-  sc(8,C_L,'',LIC,null,null);
-  sc(8,C_A,'',ATR,null,null);
-  sc(8,C_F,'',FAL,null,null);
-  sc(8,C_TOTAL,'',HDR_AZUL,null,null);
+  for(let i=fechas.length;i<36;i++)sc(8,DS+i,'',GR,null,aln('center','bottom'));
+  sc(8,CP,'',PR,null,null);sc(8,CL,'',LC,null,null);sc(8,CA,'',AT,null,null);sc(8,CF,'',FA,null,null);sc(8,CT,'',AZ,null,null);
 
-  // ===== FILAS ESTUDIANTES (fila 9 en adelante) =====
+  // Filas estudiantes
   ESTUDIANTES.forEach((e,i)=>{
     const row=9+i;
     ws.getRow(row).height=17.4;
-    const rowBg=i%2===0?WHITE:GRIS;
-
-    sc(row,C_NRO,i+1,rowBg,font(true,9),align('center','middle'));
-    merge(row,C_NOM_S,C_NOM_E,e.nombre,rowBg,font(false,9),align('left','middle'));
-
-    // Asistencia por fecha
-    let cP=0,cL=0,cA=0,cF=0;
+    const bg=i%2===0?WH:GR;
+    sc(row,CN,i+1,bg,fnt(true,9),aln('center','middle'));
+    mg(row,NS,NE,e.nombre,bg,fnt(false,9),aln('left','middle'));
     fechas.forEach((f,j)=>{
-      const col=C_DIAS_S+j;
-      const estado=(asistenciaData[e.id]&&asistenciaData[e.id][f])||'';
-      const bgMap={'P':'FFE8F5E9','L':'FFF1F8E9','A':'FFFFF9E6','F':'FFFCE4EC','':(i%2===0?WHITE:GRIS)};
-      const txtMap={'P':'FF2E7D32','L':'FF33691E','A':'FFE65100','F':'FFC62828','':(i%2===0?'FF333333':'FF555555')};
-      sc(row,col,estado||'',bgMap[estado],font(true,8,txtMap[estado]),align('center','middle'));
-      if(estado==='P') cP++;
-      else if(estado==='L') cL++;
-      else if(estado==='A') cA++;
-      else if(estado==='F') cF++;
+      const est=(asistenciaData[e.id]&&asistenciaData[e.id][f])||'';
+      const bgM={'P':'FFE8F5E9','L':'FFF1F8E9','A':'FFFFF9E6','F':'FFFCE4EC','':(i%2===0?WH:GR)};
+      const txM={'P':'FF2E7D32','L':'FF33691E','A':'FFE65100','F':'FFC62828','':(i%2===0?'FF333333':'FF555555')};
+      sc(row,DS+j,est,bgM[est],fnt(true,8,txM[est]),aln('center','middle'));
     });
-    // Rellenar celdas sin fecha
-    for(let j=fechas.length;j<36;j++){
-      sc(row,C_DIAS_S+j,'',i%2===0?WHITE:GRIS,null,align('center','middle'));
-    }
-
-    // Totales con fórmulas COUNTIF sobre las columnas D..AM
-    const dr=row; // fila actual
-    const col_ini='D'+dr, col_fin='AM'+dr;
-    sc(row,C_P,`=IF(COUNTIF($D${dr}:$AM${dr},"P")=0,"",COUNTIF($D${dr}:$AM${dr},"P"))`,PRES,font(true,10),align('center','middle'));
-    sc(row,C_L,`=IF(COUNTIF($D${dr}:$AM${dr},"L")=0,"",COUNTIF($D${dr}:$AM${dr},"L"))`,LIC,font(true,10),align('center','middle'));
-    sc(row,C_A,`=IF(COUNTIF($D${dr}:$AM${dr},"A")=0,"",COUNTIF($D${dr}:$AM${dr},"A"))`,ATR,font(true,10),align('center','middle'));
-    sc(row,C_F,`=IF(COUNTIF($D${dr}:$AM${dr},"F")=0,"",COUNTIF($D${dr}:$AM${dr},"F"))`,FAL,font(true,10),align('center','middle'));
-    sc(row,C_TOTAL,`=IF($AN${dr}="","",$AN${dr})`,HDR_AZUL,font(true,10,'FFFFFFFF'),align('center','middle'));
+    for(let j=fechas.length;j<36;j++)sc(row,DS+j,'',i%2===0?WH:GR,null,aln('center','middle'));
+    sc(row,CP,'=IF(COUNTIF($D'+row+':$AM'+row+',"P")=0,"",COUNTIF($D'+row+':$AM'+row+',"P"))',PR,fnt(true,10),aln('center','middle'));
+    sc(row,CL,'=IF(COUNTIF($D'+row+':$AM'+row+',"L")=0,"",COUNTIF($D'+row+':$AM'+row+',"L"))',LC,fnt(true,10),aln('center','middle'));
+    sc(row,CA,'=IF(COUNTIF($D'+row+':$AM'+row+',"A")=0,"",COUNTIF($D'+row+':$AM'+row+',"A"))',AT,fnt(true,10),aln('center','middle'));
+    sc(row,CF,'=IF(COUNTIF($D'+row+':$AM'+row+',"F")=0,"",COUNTIF($D'+row+':$AM'+row+',"F"))',FA,fnt(true,10),aln('center','middle'));
+    sc(row,CT,'=IF($AN'+row+'="","",$AN'+row+')',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
   });
 
-  // ===== FILA TOTALES GENERALES =====
-  const rowTot=9+ESTUDIANTES.length;
-  ws.getRow(rowTot).height=17;
-  merge(rowTot,C_NRO,C_NOM_E,'TOTALES',LABEL,font(true,10),align('center','middle'));
+  // Fila totales
+  const rt=9+ESTUDIANTES.length;
+  ws.getRow(rt).height=17;
+  mg(rt,CN,NE,'TOTALES',LA,fnt(true,10),aln('center','middle'));
   for(let j=0;j<36;j++){
-    const col=C_DIAS_S+j;
-    const colLet=colLetra(col);
-    const formulaP=`=COUNTIF(${colLet}9:${colLet}${rowTot-1},"P")`;
-    sc(rowTot,col,formulaP,'FFD9E1F2',font(false,8),align('center','middle'));
+    const cl=colLetra(DS+j);
+    sc(rt,DS+j,'=COUNTIF('+cl+'9:'+cl+(rt-1)+',"P")','FFD9E1F2',fnt(false,8),aln('center','middle'));
   }
-  sc(rowTot,C_P,`=SUM(AN9:AN${rowTot-1})`,PRES,font(true,10),align('center','middle'));
-  sc(rowTot,C_L,`=SUM(AO9:AO${rowTot-1})`,LIC,font(true,10),align('center','middle'));
-  sc(rowTot,C_A,`=SUM(AP9:AP${rowTot-1})`,ATR,font(true,10),align('center','middle'));
-  sc(rowTot,C_F,`=SUM(AQ9:AQ${rowTot-1})`,FAL,font(true,10),align('center','middle'));
-  sc(rowTot,C_TOTAL,`=SUM(AR9:AR${rowTot-1})`,HDR_AZUL,font(true,10,'FFFFFFFF'),align('center','middle'));
+  sc(rt,CP,'=SUM(AN9:AN'+(rt-1)+')',PR,fnt(true,10),aln('center','middle'));
+  sc(rt,CL,'=SUM(AO9:AO'+(rt-1)+')',LC,fnt(true,10),aln('center','middle'));
+  sc(rt,CA,'=SUM(AP9:AP'+(rt-1)+')',AT,fnt(true,10),aln('center','middle'));
+  sc(rt,CF,'=SUM(AQ9:AQ'+(rt-1)+')',FA,fnt(true,10),aln('center','middle'));
+  sc(rt,CT,'=SUM(AR9:AR'+(rt-1)+')',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
 
-  // ===== ÁREA DE IMPRESIÓN =====
-  ws.pageSetup.printArea='A1:'+colLetra(C_TOTAL)+(rowTot+2);
+  ws.pageSetup.printArea='A1:'+colLetra(CT)+(rt+2);
   ws.pageSetup.showGridLines=true;
-  ws.pageSetup.printTitlesRow='1:8';
-
 }
 
 // ===== INICIAR =====
