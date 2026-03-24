@@ -1,154 +1,1215 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exportador Profesional 2026</title>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-    <style>
-        :root { --azul: #1a3a6b; --verde: #059669; --gris: #f8fafc; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 450px; }
-        .btn { background: var(--verde); color: white; border: none; padding: 18px 30px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn:hover { background: #047857; transform: translateY(-2px); }
-        .status { margin-top: 20px; color: #64748b; font-size: 14px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exportar Registro Pedagógico 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<style>
+:root{--azul:#1a3a6b;--azul2:#2563eb;--verde:#059669;--rojo:#dc2626;--gris:#f1f5f9;--borde:#e2e8f0;--dorado:#b45309}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a3a6b,#1e40af);min-height:100vh;padding:16px;display:flex;align-items:flex-start;justify-content:center}
+.card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.3);margin-top:10px}
+.logo{text-align:center;margin-bottom:16px}
+.logo-icon{width:56px;height:56px;background:var(--azul);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 8px}
+h1{font-size:17px;font-weight:700;color:var(--azul);text-align:center}
+.sub{font-size:11px;color:#64748b;text-align:center;margin-bottom:20px}
+.docente-badge{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:10px 14px;margin-bottom:16px;display:none}
+.docente-badge .name{font-size:14px;font-weight:700;color:var(--azul)}
+.docente-badge .ue{font-size:11px;color:#64748b;margin-top:2px}
+.fg{margin-bottom:12px}
+label{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+select,input{width:100%;padding:9px 12px;border:1.5px solid var(--borde);border-radius:8px;font-size:13px;outline:none;background:#fff;transition:border .15s}
+select:focus,input:focus{border-color:var(--azul2)}
+select:disabled{background:#f8fafc;color:#94a3b8}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-p{background:var(--azul2);color:#fff;margin-bottom:8px}
+.btn-p:hover{background:var(--azul)}
+.btn-g{background:var(--verde);color:#fff;margin-bottom:8px}
+.btn-g:hover{opacity:.9}
+.btn-g:disabled,.btn-p:disabled{background:#94a3b8;cursor:not-allowed;opacity:.7}
+.btn-sm{background:var(--gris);color:#64748b;font-size:12px;padding:8px;margin-top:4px;border-radius:8px;border:none;cursor:pointer;width:100%}
+.progress{background:#f8fafc;border-radius:10px;padding:14px;margin-top:12px;border:1px solid var(--borde)}
+.prog-title{font-size:12px;font-weight:600;color:var(--azul);margin-bottom:8px}
+.prog-bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--azul2),var(--verde));border-radius:4px;transition:width .4s;width:0%}
+.prog-msg{font-size:11px;color:#64748b;margin-top:6px}
+.log-box{max-height:100px;overflow-y:auto;margin-top:8px;background:#fff;border-radius:6px;padding:8px;border:1px solid var(--borde)}
+.log-line{font-size:10px;color:#475569;line-height:1.7;font-family:monospace}
+.divider{border:none;border-top:1px solid var(--borde);margin:16px 0}
+.back-link{text-align:center;margin-top:12px}
+.back-link a{font-size:12px;color:var(--azul2);text-decoration:none}
+</style>
 </head>
 <body>
-
 <div class="card">
-    <h1 style="color: var(--azul); margin: 0 0 10px 0;">REPORTE OFICIAL</h1>
-    <p style="color: #64748b; margin-bottom: 30px;">Gestión Educativa 2026</p>
-    <button class="btn" onclick="generarExcelPerfecto()">GENERAR EXCEL AHORA</button>
-    <div id="status" class="status">Listo para procesar datos...</div>
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <h1>Exportar Registro Oficial</h1>
+    <p class="sub">Genera el Excel con formato Ministerio de Educación Bolivia</p>
+  </div>
+
+  <!-- Badge docente detectado automáticamente -->
+  <div class="docente-badge" id="docente-badge">
+    <div class="name" id="badge-nombre">—</div>
+    <div class="ue" id="badge-ue">—</div>
+  </div>
+
+  <div class="fg" id="fg-email" style="display:none">
+    <label>Email del docente</label>
+    <input type="email" id="inp-email" placeholder="docente@gmail.com">
+    <button class="btn-sm" onclick="buscarDocente()">🔍 Buscar</button>
+  </div>
+
+  <div class="fg">
+    <label>Curso</label>
+    <select id="inp-curso" disabled onchange="filtrarMaterias()">
+      <option value="">— Cargando... —</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>Área / Materia</label>
+    <select id="inp-materia" disabled>
+      <option value="">— Selecciona curso —</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>Trimestre</label>
+    <select id="inp-trim">
+      <option value="1">1er Trimestre</option>
+      <option value="2">2do Trimestre</option>
+      <option value="3">3er Trimestre</option>
+    </select>
+  </div>
+  <div class="fg">
+    <label>Unidad Educativa</label>
+    <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
+  </div>
+
+  <hr class="divider">
+
+  <button class="btn btn-g" id="btn-export" onclick="exportarExcel()" disabled>
+    📥 Descargar Registro Excel (.xlsx)
+  </button>
+  <button class="btn btn-sm" onclick="mostrarCampoEmail()">🔄 Cambiar cuenta</button>
+
+  <div class="progress" id="progress" style="display:none">
+    <div class="prog-title" id="prog-title">Preparando...</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-msg" id="prog-msg"></div>
+    <div class="log-box" id="log-box"></div>
+  </div>
+
+  <div class="back-link">
+    <a href="javascript:void(0)" onclick="window.close();if(window.history.length>1)window.history.back();" style="font-size:12px;color:var(--azul2);text-decoration:none">← Volver a la app</a>
+    &nbsp;|&nbsp;
+    <a href="/" style="font-size:12px;color:var(--azul2);text-decoration:none">Ir al inicio</a>
+  </div>
 </div>
 
 <script>
-async function generarExcelPerfecto() {
-    const status = document.getElementById('status');
-    status.innerText = "Procesando... por favor espere.";
-    
-    // 1. OBTENCIÓN DE DATOS (Surgical Check)
-    const DOCENTE = JSON.parse(localStorage.getItem('docente')) || { nombre: "MAESTRO", colegio: "U.E. BOLIVIA" };
-    const ESTUDIANTES = JSON.parse(localStorage.getItem('estudiantes_local')) || [];
-    const ACTIVIDADES = JSON.parse(localStorage.getItem('actividades_local')) || [];
-    const NOTAS = JSON.parse(localStorage.getItem('notas_local')) || {};
-    const cursoSel = localStorage.getItem('curso_exportar') || "CURSO";
-    const materiaSel = localStorage.getItem('materia_exportar') || "MATERIA";
-    const trimActual = localStorage.getItem('trim_exportar') || "1";
+const SUPA_URL='https://dmhkidkzriiorctxmwzv.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtaGtpZGt6cmlpb3JjdHhtd3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDEyNjAsImV4cCI6MjA4OTI3NzI2MH0.XkRFktuBo051m-CLsso4dhPcj2oOzUZEHRLyC4jGMRg';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
-    const wb = new ExcelJS.Workbook();
-    
-    // Estilos constantes
-    const borderBlack = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
-    const alnCenter = { vertical: 'middle', horizontal: 'center', wrapText: true };
+let DOCENTE=null, CURSOS=[];
 
-    // --- HOJA 1: REGISTRO T1/T2/T3 ---
-    const ws = wb.addWorksheet(`REGISTRO T${trimActual}`, {
-        pageSetup: { paperSize: 1, orientation: 'landscape', fitToPage: true, fitToWidth: 1 }
-    });
+function log(msg){ const d=document.getElementById('log-box'); d.innerHTML+=`<div class="log-line">${msg}</div>`; d.scrollTop=d.scrollHeight; }
+function prog(pct,title,msg){ document.getElementById('prog-fill').style.width=pct+'%'; document.getElementById('prog-title').textContent=title; document.getElementById('prog-msg').textContent=msg||''; }
 
-    // Configuración de Dimensiones Mínimas (4, 9, 9)
-    const actsSer = ACTIVIDADES.filter(a => a.dimension === 'SER' && a.trimestre == trimActual);
-    const actsSaber = ACTIVIDADES.filter(a => a.dimension === 'SABER' && a.trimestre == trimActual);
-    const actsHacer = ACTIVIDADES.filter(a => a.dimension === 'HACER' && a.trimestre == trimActual);
-
-    const nS = Math.max(4, actsSer.length);
-    const nSa = Math.max(9, actsSaber.length);
-    const nH = Math.max(9, actsHacer.length);
-    const totalCols = 2 + nS + nSa + nH + 4; // Nº, Nombre, Dim, Totales
-
-    // Ajuste de Ancho dinámico
-    const anchoCol = totalCols > 25 ? 2.5 : 3.8;
-    ws.getColumn(1).width = 4;
-    ws.getColumn(2).width = 35;
-    for(let i=3; i<=totalCols; i++) ws.getColumn(i).width = anchoCol;
-
-    // ENCABEZADOS PROFESIONALES
-    ws.mergeCells(1,1,2,totalCols);
-    const cellT = ws.getCell(1,1);
-    cellT.value = `${DOCENTE.colegio.toUpperCase()} - REGISTRO PEDAGÓGICO 2026`;
-    cellT.font = { bold: true, size: 14 };
-    cellT.alignment = alnCenter;
-
-    ws.getRow(4).values = ["", `MAESTRO: ${DOCENTE.nombre}`, "", `CURSO: ${cursoSel}`, "", `MATERIA: ${materiaSel}`];
-    
-    // CABECERA DE TABLA
-    let cActual = 3;
-    const crearSeccion = (titulo, n, color) => {
-        ws.mergeCells(6, cActual, 6, cActual + n - 1);
-        const cell = ws.getCell(6, cActual);
-        cell.value = titulo;
-        cell.fill = { type: 'pattern', pattern:'solid', fgColor:{argb: color} };
-        cell.alignment = alnCenter;
-        cell.border = borderBlack;
-        cActual += n;
-    };
-
-    crearSeccion("SER (10 PTS)", nS, "FFD9E1F2");
-    crearSeccion("SABER (45 PTS)", nSa, "FFE2EFDA");
-    crearSeccion("HACER (40 PTS)", nH, "FFFFF2CC");
-
-    ws.mergeCells(6, cActual, 7, cActual);
-    ws.getCell(6, cActual).value = "PROM. FINAL";
-    ws.getCell(6, cActual).alignment = alnCenter;
-    ws.getCell(6, cActual).border = borderBlack;
-
-    // FILAS DE DATOS (Mínimo 30)
-    const filasMax = Math.max(30, ESTUDIANTES.length);
-    for(let i=0; i < filasMax; i++){
-        const rIdx = 8 + i;
-        const est = ESTUDIANTES[i];
-        ws.getCell(rIdx, 1).value = i + 1;
-        ws.getCell(rIdx, 2).value = est ? est.nombre : "";
-        for(let c=1; c <= cActual; c++) ws.getCell(rIdx, c).border = borderBlack;
-    }
-
-    // --- HOJA 2: ASISTENCIA (50 Columnas) ---
-    const wsAs = wb.addWorksheet('ASISTENCIA', { pageSetup: { paperSize: 1, orientation: 'landscape' } });
-    wsAs.getColumn(2).width = 35;
-    for(let c=3; c<=53; c++) wsAs.getColumn(c).width = 2.2;
-    for(let i=0; i < filasMax; i++){
-        const r = 4 + i;
-        wsAs.getCell(r, 1).value = i + 1;
-        wsAs.getCell(r, 2).value = ESTUDIANTES[i]?.nombre || "";
-        for(let c=1; c <= 53; c++) wsAs.getCell(r, c).border = borderBlack;
-    }
-
-    // --- HOJA 3: BOLETÍN (SOLO NOTA FINAL) ---
-    const wsBo = wb.addWorksheet('BOLETINES', { pageSetup: { paperSize: 1 } });
-    wsBo.getRow(1).values = ["Nº", "NOMBRE DEL ESTUDIANTE", "NOTA TRIMESTRAL", "OBSERVACIÓN"];
-    wsBo.getColumn(2).width = 40;
-    wsBo.getColumn(3).width = 20;
-    ESTUDIANTES.forEach((e, idx) => {
-        const row = wsBo.addRow([idx + 1, e.nombre, e.promedio || 0, (e.promedio >= 51 ? 'APROBADO' : 'REPROBADO')]);
-        row.eachCell(c => c.border = borderBlack);
-    });
-
-    // --- HOJA 4: CENTRALIZADOR (LIMPIO) ---
-    const wsCe = wb.addWorksheet('CENTRALIZADOR', { pageSetup: { paperSize: 1, orientation: 'landscape' } });
-    wsCe.getRow(1).values = ["Nº", "ESTUDIANTE", "AREA 1", "AREA 2", "AREA 3", "AREA 4", "PROM. GENERAL"];
-    wsCe.getColumn(2).width = 35;
-    ESTUDIANTES.forEach((e, idx) => {
-        // Promedio decimal inteligente (división entre áreas con nota)
-        const row = wsCe.addRow([idx+1, e.nombre, "", "", "", "", "0.00"]);
-        row.eachCell(c => c.border = borderBlack);
-    });
-
-    // GENERAR ARCHIVO
-    try {
-        const buffer = await wb.xlsx.writeBuffer();
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Registro_Bolivia_2026_${cursoSel}.xlsx`;
-        a.click();
-        status.innerText = "Excel generado con éxito ✓";
-    } catch (err) {
-        status.innerText = "Error al generar: " + err.message;
-    }
+// ===== AUTO-DETECTAR DOCENTE desde localStorage de la app =====
+async function init(){
+  const saved=localStorage.getItem('docente');
+  if(saved){
+    try{
+      const doc=JSON.parse(saved);
+      DOCENTE=doc;
+      mostrarDocente(doc);
+      await cargarCursos(doc.id);
+      return;
+    }catch(e){}
+  }
+  // Si no hay sesión guardada, mostrar campo email
+  document.getElementById('fg-email').style.display='block';
 }
+
+function mostrarDocente(doc){
+  document.getElementById('docente-badge').style.display='block';
+  document.getElementById('badge-nombre').textContent='👤 '+doc.nombre;
+  document.getElementById('badge-ue').textContent='📍 '+(doc.unidad_educativa||'');
+  document.getElementById('inp-ue').value=doc.unidad_educativa||'Franz Tamayo de Chachacomani';
+}
+
+function mostrarCampoEmail(){
+  document.getElementById('fg-email').style.display='block';
+  document.getElementById('inp-email').focus();
+}
+
+async function buscarDocente(){
+  const email=document.getElementById('inp-email').value.trim().toLowerCase();
+  if(!email){ alert('Ingresa el email'); return; }
+  const id='D_'+email.replace(/[@.]/g,'_').replace(/[^a-z0-9_]/gi,'');
+  const {data}=await sb.from('docentes').select('*').eq('id',id).single();
+  if(!data){ alert('Docente no encontrado. Verifica el email.'); return; }
+  DOCENTE=data;
+  mostrarDocente(data);
+  await cargarCursos(id);
+  document.getElementById('fg-email').style.display='none';
+}
+
+async function cargarCursos(id){
+  const {data}=await sb.from('asignaciones').select('*').eq('id_docente',id);
+  CURSOS=data||[];
+  const sc=document.getElementById('inp-curso');
+  sc.disabled=false;
+  sc.innerHTML='<option value="">— Selecciona curso —</option>';
+  [...new Set(CURSOS.map(c=>c.curso))].sort().forEach(c=>{
+    sc.innerHTML+=`<option value="${c}">${c}</option>`;
+  });
+  document.getElementById('btn-export').disabled=false;
+}
+
+function filtrarMaterias(){
+  const curso=document.getElementById('inp-curso').value;
+  const sm=document.getElementById('inp-materia');
+  sm.disabled=!curso;
+  sm.innerHTML='<option value="">— Selecciona materia —</option>';
+  CURSOS.filter(c=>c.curso===curso).forEach(c=>{
+    sm.innerHTML+=`<option value="${c.materia}">${c.materia}</option>`;
+  });
+  sm.disabled=false;
+}
+
+// ===== EXPORTAR =====
+async function exportarExcel(){
+  const curso=document.getElementById('inp-curso').value;
+  const materia=document.getElementById('inp-materia').value;
+  const trim=document.getElementById('inp-trim').value;
+  const ue=document.getElementById('inp-ue').value;
+  if(!DOCENTE){ alert('No hay docente identificado'); return; }
+  if(!curso||!materia){ alert('Selecciona curso y materia'); return; }
+
+  document.getElementById('progress').style.display='block';
+  document.getElementById('log-box').innerHTML='';
+  prog(5,'Cargando estudiantes...','Conectando con Supabase');
+
+  const id=DOCENTE.id;
+  const {data:ests}=await sb.from('estudiantes').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia);
+  const ESTUDIANTES=(ests||[]).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  log('✓ Estudiantes: '+ESTUDIANTES.length);
+  prog(20,'Cargando actividades...','');
+
+  const {data:acts}=await sb.from('actividades').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia).eq('trimestre',trim);
+  const ACTIVIDADES=acts||[];
+  log('✓ Actividades: '+ACTIVIDADES.length+' (SER:'+ACTIVIDADES.filter(a=>a.dimension==='SER').length+' SABER:'+ACTIVIDADES.filter(a=>a.dimension==='SABER').length+' HACER:'+ACTIVIDADES.filter(a=>a.dimension==='HACER').length+')');
+  prog(40,'Cargando notas...','');
+
+  const {data:notasArr}=await sb.from('notas').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia).eq('trimestre',trim);
+  const NOTAS={};
+  (notasArr||[]).forEach(n=>{ if(!NOTAS[n.id_estudiante]) NOTAS[n.id_estudiante]={}; NOTAS[n.id_estudiante][n.id_actividad]=parseFloat(n.nota); });
+  log('✓ Notas: '+(notasArr||[]).length+' registros');
+  prog(60,'Cargando autoevaluaciones...','');
+
+  const {data:autoArr}=await sb.from('autoevaluacion').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia).eq('trimestre',trim);
+  const AUTOEVALS={};
+  (autoArr||[]).forEach(a=>{ AUTOEVALS[a.id_estudiante]=parseFloat(a.nota); });
+  log('✓ Autoevaluaciones: '+(autoArr||[]).length);
+  prog(70,'Cargando asistencia...','');
+  const {data:asistArr}=await sb.from('asistencia').select('*').eq('id_docente',id).eq('curso',curso).eq('materia',materia);
+  const asistenciaData={};
+  (asistArr||[]).forEach(a=>{
+    if(!asistenciaData[a.id_estudiante]) asistenciaData[a.id_estudiante]={};
+    asistenciaData[a.id_estudiante][a.fecha]=a.estado;
+  });
+  const todasFechasAsist=[...new Set((asistArr||[]).map(a=>a.fecha))].sort();
+  log('✓ Asistencia: '+(asistArr||[]).length+' registros / '+todasFechasAsist.length+' días');
+  prog(75,'Generando Excel con formato oficial...','');
+
+  try{
+    await generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenciaData,curso,materia,trim,ue});
+    prog(100,'✅ Excel listo','Descarga iniciada');
+    log('📁 Archivo generado exitosamente');
+  }catch(e){
+    prog(0,'❌ Error','');
+    log('ERROR: '+e.message);
+    console.error(e);
+  }
+}
+
+function promDim(estId,acts,NOTAS){
+  if(!acts.length) return null;
+  // Vacíos cuentan como 0 — divide entre el total de actividades del criterio
+  const hayAlguna=acts.some(a=>{ const n=NOTAS[estId]?.[a.id]; return n!==undefined&&n!==null&&n!==''&&!isNaN(n); });
+  if(!hayAlguna) return null;
+  const suma=acts.reduce((s,a)=>{
+    const n=NOTAS[estId]?.[a.id];
+    return s+(n!==undefined&&n!==null&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);
+  },0);
+  return suma/acts.length; // divide entre TOTAL actividades del criterio
+}
+
+async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenciaData,curso,materia,trim,ue}){
+  const wb=new ExcelJS.Workbook();
+  wb.creator='Registro Pedagógico 2026';
+  const trimNombres={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
+
+  const ws=wb.addWorksheet('Registro 1T',{
+    pageSetup:{
+      paperSize:1,
+      orientation:'landscape',
+      fitToPage:false,
+      scale:65,
+      horizontalCentered:true,
+      verticalCentered:false,
+      margins:{
+        left:0.2,            // 0.5 cm aprox en pulgadas
+        right:0.2,
+        top:0.31,
+        bottom:0.31,
+        header:0.12,
+        footer:0.12
+      }
+    },
+    headerFooter:{
+      oddHeader:'',
+      oddFooter:''
+    }
+  });
+
+  // ===== COLORES (exactos del original) =====
+  const C={
+    SER_BG:   'FFD9E1F2', // azul pálido SER
+    SAB_BG:   'FFE8A9F5', // violeta SABER
+    HAC_BG:   'FF77EDCE', // verde HACER
+    SER_MED:  'FFB4C6E7', // azul medio promedio SER
+    SAB_MED:  'FFD09EF0', // violeta medio promedio SABER
+    HAC_MED:  'FF4ADDB8', // verde medio promedio HACER
+    NOMBRE:   'FFF3F599', // amarillo apellidos
+    LABEL:    'FFF2CF50', // amarillo encabezado MAESTRA
+    TOTAL:    'FFFFD966', // amarillo valoración total
+    AUTO:     'FFFCE4D6', // naranja auto eval
+    PROM:     'FFFFE699', // amarillo prom final
+    APROBADO: 'FFD1FAE5', // verde estado
+    REPROBADO:'FFFEE2E2', // rojo estado
+    HDR_AZUL: 'FF1A3A6B', // azul oscuro encabezado
+    HDR_MED:  'FF2563EB', // azul medio
+    GRIS:     'FFF1F5F9', // gris alternado
+    WHITE:    'FFFFFFFF',
+  };
+
+  const serActs   = ACTIVIDADES.filter(a=>a.dimension==='SER');
+  const saberActs = ACTIVIDADES.filter(a=>a.dimension==='SABER');
+  const hacerActs = ACTIVIDADES.filter(a=>a.dimension==='HACER');
+
+  // ===== LAYOUT DE COLUMNAS =====
+  // C1=Nº, C2-C4=Nombre(merge), C5 en adelante SER cols
+  const C1=1, C_NOM_S=2, C_NOM_E=4;
+  const C_SER_S=5, C_SER_E=Math.max(5, 4+serActs.length);
+  const C_PSER=C_SER_E+1;
+  const C_SAB_S=C_PSER+1, C_SAB_E=Math.max(C_SAB_S, C_PSER+saberActs.length);
+  const C_PSAB=C_SAB_E+1;
+  const C_HAC_S=C_PSAB+1, C_HAC_E=Math.max(C_HAC_S, C_PSAB+hacerActs.length);
+  const C_PHAC=C_HAC_E+1;
+  const C_TOTAL=C_PHAC+1, C_AUTO=C_TOTAL+1, C_PROM=C_AUTO+1, C_EST=C_PROM+1;
+  const NCOLS=C_EST;
+
+  // ===== REPETIR FILAS ENCABEZADO EN CADA PÁGINA IMPRESA =====
+  ws.views = [{state:'frozen', xSplit:0, ySplit:7}]; // congelar primeras 7 filas en pantalla
+  // Nota: ExcelJS no soporta PrintTitleRows directamente, se aplica via pageSetup
+  ws.pageSetup.printTitlesRow = '1:7'; // repetir filas 1-7 en cada página
+
+  // ===== ANCHOS =====
+  ws.getColumn(C1).width=4;
+  ws.getColumn(C_NOM_S).width=30; // Nombre más ancho
+  for(let c=C_NOM_S+1;c<=C_NOM_E;c++) ws.getColumn(c).width=2;
+  for(let c=C_SER_S;c<=C_SER_E;c++) ws.getColumn(c).width=7;
+  ws.getColumn(C_PSER).width=6.5;
+  for(let c=C_SAB_S;c<=C_SAB_E;c++) ws.getColumn(c).width=7;
+  ws.getColumn(C_PSAB).width=6.5;
+  for(let c=C_HAC_S;c<=C_HAC_E;c++) ws.getColumn(c).width=7;
+  ws.getColumn(C_PHAC).width=6.5;
+  ws.getColumn(C_TOTAL).width=6.5;
+  ws.getColumn(C_AUTO).width=6;
+  ws.getColumn(C_PROM).width=6.5;
+  ws.getColumn(C_EST).width=10;
+
+  // ===== HELPERS =====
+  const border={style:'thin',color:{argb:'FF000000'}};
+  const allBorder={top:border,left:border,bottom:border,right:border};
+
+  function fill(argb){ return {type:'pattern',pattern:'solid',fgColor:{argb}}; }
+  function font(bold,size,color='FF000000'){ return {bold,size,name:'Calibri',color:{argb:color}}; }
+  function align(h,v,rot,wrap){ return {horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap}; }
+
+  function sc(r,c,val,bg,fnt,aln,brd=true){
+    const cell=ws.getCell(r,c);
+    if(val!==null&&val!==undefined) cell.value=val;
+    if(bg) cell.fill=fill(bg);
+    if(fnt) cell.font=fnt;
+    if(aln) cell.alignment=aln;
+    if(brd) cell.border=allBorder;
+    return cell;
+  }
+
+  function merge(r,c1,c2,val,bg,fnt,aln){
+    if(c1<c2){ try{ws.mergeCells(r,c1,r,c2);}catch(e){} }
+    return sc(r,c1,val,bg,fnt,aln);
+  }
+
+  function mergeBlock(r1,r2,c1,c2,val,bg,fnt,aln){
+    if(r1!==r2||c1!==c2){ try{ws.mergeCells(r1,c1,r2,c2);}catch(e){} }
+    const cell=ws.getCell(r1,c1);
+    if(val!==null&&val!==undefined) cell.value=val;
+    if(bg) cell.fill=fill(bg);
+    if(fnt) cell.font=fnt;
+    if(aln) cell.alignment=aln;
+    cell.border=allBorder;
+    return cell;
+  }
+
+  // ===== FILA 1: UE =====
+  ws.getRow(1).height=22;
+  merge(1,1,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(),
+    C.HDR_AZUL, font(true,14,'FFFFFFFF'), align('center','middle',0,false));
+
+  // ===== FILA 2: REGISTRO DE EVALUACIÓN =====
+  ws.getRow(2).height=20;
+  merge(2,1,NCOLS,'REGISTRO DE EVALUACIÓN — GESTIÓN 2026',
+    C.HDR_MED, font(false,13,'FFFFFFFF'), align('center','middle',0,false));
+
+  // ===== FILA 3: MAESTRA + CURSO =====
+  ws.getRow(3).height=20;
+  merge(3,C1,C_NOM_E,'MAESTRA(O):', C.LABEL, font(true,11), align('right','middle'));
+  merge(3,C_SER_S,C_PHAC, DOCENTE.nombre, C.WHITE, font(false,11), align('left','middle'));
+  sc(3,C_TOTAL,'CURSO:', C.LABEL, font(true,10), align('center','middle'));
+  merge(3,C_AUTO,C_EST, curso, C.WHITE, font(true,12), align('center','middle'));
+
+  // ===== FILA 4: ASIGNATURA =====
+  ws.getRow(4).height=20;
+  merge(4,C1,C_NOM_E,'ASIGNATURA:', null, font(true,11), align('right','middle'));
+  merge(4,C_SER_S,C_EST, materia.toUpperCase(), C.WHITE, font(true,12), align('left','middle'));
+
+  // ===== FILA 5: TRIMESTRE + col headers top =====
+  ws.getRow(5).height=18;
+  merge(5,C1,C_NOM_E,'', C.GRIS, null, null);
+  merge(5,C_SER_S,C_PHAC, trimNombres[trim], C.SER_BG, font(true,11), align('center','middle'));
+  sc(5,C_TOTAL,'EVAL.\nTOTAL', C.TOTAL, font(true,8), align('center','middle',0,true));
+  sc(5,C_AUTO,'AUTO\nEVAL.', C.AUTO, font(true,8), align('center','middle',0,true));
+  sc(5,C_PROM,'PROM.\nFINAL', C.PROM, font(true,8), align('center','middle',0,true));
+  sc(5,C_EST,'ESTADO', 'FFE2EFDA', font(true,8), align('center','middle',0,true));
+
+  // ===== FILA 6: SER / SABER / HACER =====
+  ws.getRow(6).height=16;
+  merge(6,C1,C_NOM_E,'Valoración del Docente', 'FFE2EFDA', font(false,9), align('center','middle'));
+  merge(6,C_SER_S,C_PSER,'SER — 10 pts', C.SER_BG, font(true,10), align('center','middle'));
+  merge(6,C_SAB_S,C_PSAB,'SABER — 45 pts', C.SAB_BG, font(true,10), align('center','middle'));
+  merge(6,C_HAC_S,C_PHAC,'HACER — 40 pts', C.HAC_BG, font(true,10), align('center','middle'));
+  sc(6,C_TOTAL,'', C.TOTAL, null, null);
+  sc(6,C_AUTO,'', C.AUTO, null, null);
+  sc(6,C_PROM,'', C.PROM, null, null);
+  sc(6,C_EST,'', 'FFE2EFDA', null, null);
+
+  // ===== FILA 7: ENCABEZADOS ACTIVIDADES (texto vertical rotado 90°) =====
+  ws.getRow(7).height=135;
+  merge(7,C1,C_NOM_E,'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true,10), align('center','bottom',0,true));
+
+  // SER actividades
+  serActs.forEach((a,i)=>{
+    sc(7,C_SER_S+i, a.nombre_actividad, C.SER_BG, font(false,9), align('center','bottom',90,true));
+  });
+  if(serActs.length===0) sc(7,C_SER_S,'(sin actividades)', C.SER_BG, font(false,8), align('center','bottom',90,true));
+  sc(7,C_PSER,'PROMEDIO\nSER', C.SER_MED, font(true,8), align('center','bottom',0,true));
+
+  // SABER actividades
+  saberActs.forEach((a,i)=>{
+    sc(7,C_SAB_S+i, a.nombre_actividad, C.SAB_BG, font(false,9), align('center','bottom',90,true));
+  });
+  if(saberActs.length===0) sc(7,C_SAB_S,'(sin actividades)', C.SAB_BG, font(false,8), align('center','bottom',90,true));
+  sc(7,C_PSAB,'PROMEDIO\nSABER', C.SAB_MED, font(true,8), align('center','bottom',0,true));
+
+  // HACER actividades
+  hacerActs.forEach((a,i)=>{
+    sc(7,C_HAC_S+i, a.nombre_actividad, C.HAC_BG, font(false,9), align('center','bottom',90,true));
+  });
+  if(hacerActs.length===0) sc(7,C_HAC_S,'(sin actividades)', C.HAC_BG, font(false,8), align('center','bottom',90,true));
+  sc(7,C_PHAC,'PROMEDIO\nHACER', C.HAC_MED, font(true,8), align('center','bottom',0,true));
+
+  sc(7,C_TOTAL,'VALORACIÓN\nTOTAL', C.TOTAL, font(true,8), align('center','bottom',0,true));
+  sc(7,C_AUTO,'AUTO\nEVAL.(5)', C.AUTO, font(true,8), align('center','bottom',0,true));
+  sc(7,C_PROM,'PROM.\nTRIM.', C.PROM, font(true,8), align('center','bottom',0,true));
+  sc(7,C_EST,'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true,8), align('center','bottom',0,true));
+
+  // ===== FILAS ESTUDIANTES =====
+  let aprobados=0;
+  ESTUDIANTES.forEach((e,i)=>{
+    const row=8+i;
+    ws.getRow(row).height=17;
+    const rowBg=i%2===0?C.WHITE:C.GRIS;
+
+    // Nº
+    sc(row,C1, i+1, rowBg, font(true,10), align('center','middle'));
+    // Nombre (merge cols 2-4)
+    merge(row,C_NOM_S,C_NOM_E, e.nombre, rowBg, font(true,10), align('left','middle'));
+
+    // SER notas
+    serActs.forEach((a,j)=>{
+      const n=NOTAS[e.id]?.[a.id];
+      sc(row,C_SER_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFEFF6FF':'FFE1EFFE', font(false,9), align('center','middle'));
+    });
+    if(serActs.length===0) sc(row,C_SER_S,'', i%2===0?'FFEFF6FF':'FFE1EFFE', null, align('center','middle'));
+    const pSer=promDim(e.id,serActs,NOTAS);
+    sc(row,C_PSER, pSer!==null?Math.round(pSer):'', C.SER_MED, font(true,10), align('center','middle'));
+
+    // SABER notas (ingresadas sobre 100)
+    saberActs.forEach((a,j)=>{
+      const n=NOTAS[e.id]?.[a.id];
+      sc(row,C_SAB_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF5F3FF':'FFEDE9FE', font(false,9), align('center','middle'));
+    });
+    if(saberActs.length===0) sc(row,C_SAB_S,'', i%2===0?'FFF5F3FF':'FFEDE9FE', null, align('center','middle'));
+    const pSab=promDim(e.id,saberActs,NOTAS);
+    const pSabConv=pSab!==null?Math.round(pSab*0.45):null;
+    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,10), align('center','middle'));
+
+    // HACER notas (ingresadas sobre 100)
+    hacerActs.forEach((a,j)=>{
+      const n=NOTAS[e.id]?.[a.id];
+      sc(row,C_HAC_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF0FDF4':'FFE6FAF2', font(false,9), align('center','middle'));
+    });
+    if(hacerActs.length===0) sc(row,C_HAC_S,'', i%2===0?'FFF0FDF4':'FFE6FAF2', null, align('center','middle'));
+    const pHac=promDim(e.id,hacerActs,NOTAS);
+    const pHacConv=pHac!==null?Math.round(pHac*0.40):null;
+    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,10), align('center','middle'));
+
+    // TOTAL SER + SABER×0.45 + HACER×0.40
+    const total=(pSer!==null||pSabConv!==null||pHacConv!==null)?
+      Math.round((pSer||0)+(pSabConv||0)+(pHacConv||0)):null;
+    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,10), align('center','middle'));
+
+    // AUTOEVALUACIÓN (sobre 5)
+    const auto=AUTOEVALS[e.id]!==undefined?AUTOEVALS[e.id]:null;
+    sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(false,9), align('center','middle'));
+
+    // PROMEDIO FINAL = total + autoevaluación
+    const promFinal=total!==null?Math.round(total+(auto||0)):null;
+    sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,11), align('center','middle'));
+
+    // ESTADO
+    let estado='', estBg=C.WHITE, estColor='FF000000';
+    if(promFinal!==null){
+      if(promFinal>=51){ estado='APROBADO'; estBg=C.APROBADO; estColor='FF065F46'; aprobados++; }
+      else{ estado='REPROBADO'; estBg=C.REPROBADO; estColor='FF991B1B'; }
+    }
+    sc(row,C_EST, estado, estBg, font(true,9,estColor), align('center','middle'));
+  });
+
+  // ===== FILA TOTALES =====
+  const rowTot=8+ESTUDIANTES.length;
+  ws.getRow(rowTot).height=14;
+  merge(rowTot,C1,C_NOM_E, 'TOTAL: '+ESTUDIANTES.length+' estudiantes',
+    'FFDCE6F1', font(true,9), align('left','middle'));
+  merge(rowTot,C_SER_S,C_PHAC,'',C.GRIS,null,null);
+  sc(rowTot,C_TOTAL,'',C.GRIS,null,null);
+  sc(rowTot,C_AUTO,'',C.GRIS,null,null);
+  sc(rowTot,C_PROM,'',C.GRIS,null,null);
+  sc(rowTot,C_EST,'Aprobados: '+aprobados+'/'+ESTUDIANTES.length,
+    C.APROBADO, font(true,9,'FF065F46'), align('center','middle',0,true));
+
+  // ===== FILA FIRMA =====
+  const rowFirma=rowTot+2;
+  ws.getRow(rowFirma).height=30;
+  merge(rowFirma,C1,Math.floor(NCOLS/2)-1,'',C.WHITE,null,null);
+  merge(rowFirma,Math.floor(NCOLS/2),NCOLS,'',C.WHITE,null,null);
+  ws.getRow(rowFirma+1).height=12;
+  merge(rowFirma+1,C1,Math.floor(NCOLS/2)-1,'_______________________________',C.WHITE,font(false,9),align('center','top'));
+  merge(rowFirma+1,Math.floor(NCOLS/2),NCOLS,'_______________________________',C.WHITE,font(false,9),align('center','top'));
+  ws.getRow(rowFirma+2).height=12;
+  merge(rowFirma+2,C1,Math.floor(NCOLS/2)-1,'Firma del Docente',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
+  merge(rowFirma+2,Math.floor(NCOLS/2),NCOLS,'Sello y Firma de Dirección',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
+
+  // ===== CONFIGURAR ÁREA DE IMPRESIÓN AUTOMÁTICA =====
+  // Solo incluir celdas con datos (hasta última fila de estudiantes + totales + firma)
+  const lastDataRow = 8 + ESTUDIANTES.length + 4; // filas header + estudiantes + totales + firma
+  // Convertir número de columna a letra Excel
+  function numToCol(n){ let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26); } return s; }
+  ws.pageSetup.printArea = 'A1:'+numToCol(NCOLS)+lastDataRow;
+
+  // Cuadrícula visible en impresión
+  ws.pageSetup.showGridLines = true;
+  ws.pageSetup.blackAndWhite = false;
+  ws.pageSetup.draft = false;
+
+  // ===== HOJA AS.1 =====
+  await generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,DOCENTE});
+  log('✓ Hoja AS.1 generada');
+
+  // ===== HOJA 1.BOL =====
+  await generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistenciaData,curso,materia,trim,ue,DOCENTE});
+  log('✓ Hoja 1.BOL generada');
+
+  // ===== HOJA CENTRALIZADOR =====
+  await generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,curso,materia,trim,ue,DOCENTE});
+  log('✓ Hoja Centralizador generada');
+
+  // ===== DESCARGAR =====
+  log('📐 Generando archivo...');
+  const buffer=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  const fname=`Registro_${curso}_${materia.replace(/[/:,\s]/g,'-')}_Trim${trim}_2026.xlsx`;
+  a.download=fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  log('📁 '+fname);
+}
+
+
+// ===== HOJA AS.1 — CUADRO DE ASISTENCIA =====
+async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,DOCENTE}){
+  function colLetra(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
+  const trimNom={'1':'1ER. TRIMESTRE','2':'2DO. TRIMESTRE','3':'3ER. TRIMESTRE'};
+  const ws=wb.addWorksheet('AS.1');
+  ws.pageSetup.orientation='landscape';
+  ws.pageSetup.paperSize=1;
+  ws.pageSetup.scale=75;
+  ws.pageSetup.fitToPage=false;
+  ws.pageSetup.margins={left:0,right:0,top:0.39,bottom:0.2,header:0.12,footer:0.12};
+  ws.headerFooter={oddHeader:'',oddFooter:''};
+
+  const todasFechas=[...new Set(Object.values(asistenciaData).flatMap(d=>Object.keys(d)))].sort();
+  const fechas=todasFechas.slice(0,36);
+
+  const brd={style:'thin',color:{argb:'FF000000'}};
+  const allB={top:brd,left:brd,bottom:brd,right:brd};
+  function fill(a){return{type:'pattern',pattern:'solid',fgColor:{argb:a}};}
+  function fnt(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
+  function aln(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
+  function sc(r,col,val,bg,fn,al,borde=true){
+    const cell=ws.getCell(r,col);
+    if(val!==null&&val!==undefined)cell.value=val;
+    if(bg)cell.fill=fill(bg);
+    if(fn)cell.font=fn;
+    if(al)cell.alignment=al;
+    if(borde)cell.border=allB;
+    return cell;
+  }
+  function mg(r,c1,c2,val,bg,fn,al){
+    if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
+    return sc(r,c1,val,bg,fn,al);
+  }
+
+  const AZ='FF1A3A6B',AM='FF2563EB',LA='FFF2CF50',PR='FFFFC000',LC='FF92D050',AT='FFFDE9D9',FA='FFFFC7CE',WH='FFFFFFFF',GR='FFF1F5F9';
+  const CN=1,NS=2,NE=3,DS=4,DE=39,CP=40,CL=41,CA=42,CF=43,CT=44;
+
+  ws.getColumn(CN).width=3.5;
+  ws.getColumn(NS).width=16;
+  ws.getColumn(NE).width=15;
+  for(let i=DS;i<=DE;i++)ws.getColumn(i).width=2.7;
+  ws.getColumn(CP).width=3.7;ws.getColumn(CL).width=4;ws.getColumn(CA).width=4;ws.getColumn(CF).width=4;ws.getColumn(CT).width=5.7;
+
+  // Fila 1
+  ws.getRow(1).height=15;
+  mg(1,CN,3,'UNIDAD EDUCATIVA TECNICO HUMANISTICA: '+ue.toUpperCase(),AZ,fnt(true,10,'FFFFFFFF'),aln('left','middle'));
+  mg(1,5,30,trimNom[trim],AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
+  mg(1,38,CT,'2026',AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
+
+  // Fila 2
+  ws.getRow(2).height=14;
+  mg(2,CN,CT,'CUADRO DE ASISTENCIA',AZ,fnt(true,12,'FFFFFFFF'),aln('center','middle'));
+
+  // Fila 3
+  ws.getRow(3).height=27;
+  mg(3,CN,1,'MAESTRA(O):',LA,fnt(true,9),aln('right','middle'));
+  mg(3,NS,30,DOCENTE.nombre,WH,fnt(false,10),aln('left','middle'));
+  mg(3,38,CT,'CURSO: '+curso,LA,fnt(true,10),aln('center','middle'));
+
+  // Fila 4
+  ws.getRow(4).height=19.5;
+  mg(4,CN,1,'ASIGNATURA:',LA,fnt(true,9),aln('right','middle'));
+  mg(4,NS,CT,materia.toUpperCase(),WH,fnt(false,10),aln('left','middle'));
+
+  // Fila 5 separador
+  ws.getRow(5).height=4.5;
+
+  // Fila 6: encabezados
+  ws.getRow(6).height=25;
+  sc(6,CN,'N°',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  mg(6,NS,NE,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  mg(6,DS,DE,'ASISTENCIA — '+fechas.length+' dias registrados',AM,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  sc(6,CP,'P',PR,fnt(true,9),aln('center','middle'));
+  sc(6,CL,'L',LC,fnt(true,9),aln('center','middle'));
+  sc(6,CA,'A',AT,fnt(true,9),aln('center','middle'));
+  sc(6,CF,'F',FA,fnt(true,9),aln('center','middle'));
+  mg(6,CT,CT,'TOTAL\nDIAS',AZ,fnt(true,8,'FFFFFFFF'),aln('center','middle',0,true));
+
+  // Fila 7: leyenda rotada
+  ws.getRow(7).height=12.75;
+  sc(7,CN,'',GR,null,null);
+  mg(7,NS,NE,'',GR,null,null);
+  for(let i=DS;i<=DE;i++)sc(7,i,'',GR,null,null);
+  sc(7,CP,'P / PRESENTE',PR,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CL,'L / LICENCIA',LC,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CA,'A / ATRASO',AT,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CF,'F / FALTA',FA,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CT,'',AZ,null,null);
+
+  // Fila 8: fechas rotadas
+  ws.getRow(8).height=58.5;
+  sc(8,CN,'',GR,null,aln('center','bottom'));
+  mg(8,NS,NE,'',GR,null,null);
+  fechas.forEach((f,i)=>{
+    const p=f.split('-');
+    const lbl=p.length===3?p[2]+'/'+p[1]:f;
+    const bg=i%2===0?'FFD9E1F2':'FFE8F4FD';
+    sc(8,DS+i,lbl,bg,fnt(false,9),aln('center','bottom',90,false));
+  });
+  for(let i=fechas.length;i<36;i++)sc(8,DS+i,'',GR,null,aln('center','bottom'));
+  sc(8,CP,'',PR,null,null);sc(8,CL,'',LC,null,null);sc(8,CA,'',AT,null,null);sc(8,CF,'',FA,null,null);sc(8,CT,'',AZ,null,null);
+
+  // Filas estudiantes
+  ESTUDIANTES.forEach((e,i)=>{
+    const row=9+i;
+    ws.getRow(row).height=17.4;
+    const bg=i%2===0?WH:GR;
+    sc(row,CN,i+1,bg,fnt(true,9),aln('center','middle'));
+    mg(row,NS,NE,e.nombre,bg,fnt(false,9),aln('left','middle'));
+    fechas.forEach((f,j)=>{
+      const est=(asistenciaData[e.id]&&asistenciaData[e.id][f])||'';
+      const bgM={'P':'FFE8F5E9','L':'FFF1F8E9','A':'FFFFF9E6','F':'FFFCE4EC','':(i%2===0?WH:GR)};
+      const txM={'P':'FF2E7D32','L':'FF33691E','A':'FFE65100','F':'FFC62828','':(i%2===0?'FF333333':'FF555555')};
+      sc(row,DS+j,est,bgM[est],fnt(true,8,txM[est]),aln('center','middle'));
+    });
+    for(let j=fechas.length;j<36;j++)sc(row,DS+j,'',i%2===0?WH:GR,null,aln('center','middle'));
+    // Contar directamente desde los datos ya escritos en memoria (más confiable que COUNTIF en ExcelJS)
+    const cP=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
+    const cL=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='L').length;
+    const cA=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='A').length;
+    const cF=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='F').length;
+    const cTot=cP+cL+cA+cF;
+    sc(row,CP,cP||'',PR,fnt(true,10),aln('center','middle'));
+    sc(row,CL,cL||'',LC,fnt(true,10),aln('center','middle'));
+    sc(row,CA,cA||'',AT,fnt(true,10),aln('center','middle'));
+    sc(row,CF,cF||'',FA,fnt(true,10),aln('center','middle'));
+    sc(row,CT,cTot||'',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
+  });
+
+  // Fila totales — sumar directamente desde los datos
+  const rt=9+ESTUDIANTES.length;
+  ws.getRow(rt).height=17;
+  mg(rt,CN,NE,'TOTALES',LA,fnt(true,10),aln('center','middle'));
+  // Contar P por cada columna de fecha
+  fechas.forEach((f,j)=>{
+    const cPcol=ESTUDIANTES.filter(e=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
+    sc(rt,DS+j,cPcol||'','FFD9E1F2',fnt(false,8),aln('center','middle'));
+  });
+  for(let j=fechas.length;j<36;j++) sc(rt,DS+j,'',GR,null,aln('center','middle'));
+  // Totales generales P/L/A/F
+  const totP=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length,0);
+  const totL=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='L').length,0);
+  const totA=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='A').length,0);
+  const totF=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='F').length,0);
+  sc(rt,CP,totP||'',PR,fnt(true,10),aln('center','middle'));
+  sc(rt,CL,totL||'',LC,fnt(true,10),aln('center','middle'));
+  sc(rt,CA,totA||'',AT,fnt(true,10),aln('center','middle'));
+  sc(rt,CF,totF||'',FA,fnt(true,10),aln('center','middle'));
+  sc(rt,CT,(totP+totL+totA+totF)||'',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
+
+  ws.pageSetup.printArea='A1:'+colLetra(CT)+(rt+2);
+  ws.pageSetup.showGridLines=true;
+}
+
+
+// ===== HOJA 1.BOL — CUADRO DE CALIFICACIONES =====
+async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistenciaData,curso,materia,trim,ue,DOCENTE}){
+  function colL(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
+  const trimNom={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
+  const ws=wb.addWorksheet('1.BOL');
+  ws.pageSetup.orientation='portrait';
+  ws.pageSetup.paperSize=1;
+  ws.pageSetup.scale=69;
+  ws.pageSetup.fitToPage=false;
+  ws.pageSetup.margins={left:0.39,right:0,top:0.59,bottom:0,header:0.12,footer:0.12};
+  ws.headerFooter={oddHeader:'',oddFooter:''};
+
+  const brd={style:'thin',color:{argb:'FF000000'}};
+  const allB={top:brd,left:brd,bottom:brd,right:brd};
+  function fill(a){return{type:'pattern',pattern:'solid',fgColor:{argb:a}};}
+  function fnt(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
+  function aln(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
+  function sc(r,col,val,bg,fn,al,borde=true){
+    const cell=ws.getCell(r,col);
+    if(val!==null&&val!==undefined)cell.value=val;
+    if(bg)cell.fill=fill(bg);
+    if(fn)cell.font=fn;
+    if(al)cell.alignment=al;
+    if(borde)cell.border=allB;
+    return cell;
+  }
+  function mg(r,c1,c2,val,bg,fn,al){
+    if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
+    return sc(r,c1,val,bg,fn,al);
+  }
+  function mgBlock(r1,r2,c1,c2,val,bg,fn,al){
+    if(r1!==r2||c1!==c2){try{ws.mergeCells(r1,c1,r2,c2);}catch(e){}}
+    const cell=ws.getCell(r1,c1);
+    if(val!==null&&val!==undefined)cell.value=val;
+    if(bg)cell.fill=fill(bg);
+    if(fn)cell.font=fn;
+    if(al)cell.alignment=al;
+    cell.border=allB;
+    return cell;
+  }
+
+  // Colores
+  const AZ='FF1A3A6B',AM='FF2563EB';
+  const SER_BG='FFD9E1F2',SAB_BG='FFE8A9F5',HAC_BG='FF77EDCE';
+  const SER_MED='FFB4C6E7',SAB_MED='FFD09EF0',HAC_MED='FF4ADDB8';
+  const LABEL='FFF2CF50',TOTAL='FFFFD966',AUTO='FFFCE4D6',PROM='FFFFE699';
+  const APROB='FFD1FAE5',REPRO='FFFEE2E2',WH='FFFFFFFF',GR='FFF1F5F9';
+  const AMARILLO='FFFFC000',VERDE='FF46E281';
+
+  // Dimensiones mínimas de columnas según instrucciones
+  // SER mín 4 cols, SABER mín 9 cols, HACER mín 9 cols
+  const serActs=ACTIVIDADES.filter(a=>a.dimension==='SER'&&String(a.trimestre)===String(trim));
+  const sabActs=ACTIVIDADES.filter(a=>a.dimension==='SABER'&&String(a.trimestre)===String(trim));
+  const hacActs=ACTIVIDADES.filter(a=>a.dimension==='HACER'&&String(a.trimestre)===String(trim));
+  const nSER=Math.max(4,serActs.length);
+  const nSAB=Math.max(9,sabActs.length);
+  const nHAC=Math.max(9,hacActs.length);
+
+  // Layout columnas: A=Nº, B-C=Nombre, D..=SER, PSER, SAB, PSAB, HAC, PHAC, TOTAL, AUTO, PROM, PROM_FINAL, LITERAL, OBS
+  const CA=1,CNS=2,CNE=3;
+  const CS_S=4, CS_E=4+nSER-1;           // SER actividades
+  const C_PSER=CS_E+1;                    // Promedio SER
+  const CB_S=C_PSER+1, CB_E=CB_S+nSAB-1; // SABER actividades
+  const C_PSAB=CB_E+1;
+  const CH_S=C_PSAB+1, CH_E=CH_S+nHAC-1; // HACER actividades
+  const C_PHAC=CH_E+1;
+  const C_TOT=C_PHAC+1,C_AUTO=C_TOT+1,C_PROM=C_AUTO+1;
+  const C_PF=C_PROM+1,C_LIT=C_PF+1,C_OBS=C_LIT+1;
+  const NCOLS=C_OBS;
+
+  // Anchos
+  ws.getColumn(CA).width=3.6;
+  ws.getColumn(CNS).width=22;
+  ws.getColumn(CNE).width=12;
+  for(let i=CS_S;i<=CS_E;i++) ws.getColumn(i).width=6.7;
+  ws.getColumn(C_PSER).width=7.7;
+  for(let i=CB_S;i<=CB_E;i++) ws.getColumn(i).width=6.7;
+  ws.getColumn(C_PSAB).width=7.7;
+  for(let i=CH_S;i<=CH_E;i++) ws.getColumn(i).width=6.7;
+  ws.getColumn(C_PHAC).width=7.7;
+  ws.getColumn(C_TOT).width=7.7;
+  ws.getColumn(C_AUTO).width=6.7;
+  ws.getColumn(C_PROM).width=9.7;
+  ws.getColumn(C_PF).width=9.7;
+  ws.getColumn(C_LIT).width=17.9;
+  ws.getColumn(C_OBS).width=4.4;
+
+  // === FILA 1: UE ===
+  ws.getRow(1).height=9;
+  mg(1,CA,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICO "FRANZ TAMAYO DE CHACHACOMANI"',WH,fnt(false,8),aln('center','middle'));
+
+  // === FILA 2: vacío ===
+  ws.getRow(2).height=14.25;
+
+  // === FILA 3: CUADRO DE CALIFICACIONES ===
+  ws.getRow(3).height=29.25;
+  sc(3,CA,'CUADRO DE CALIFICACIONES',WH,fnt(true,14,'FF833C00'),aln('left','middle'));
+  mg(3,CNS,C_LIT,'',WH,null,null,false);
+  sc(3,NCOLS,trim==='1'?'1T':trim==='2'?'2T':'3T',WH,fnt(true,11,'FF833C00'),aln('center','middle'));
+
+  // === FILA 4: TRIMESTRE ===
+  ws.getRow(4).height=25.2;
+  mg(4,CA,NCOLS,trimNom[trim],WH,fnt(true,12,'FF833C00'),aln('left','middle'));
+
+  // === FILA 5-6: MAESTR@ + CURSO ===
+  ws.getRow(5).height=15.75;
+  ws.getRow(6).height=14.1;
+  mgBlock(5,6,CA,1,'MAESTR@:',LABEL,fnt(true,10),aln('right','middle'));
+  mgBlock(5,6,CNS,C_LIT,DOCENTE.nombre,WH,fnt(false,10),aln('left','middle'));
+  mgBlock(5,6,C_OBS,C_OBS,'CURSO:',WH,fnt(true,8),aln('center','middle'));
+  // Curso en bloque aparte a la derecha
+  const cursoCelda=ws.getCell(5,NCOLS);
+  cursoCelda.value=curso;
+  cursoCelda.font=fnt(true,12);
+  cursoCelda.alignment=aln('center','middle');
+  cursoCelda.border=allB;
+
+  // === FILA 7: AREA ===
+  ws.getRow(7).height=14.1;
+  mg(7,CA,1,'AREA:',LABEL,fnt(true,10),aln('right','middle'));
+  mg(7,CNS,NCOLS,materia.toUpperCase(),WH,fnt(false,10),aln('left','middle'));
+
+  // === FILA 8: vacío separador ===
+  ws.getRow(8).height=21.75;
+
+  // === FILA 9: ENCABEZADOS PRINCIPALES ===
+  ws.getRow(9).height=13.5;
+  mgBlock(9,10,CA,CA,'No.',WH,fnt(false,9),aln('center','middle'));
+  mgBlock(9,10,CNS,CNE,'APELLIDOS Y NOMBRES',WH,fnt(true,10),aln('center','middle'));
+  mg(9,CS_S,C_PSER,'Dimensiones',AMARILLO,fnt(true,10),aln('center','middle'));
+  mgBlock(9,10,C_TOT,C_TOT,'EVAL.\nTOTAL',AMARILLO,fnt(true,9),aln('center','middle',0,true));
+  mgBlock(9,10,C_AUTO,C_AUTO,'AUTO\nEV.',WH,fnt(true,9),aln('center','middle',0,true));
+  mgBlock(9,10,C_PROM,C_PROM,'PROM.\nTRIM.',WH,fnt(true,9),aln('center','middle',0,true));
+  mgBlock(9,10,C_PF,C_PF,'PROM.\nTRIM.\nFINAL',VERDE,fnt(true,8,'FFFFFFFF'),aln('center','middle',0,true));
+  mgBlock(9,10,C_LIT,C_LIT,'LITERAL',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  mgBlock(9,10,C_OBS,C_OBS,'OBS.',WH,fnt(true,8),aln('center','middle',0,true));
+
+  // === FILA 10: SER / SABER / HACER ===
+  ws.getRow(10).height=27.75;
+  mg(10,CS_S,C_PSER,'Ser',SER_BG,fnt(true,9),aln('center','middle'));
+  mg(10,CB_S,C_PSAB,'Saber',SAB_BG,fnt(true,9),aln('center','middle'));
+  mg(10,CH_S,C_PHAC,'Hacer',HAC_BG,fnt(true,9),aln('center','middle'));
+
+  // === MÍNIMO 40 FILAS DE ESTUDIANTES (fila 11 a 50) ===
+  const FILA_INICIO=11;
+  const MIN_FILAS=40;
+
+  for(let i=0;i<MIN_FILAS;i++){
+    const row=FILA_INICIO+i;
+    ws.getRow(row).height=17.1;
+    const est=ESTUDIANTES[i]||null;
+    const bg=i%2===0?WH:GR;
+
+    // Nº
+    sc(row,CA,est?i+1:'',bg,fnt(false,10),aln('center','middle'));
+    // Nombre
+    mg(row,CNS,CNE,est?est.nombre:'',bg,fnt(false,10),aln('left','middle'));
+
+    if(est){
+      // Calcular promedios
+      function prom(acts){
+        if(!acts.length)return null;
+        const hay=acts.some(a=>NOTAS[est.id]?.[a.id]!==undefined&&NOTAS[est.id]?.[a.id]!==''&&!isNaN(parseFloat(NOTAS[est.id]?.[a.id])));
+        if(!hay)return null;
+        const suma=acts.reduce((s,a)=>{const n=NOTAS[est.id]?.[a.id];return s+(n!==undefined&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);},0);
+        return suma/acts.length;
+      }
+      const pSer=prom(serActs);
+      const pSab=prom(sabActs);
+      const pHac=prom(hacActs);
+      const pSabConv=pSab!==null?Math.round(pSab*0.45):null;
+      const pHacConv=pHac!==null?Math.round(pHac*0.40):null;
+      const auto=AUTOEVALS[est.id]!==undefined?AUTOEVALS[est.id]:null;
+      const evalTot=(pSer!==null||pSabConv!==null||pHacConv!==null)?
+        Math.round((pSer||0)+(pSabConv||0)+(pHacConv||0)):null;
+      const promFinal=evalTot!==null?Math.round(evalTot+(auto||0)):null;
+
+      // SER actividades
+      serActs.forEach((a,j)=>{const n=NOTAS[est.id]?.[a.id];sc(row,CS_S+j,n!==undefined&&n!==''?n:'',SER_BG,fnt(false,9),aln('center','middle'));});
+      for(let j=serActs.length;j<nSER;j++) sc(row,CS_S+j,'',SER_BG,null,aln('center','middle'));
+      sc(row,C_PSER,pSer!==null?Math.round(pSer):'',SER_MED,fnt(true,10),aln('center','middle'));
+
+      // SABER actividades
+      sabActs.forEach((a,j)=>{const n=NOTAS[est.id]?.[a.id];sc(row,CB_S+j,n!==undefined&&n!==''?n:'',SAB_BG,fnt(false,9),aln('center','middle'));});
+      for(let j=sabActs.length;j<nSAB;j++) sc(row,CB_S+j,'',SAB_BG,null,aln('center','middle'));
+      sc(row,C_PSAB,pSabConv!==null?pSabConv:'',SAB_MED,fnt(true,10),aln('center','middle'));
+
+      // HACER actividades
+      hacActs.forEach((a,j)=>{const n=NOTAS[est.id]?.[a.id];sc(row,CH_S+j,n!==undefined&&n!==''?n:'',HAC_BG,fnt(false,9),aln('center','middle'));});
+      for(let j=hacActs.length;j<nHAC;j++) sc(row,CH_S+j,'',HAC_BG,null,aln('center','middle'));
+      sc(row,C_PHAC,pHacConv!==null?pHacConv:'',HAC_MED,fnt(true,10),aln('center','middle'));
+
+      // Totales
+      sc(row,C_TOT,evalTot!==null?evalTot:'',TOTAL,fnt(true,11),aln('center','middle'));
+      sc(row,C_AUTO,auto!==null?auto:'',AUTO,fnt(true,11),aln('center','middle'));
+      sc(row,C_PROM,promFinal!==null?promFinal:'',PROM,fnt(true,11),aln('center','middle'));
+      sc(row,C_PF,promFinal!==null?promFinal:'',VERDE,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
+
+      // Literal (escala boliviana)
+      const scala=promFinal!==null?getLiteral(promFinal):'';
+      sc(row,C_LIT,scala,WH,fnt(false,8),aln('center','middle'));
+
+      // Estado
+      let estado='',estBg=WH;
+      if(promFinal!==null){estado=promFinal>=51?'APROBADO':'REPROBADO';estBg=promFinal>=51?APROB:REPRO;}
+      sc(row,C_OBS,estado,estBg,fnt(true,7,promFinal>=51?'FF065F46':'FF991B1B'),aln('center','middle',0,true));
+    } else {
+      // Fila vacía con colores de dimensiones
+      for(let j=0;j<nSER;j++) sc(row,CS_S+j,'',SER_BG,null,aln('center','middle'));
+      sc(row,C_PSER,'',SER_MED,null,null);
+      for(let j=0;j<nSAB;j++) sc(row,CB_S+j,'',SAB_BG,null,aln('center','middle'));
+      sc(row,C_PSAB,'',SAB_MED,null,null);
+      for(let j=0;j<nHAC;j++) sc(row,CH_S+j,'',HAC_BG,null,aln('center','middle'));
+      sc(row,C_PHAC,'',HAC_MED,null,null);
+      sc(row,C_TOT,'',TOTAL,null,null);
+      sc(row,C_AUTO,'',AUTO,null,null);
+      sc(row,C_PROM,'',PROM,null,null);
+      sc(row,C_PF,'','FF46E281',null,null);
+      sc(row,C_LIT,'',WH,null,null);
+      sc(row,C_OBS,'',WH,null,null);
+    }
+  }
+
+  // === ESTADÍSTICAS AL FINAL ===
+  const rowStat=FILA_INICIO+MIN_FILAS+1;
+  ws.getRow(rowStat).height=14;
+  const lastDataRow=FILA_INICIO+MIN_FILAS-1; // fila 50
+
+  const totalEst=ESTUDIANTES.length;
+  const aprobados=ESTUDIANTES.filter(e=>{
+    const serA=ACTIVIDADES.filter(a=>a.dimension==='SER'&&String(a.trimestre)===String(trim));
+    const sabA=ACTIVIDADES.filter(a=>a.dimension==='SABER'&&String(a.trimestre)===String(trim));
+    const hacA=ACTIVIDADES.filter(a=>a.dimension==='HACER'&&String(a.trimestre)===String(trim));
+    function pr(acts){if(!acts.length)return null;const hay=acts.some(a=>NOTAS[e.id]?.[a.id]!==undefined&&NOTAS[e.id]?.[a.id]!=='');if(!hay)return null;const s=acts.reduce((s,a)=>{const n=NOTAS[e.id]?.[a.id];return s+(n!==undefined&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);},0);return s/acts.length;}
+    const pS=pr(serA),pB=pr(sabA),pH=pr(hacA);
+    const auto=AUTOEVALS[e.id]||0;
+    const tot=Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto);
+    return tot>=51;
+  }).length;
+  const reprobados=totalEst-aprobados;
+
+  // Tabla estadística
+  const statData=[
+    ['ESTADISTICA','2DO. TRIM.'],
+    ['TOTAL ESTUDIANTES',totalEst],
+    ['EFECTIVOS',totalEst],
+    ['APROBADOS',aprobados],
+    ['REPROBADOS',reprobados],
+    ['RETIRADOS',0],
+  ];
+
+  statData.forEach((fila,idx)=>{
+    const r=rowStat+idx;
+    ws.getRow(r).height=13;
+    mg(r,Math.floor(NCOLS/2),C_LIT-1,fila[0],idx===0?AZ:GR,fnt(idx===0,9,idx===0?'FFFFFFFF':'FF374151'),aln('left','middle'));
+    sc(r,C_LIT,fila[1],idx===0?AZ:WH,fnt(true,10,idx===0?'FFFFFFFF':'FF1A3A6B'),aln('center','middle'));
+  });
+
+  // FECHA Y FIRMA
+  const rowFecha=rowStat+statData.length+1;
+  ws.getRow(rowFecha).height=13;
+  mg(rowFecha,CA,2,'FECHA:',WH,fnt(false,9),aln('right','middle'));
+  mg(rowFecha,3,C_LIT,'Chachacomani,   '+new Date().toLocaleDateString('es-BO',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),WH,fnt(false,9),aln('left','middle'));
+  ws.getRow(rowFecha+2).height=15;
+  mg(rowFecha+2,CA,3,'FIRMA / SELLO',WH,fnt(false,8,'FF64748B'),aln('center','middle'));
+
+  ws.pageSetup.printArea='A1:'+colL(NCOLS)+(rowFecha+3);
+  ws.pageSetup.showGridLines=true;
+  ws.pageSetup.printTitlesRow='1:10';
+}
+
+function getLiteral(nota){
+  if(nota>=91&&nota<=100) return 'Excelente';
+  if(nota>=81&&nota<=90)  return 'Muy Bueno';
+  if(nota>=71&&nota<=80)  return 'Bueno';
+  if(nota>=61&&nota<=70)  return 'Aceptable';
+  if(nota>=51&&nota<=60)  return 'Regular';
+  if(nota>=1&&nota<=50)   return 'Insuficiente';
+  return '';
+}
+
+// ===== HOJA CENTRALIZADOR DE NOTAS =====
+async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,curso,materia,trim,ue,DOCENTE}){
+  function colL(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
+  const trimNom={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
+  const ws=wb.addWorksheet('Cent.'+trim+'er TRIM');
+  ws.pageSetup.orientation='landscape';
+  ws.pageSetup.paperSize=1;
+  ws.pageSetup.scale=80;
+  ws.pageSetup.fitToPage=false;
+  ws.pageSetup.margins={left:0.2,right:0,top:0.39,bottom:0,header:0.12,footer:0.12};
+  ws.headerFooter={oddHeader:'',oddFooter:''};
+
+  const brd={style:'thin',color:{argb:'FF000000'}};
+  const allB={top:brd,left:brd,bottom:brd,right:brd};
+  function fill(a){return{type:'pattern',pattern:'solid',fgColor:{argb:a}};}
+  function fnt(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
+  function aln(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
+  function sc(r,col,val,bg,fn,al,borde=true){
+    const cell=ws.getCell(r,col);
+    if(val!==null&&val!==undefined)cell.value=val;
+    if(bg)cell.fill=fill(bg);
+    if(fn)cell.font=fn;
+    if(al)cell.alignment=al;
+    if(borde)cell.border=allB;
+    return cell;
+  }
+  function mg(r,c1,c2,val,bg,fn,al){
+    if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
+    return sc(r,c1,val,bg,fn,al);
+  }
+
+  const AZ='FF1A3A6B',AM='FF2563EB',WH='FFFFFFFF',GR='FFF1F5F9';
+  const LA='FFF2CF50',ROJO='FFDC2626',VERDE='FF059669';
+
+  // Lista de todas las materias/campos del Ministerio
+  const CAMPOS=[
+    {campo:'COMUNIDAD Y SOCIEDAD', materias:[
+      'Comunicación y Lenguajes: Lengua Castellana y Originaria',
+      'Lengua Extranjera','Ciencias Sociales','Educación Física y Deportes',
+      'Educación Musical','Artes Plásticas y Visuales'
+    ]},
+    {campo:'CIENCIA TECNOLOGÍA Y PRODUCCIÓN', materias:[
+      'Matemática','Técnica Tecnológica','Técnica Tecnológica Especializada'
+    ]},
+    {campo:'VIDA TIERRA Y TERRITORIO', materias:[
+      'Ciencias Naturales','Ciencias Naturales: Biología - Geografía',
+      'Ciencias Naturales: Física','Ciencias Naturales: Química'
+    ]},
+    {campo:'COSMOS Y PENSAMIENTO', materias:[
+      'Cosmovisiones, Filosofía y Sicología','Valores, Espiritualidad y Religiones'
+    ]},
+  ];
+
+  // Construir lista de materias como columnas (una columna por materia)
+  const todasMaterias=CAMPOS.flatMap(c=>c.materias);
+
+  // Columnas: B=Nº, C-D=Nombre, E=Nivel, F=Sexo, G..=materias, luego PROM, OBS
+  const CB=2,CNS=3,CNE=4,CNIV=5,CSEX=6;
+  const CM_S=7; // inicio materias
+  const CM_E=CM_S+todasMaterias.length-1;
+  const C_PROM=CM_E+1,C_PROM2=C_PROM+1,C_OBS=C_PROM2+1;
+  const NCOLS=C_OBS;
+
+  // Anchos
+  ws.getColumn(1).width=0.7;
+  ws.getColumn(CB).width=3.7;
+  ws.getColumn(CNS).width=16;
+  ws.getColumn(CNE).width=11.4;
+  ws.getColumn(CNIV).width=6.1;
+  ws.getColumn(CSEX).width=3.4;
+  for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=2.7;
+  ws.getColumn(C_PROM).width=4;
+  ws.getColumn(C_PROM2).width=4;
+  ws.getColumn(C_OBS).width=2.3;
+
+  // === FILAS ENCABEZADO ===
+  ws.getRow(1).height=15.6;
+  mg(1,CB,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICO "FRANZ TAMAYO DE CHACHACOMANI"',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
+
+  ws.getRow(2).height=17.4;
+  mg(2,CB,NCOLS,'CENTRALIZADOR DE NOTAS '+new Date().getFullYear(),AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
+
+  ws.getRow(3).height=18;
+  mg(3,CB,NCOLS,trimNom[trim],AZ,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
+
+  ws.getRow(4).height=15;
+  mg(4,CB,3,'DISTRITO:',LA,fnt(true,9),aln('right','middle'));
+  mg(4,4,CNIV,'Batallas',WH,fnt(false,9),aln('left','middle'));
+  mg(4,CSEX,C_PROM2,'AÑO DE ESCOLARIDAD: '+curso,LA,fnt(true,9),aln('center','middle'));
+
+  ws.getRow(5).height=15;
+  mg(5,CB,3,'PROFESOR(A):',LA,fnt(true,9),aln('right','middle'));
+  mg(5,4,CNIV,DOCENTE.nombre,WH,fnt(false,9),aln('left','middle'));
+  mg(5,CSEX,C_PROM2,'NIVEL: Educación Secundaria Comunitaria Productiva',LA,fnt(true,8),aln('center','middle'));
+
+  // === FILA 6: NÚMERO/NOMBRE + CAMPOS GENERALES ===
+  ws.getRow(6).height=15.6;
+  mg(6,CB,1,'NUMERO',AZ,fnt(true,8,'FFFFFFFF'),aln('center','middle'));
+  mg(6,CNS,CNE,'APELLIDOS   Y   NOMBRES',AZ,fnt(true,8,'FFFFFFFF'),aln('center','middle'));
+  mg(6,CNIV,CSEX,'',AZ,null,null);
+  mg(6,CM_S,NCOLS,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+
+  // === FILA 7: sub-campos ===
+  ws.getRow(7).height=15.75;
+  // Comunidad y Sociedad: cols CM_S a CM_S+5
+  mg(7,CM_S,CM_S+5,'COMUNIDAD Y SOCIEDAD',AM,fnt(true,7,'FFFFFFFF'),aln('center','middle'));
+  // C.Tec y Prod: cols CM_S+6 a CM_S+8
+  mg(7,CM_S+6,CM_S+8,'C. TEC. Y PRODUCCION',AM,fnt(true,7,'FFFFFFFF'),aln('center','middle'));
+  // Vida Tierra: cols CM_S+9 a CM_S+12
+  mg(7,CM_S+9,CM_S+12,'VIDA TIERRA Y TERRITORIO',AM,fnt(true,7,'FFFFFFFF'),aln('center','middle'));
+  // Cosmos: cols CM_S+13 a CM_S+14
+  mg(7,CM_S+13,CM_S+14,'COSMOS Y PENSAMIENTO',AM,fnt(true,7,'FFFFFFFF'),aln('center','middle'));
+  sc(7,C_PROM,'',AZ,null,null);
+  sc(7,C_PROM2,'',AZ,null,null);
+  sc(7,C_OBS,'',AZ,null,null);
+
+  // === FILA 8: materias rotadas 90° ===
+  ws.getRow(8).height=93.75;
+  sc(8,CB,'',AZ,null,aln('center','bottom'));
+  mg(8,CNS,CNE,'',AZ,null,null);
+  sc(8,CNIV,'SEXO',AZ,fnt(true,8,'FFFFFFFF'),aln('center','bottom',90,false));
+  sc(8,CSEX,'',AZ,null,null);
+  todasMaterias.forEach((mat,i)=>{
+    const col=CM_S+i;
+    // Resaltar la materia actual del docente
+    const esActual=mat.toLowerCase()===materia.toLowerCase();
+    sc(8,col,mat,esActual?AM:AZ,fnt(esActual,7,'FFFFFFFF'),aln('center','bottom',90,false));
+  });
+  sc(8,C_PROM,'PROMEDIO',AZ,fnt(true,7,'FFFFFFFF'),aln('center','bottom',90,false));
+  sc(8,C_PROM2,'PROMEDIO',AZ,fnt(true,7,'FFFFFFFF'),aln('center','bottom',90,false));
+  sc(8,C_OBS,'OBS.',AZ,fnt(true,7,'FFFFFFFF'),aln('center','bottom',90,false));
+
+  // === FILAS ESTUDIANTES (mínimo 40) ===
+  const MIN_FILAS=40;
+  const idxMateria=todasMaterias.findIndex(m=>m.toLowerCase()===materia.toLowerCase());
+
+  for(let i=0;i<MIN_FILAS;i++){
+    const row=9+i;
+    ws.getRow(row).height=15;
+    const est=ESTUDIANTES[i]||null;
+    const bg=i%2===0?WH:GR;
+
+    sc(row,CB,est?i+1:'',bg,fnt(false,8),aln('center','middle'));
+    mg(row,CNS,CNE,est?est.nombre:'',bg,fnt(false,8),aln('left','middle'));
+    sc(row,CNIV,'4TO',bg,fnt(false,7),aln('center','middle'));
+    sc(row,CSEX,'',bg,null,aln('center','middle'));
+
+    // Columnas de materias — solo llenar la materia del docente actual
+    for(let j=0;j<todasMaterias.length;j++){
+      const col=CM_S+j;
+      const esActual=j===idxMateria;
+      if(est&&esActual){
+        // Calcular promedio final del estudiante para esta materia
+        const serA=ACTIVIDADES.filter(a=>a.dimension==='SER'&&String(a.trimestre)===String(trim));
+        const sabA=ACTIVIDADES.filter(a=>a.dimension==='SABER'&&String(a.trimestre)===String(trim));
+        const hacA=ACTIVIDADES.filter(a=>a.dimension==='HACER'&&String(a.trimestre)===String(trim));
+        function pr(acts){if(!acts.length)return null;const hay=acts.some(a=>NOTAS[est.id]?.[a.id]!==undefined&&NOTAS[est.id]?.[a.id]!=='');if(!hay)return null;const s=acts.reduce((s,a)=>{const n=NOTAS[est.id]?.[a.id];return s+(n!==undefined&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);},0);return s/acts.length;}
+        const pS=pr(serA),pB=pr(sabA),pH=pr(hacA);
+        const auto=AUTOEVALS[est.id]||0;
+        const tot=pS!==null||pB!==null||pH!==null?Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto):null;
+        const bgCelda=tot!==null&&tot<51?'FFFFC7CE':esActual?'FFFFE699':bg;
+        sc(row,col,tot!==null?tot:'',bgCelda,fnt(true,8,tot!==null&&tot<51?ROJO:'FF000000'),aln('center','middle'));
+      } else {
+        sc(row,col,'',bg,null,aln('center','middle'));
+      }
+    }
+
+    sc(row,C_PROM,'',bg,null,aln('center','middle'));
+    sc(row,C_PROM2,'',bg,null,aln('center','middle'));
+    sc(row,C_OBS,'',bg,null,aln('center','middle'));
+  }
+
+  // === FILA PROMEDIO DE APROVECHAMIENTO ===
+  const rowProm=9+MIN_FILAS;
+  ws.getRow(rowProm).height=15;
+  mg(rowProm,CB,CNE,'PROMEDIO DE APROVECHAMIENTO',LA,fnt(true,8),aln('center','middle'));
+  sc(rowProm,CNIV,'',LA,null,null);
+  sc(rowProm,CSEX,'',LA,null,null);
+  // Promedio de la materia actual
+  if(idxMateria>=0){
+    const col=CM_S+idxMateria;
+    const promats=ESTUDIANTES.map(e=>{
+      const serA=ACTIVIDADES.filter(a=>a.dimension==='SER'&&String(a.trimestre)===String(trim));
+      const sabA=ACTIVIDADES.filter(a=>a.dimension==='SABER'&&String(a.trimestre)===String(trim));
+      const hacA=ACTIVIDADES.filter(a=>a.dimension==='HACER'&&String(a.trimestre)===String(trim));
+      function pr(acts){if(!acts.length)return null;const hay=acts.some(a=>NOTAS[e.id]?.[a.id]!==undefined&&NOTAS[e.id]?.[a.id]!=='');if(!hay)return null;const s=acts.reduce((s,a)=>{const n=NOTAS[e.id]?.[a.id];return s+(n!==undefined&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);},0);return s/acts.length;}
+      const pS=pr(serA),pB=pr(sabA),pH=pr(hacA);
+      const auto=AUTOEVALS[e.id]||0;
+      return pS!==null||pB!==null||pH!==null?Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto):null;
+    }).filter(v=>v!==null);
+    const promedio=promats.length?Math.round(promats.reduce((a,b)=>a+b,0)/promats.length):0;
+    sc(rowProm,col,promedio,LA,fnt(true,8),aln('center','middle'));
+  }
+  for(let j=0;j<todasMaterias.length;j++){
+    if(j!==idxMateria) sc(rowProm,CM_S+j,0,LA,fnt(false,8),aln('center','middle'));
+  }
+  sc(rowProm,C_PROM,'',LA,null,null);
+  sc(rowProm,C_PROM2,'',LA,null,null);
+  sc(rowProm,C_OBS,'',LA,null,null);
+
+  ws.pageSetup.printArea='B1:'+colL(NCOLS)+(rowProm+2);
+  ws.pageSetup.showGridLines=true;
+}
+
+// ===== INICIAR =====
+init();
 </script>
 </body>
 </html>
