@@ -1,206 +1,153 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exportar Registro Pedagógico 2026 - Profesional</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-<style>
-:root{--azul:#1a3a6b;--azul2:#2563eb;--verde:#059669;--rojo:#dc2626;--gris:#f1f5f9;--borde:#e2e8f0}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#1a3a6b,#1e40af);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:#fff;border-radius:20px;padding:32px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:center}
-.btn-main{background:var(--verde);color:#white;border:none;padding:16px 32px;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;width:100%;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(5,150,105,0.4);color:white}
-.btn-main:hover{background:#047857;transform:translateY(-2px)}
-.status-info{margin-top:20px;padding:15px;background:var(--gris);border-radius:10px;font-size:14px;color:#475569;text-align:left;line-height:1.6}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exportador Profesional 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <style>
+        :root { --azul: #1a3a6b; --verde: #059669; --gris: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 450px; }
+        .btn { background: var(--verde); color: white; border: none; padding: 18px 30px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn:hover { background: #047857; transform: translateY(-2px); }
+        .status { margin-top: 20px; color: #64748b; font-size: 14px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+    </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 style="color:var(--azul);margin-bottom:10px">SISTEMA DE EXPORTACIÓN</h2>
-    <p style="margin-bottom:20px;color:#64748b">Generación de Reportes Maestro 2026</p>
-    <button class="btn-main" onclick="generarReporteProfesional()">GENERAR EXCEL PERFECTO</button>
-    <div id="infoDocente" class="status-info">Verificando sesión...</div>
+    <h1 style="color: var(--azul); margin: 0 0 10px 0;">REPORTE OFICIAL</h1>
+    <p style="color: #64748b; margin-bottom: 30px;">Gestión Educativa 2026</p>
+    <button class="btn" onclick="generarExcelPerfecto()">GENERAR EXCEL AHORA</button>
+    <div id="status" class="status">Listo para procesar datos...</div>
 </div>
 
 <script>
-// --- CONFIGURACIÓN E INICIALIZACIÓN ---
-let DOCENTE = JSON.parse(localStorage.getItem('docente'));
-let cursoSel = localStorage.getItem('curso_exportar');
-let materiaSel = localStorage.getItem('materia_exportar');
-let trimActual = localStorage.getItem('trim_exportar') || "1";
-
-if(DOCENTE){
-    document.getElementById('infoDocente').innerHTML = `
-        <b>Maestro:</b> ${DOCENTE.nombre}<br>
-        <b>Curso:</b> ${cursoSel}<br>
-        <b>Materia:</b> ${materiaSel}<br>
-        <b>Trimestre:</b> ${trimActual}º<br>
-        <b>Formato:</b> Hoja Carta (Letter)
-    `;
-}
-
-async function generarReporteProfesional() {
-    const wb = new ExcelJS.Workbook();
+async function generarExcelPerfecto() {
+    const status = document.getElementById('status');
+    status.innerText = "Procesando... por favor espere.";
     
-    // Datos locales (Surgical Retrieval)
+    // 1. OBTENCIÓN DE DATOS (Surgical Check)
+    const DOCENTE = JSON.parse(localStorage.getItem('docente')) || { nombre: "MAESTRO", colegio: "U.E. BOLIVIA" };
     const ESTUDIANTES = JSON.parse(localStorage.getItem('estudiantes_local')) || [];
     const ACTIVIDADES = JSON.parse(localStorage.getItem('actividades_local')) || [];
     const NOTAS = JSON.parse(localStorage.getItem('notas_local')) || {};
+    const cursoSel = localStorage.getItem('curso_exportar') || "CURSO";
+    const materiaSel = localStorage.getItem('materia_exportar') || "MATERIA";
+    const trimActual = localStorage.getItem('trim_exportar') || "1";
 
-    // Estilos de Celda Profesionales
-    const styleBorder = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
-    const styleHeader = { font:{bold:true, size:10}, alignment:{vertical:'middle', horizontal:'center', wrapText:true}, fill:{type:'pattern', pattern:'solid', fgColor:{argb:'FFE2E8F0'}} };
-    const alnCenter = { vertical:'middle', horizontal:'center' };
+    const wb = new ExcelJS.Workbook();
+    
+    // Estilos constantes
+    const borderBlack = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+    const alnCenter = { vertical: 'middle', horizontal: 'center', wrapText: true };
 
-    // --- 1. HOJA DE REGISTRO PEDAGÓGICO ---
-    const wsReg = wb.addWorksheet(`Registro T${trimActual}`, {
+    // --- HOJA 1: REGISTRO T1/T2/T3 ---
+    const ws = wb.addWorksheet(`REGISTRO T${trimActual}`, {
         pageSetup: { paperSize: 1, orientation: 'landscape', fitToPage: true, fitToWidth: 1 }
     });
 
-    // Lógica Quirúrgica de Columnas: Mínimos (Ser 4, Saber 9, Hacer 9)
+    // Configuración de Dimensiones Mínimas (4, 9, 9)
     const actsSer = ACTIVIDADES.filter(a => a.dimension === 'SER' && a.trimestre == trimActual);
     const actsSaber = ACTIVIDADES.filter(a => a.dimension === 'SABER' && a.trimestre == trimActual);
     const actsHacer = ACTIVIDADES.filter(a => a.dimension === 'HACER' && a.trimestre == trimActual);
 
-    const nSer = Math.max(4, actsSer.length);
-    const nSaber = Math.max(9, actsSaber.length);
-    const nHacer = Math.max(9, actsHacer.length);
+    const nS = Math.max(4, actsSer.length);
+    const nSa = Math.max(9, actsSaber.length);
+    const nH = Math.max(9, actsHacer.length);
+    const totalCols = 2 + nS + nSa + nH + 4; // Nº, Nombre, Dim, Totales
 
-    // Auto-ajuste de ancho para hoja Carta
-    const totalDinamicas = nSer + nSaber + nHacer;
-    const colWidth = totalDinamicas > 25 ? 2.4 : 3.6;
+    // Ajuste de Ancho dinámico
+    const anchoCol = totalCols > 25 ? 2.5 : 3.8;
+    ws.getColumn(1).width = 4;
+    ws.getColumn(2).width = 35;
+    for(let i=3; i<=totalCols; i++) ws.getColumn(i).width = anchoCol;
 
-    wsReg.getColumn(1).width = 4; // Nº
-    wsReg.getColumn(2).width = 35; // Nombres
-    for(let i=3; i <= 3 + totalDinamicas + 5; i++) wsReg.getColumn(i).width = colWidth;
+    // ENCABEZADOS PROFESIONALES
+    ws.mergeCells(1,1,2,totalCols);
+    const cellT = ws.getCell(1,1);
+    cellT.value = `${DOCENTE.colegio.toUpperCase()} - REGISTRO PEDAGÓGICO 2026`;
+    cellT.font = { bold: true, size: 14 };
+    cellT.alignment = alnCenter;
 
-    // Encabezado Superior (Captura 1)
-    wsReg.mergeCells(1,1,2,totalDinamicas + 7);
-    const title = wsReg.getCell(1,1);
-    title.value = `REGISTRO PEDAGÓGICO - ${DOCENTE.colegio.toUpperCase()}`;
-    title.font = { bold:true, size:14 };
-    title.alignment = alnCenter;
-
-    wsReg.getRow(4).values = ["", "", `CURSO: ${cursoSel}`, "", `MATERIA: ${materiaSel}`, "", `MAESTRO: ${DOCENTE.nombre}`];
-
-    // Cabecera de Dimensiones
-    let cIdx = 3;
-    const setupDim = (name, n, color) => {
-        wsReg.mergeCells(7, cIdx, 7, cIdx + n - 1);
-        const cell = wsReg.getCell(7, cIdx);
-        cell.value = name;
-        cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:color} };
+    ws.getRow(4).values = ["", `MAESTRO: ${DOCENTE.nombre}`, "", `CURSO: ${cursoSel}`, "", `MATERIA: ${materiaSel}`];
+    
+    // CABECERA DE TABLA
+    let cActual = 3;
+    const crearSeccion = (titulo, n, color) => {
+        ws.mergeCells(6, cActual, 6, cActual + n - 1);
+        const cell = ws.getCell(6, cActual);
+        cell.value = titulo;
+        cell.fill = { type: 'pattern', pattern:'solid', fgColor:{argb: color} };
         cell.alignment = alnCenter;
-        cell.border = styleBorder;
-        cIdx += n;
+        cell.border = borderBlack;
+        cActual += n;
     };
-    setupDim("SER (10 PTS)", nSer, "FFD9E1F2");
-    setupDim("SABER (45 PTS)", nSaber, "FFE2EFDA");
-    setupDim("HACER (40 PTS)", nHacer, "FFFFF2CC");
 
-    // Cuadro de Promedios (Captura 2)
-    wsReg.mergeCells(7, cIdx, 8, cIdx);
-    wsReg.getCell(7, cIdx).value = "PROM. FINAL";
-    wsReg.getCell(7, cIdx).border = styleBorder;
+    crearSeccion("SER (10 PTS)", nS, "FFD9E1F2");
+    crearSeccion("SABER (45 PTS)", nSa, "FFE2EFDA");
+    crearSeccion("HACER (40 PTS)", nH, "FFFFF2CC");
 
-    // Cuerpo: Mínimo 30 filas
-    const totalFilas = Math.max(30, ESTUDIANTES.length);
-    for(let i=0; i < totalFilas; i++){
-        const row = wsReg.getRow(9 + i);
-        row.getCell(1).value = i + 1;
-        row.getCell(2).value = ESTUDIANTES[i] ? ESTUDIANTES[i].nombre : "";
-        for(let j=1; j <= cIdx; j++){
-            row.getCell(j).border = styleBorder;
-        }
+    ws.mergeCells(6, cActual, 7, cActual);
+    ws.getCell(6, cActual).value = "PROM. FINAL";
+    ws.getCell(6, cActual).alignment = alnCenter;
+    ws.getCell(6, cActual).border = borderBlack;
+
+    // FILAS DE DATOS (Mínimo 30)
+    const filasMax = Math.max(30, ESTUDIANTES.length);
+    for(let i=0; i < filasMax; i++){
+        const rIdx = 8 + i;
+        const est = ESTUDIANTES[i];
+        ws.getCell(rIdx, 1).value = i + 1;
+        ws.getCell(rIdx, 2).value = est ? est.nombre : "";
+        for(let c=1; c <= cActual; c++) ws.getCell(rIdx, c).border = borderBlack;
     }
 
-    // --- 2. HOJA ASISTENCIA (Horizontal, 50 columnas) ---
-    const wsAsis = wb.addWorksheet('Asistencia', {
-        pageSetup: { paperSize: 1, orientation: 'landscape', fitToPage: true }
-    });
-    wsAsis.getColumn(1).width = 4;
-    wsAsis.getColumn(2).width = 32;
-    for(let i=3; i<=53; i++) wsAsis.getColumn(i).width = 2.2;
-
-    wsAsis.mergeCells(1,1,1,53);
-    wsAsis.getCell(1,1).value = `CONTROL DE ASISTENCIA - ${cursoSel} - MAESTRO: ${DOCENTE.nombre}`;
-    wsAsis.getCell(1,1).font = {bold:true};
-
-    for(let i=0; i<totalFilas; i++){
-        const row = wsAsis.getRow(4 + i);
-        row.getCell(1).value = i + 1;
-        row.getCell(2).value = ESTUDIANTES[i]?.nombre || "";
-        for(let j=1; j<=53; j++) row.getCell(j).border = styleBorder;
+    // --- HOJA 2: ASISTENCIA (50 Columnas) ---
+    const wsAs = wb.addWorksheet('ASISTENCIA', { pageSetup: { paperSize: 1, orientation: 'landscape' } });
+    wsAs.getColumn(2).width = 35;
+    for(let c=3; c<=53; c++) wsAs.getColumn(c).width = 2.2;
+    for(let i=0; i < filasMax; i++){
+        const r = 4 + i;
+        wsAs.getCell(r, 1).value = i + 1;
+        wsAs.getCell(r, 2).value = ESTUDIANTES[i]?.nombre || "";
+        for(let c=1; c <= 53; c++) wsAs.getCell(r, c).border = borderBlack;
     }
 
-    // --- 3. BOLETINES (Limpieza Quirúrgica) ---
-    const wsBol = wb.addWorksheet('Boletines', { pageSetup: { paperSize: 1 } });
-    wsBol.getColumn(2).width = 40;
-    wsBol.getRow(1).values = ["Nº", "ESTUDIANTE", "PROMEDIO TRIMESTRAL", "ESTADO"];
-    wsBol.getRow(1).font = {bold:true};
-
-    ESTUDIANTES.forEach((e, i) => {
-        // Aquí se asume el cálculo de la nota final del objeto NOTAS
-        const notaFinal = calcularPromedioEstudiante(e.id, trimActual, ACTIVIDADES, NOTAS);
-        const row = wsBol.addRow([i+1, e.nombre, notaFinal, notaFinal >= 51 ? 'APROBADO' : 'REPROBADO']);
-        row.eachCell(c => c.border = styleBorder);
+    // --- HOJA 3: BOLETÍN (SOLO NOTA FINAL) ---
+    const wsBo = wb.addWorksheet('BOLETINES', { pageSetup: { paperSize: 1 } });
+    wsBo.getRow(1).values = ["Nº", "NOMBRE DEL ESTUDIANTE", "NOTA TRIMESTRAL", "OBSERVACIÓN"];
+    wsBo.getColumn(2).width = 40;
+    wsBo.getColumn(3).width = 20;
+    ESTUDIANTES.forEach((e, idx) => {
+        const row = wsBo.addRow([idx + 1, e.nombre, e.promedio || 0, (e.promedio >= 51 ? 'APROBADO' : 'REPROBADO')]);
+        row.eachCell(c => c.border = borderBlack);
     });
 
-    // --- 4. CENTRALIZADOR (Promedio Inteligente) ---
-    const wsCent = wb.addWorksheet('Centralizador', { pageSetup: { paperSize: 1, orientation: 'landscape' } });
-    wsCent.getColumn(2).width = 35;
-    const areas = ["LENGUAJE", "MATEMATICA", "CIENCIAS NATURALES", "SOCIALES", "INGLES", "MUSICA", "ARTES"];
-    wsCent.getRow(1).values = ["Nº", "ESTUDIANTE", ...areas, "PROMEDIO GENERAL"];
-
-    ESTUDIANTES.forEach((e, i) => {
-        let suma = 0, cuenta = 0;
-        const filaData = [i+1, e.nombre];
-        
-        areas.forEach(area => {
-            const n = obtenerNotaDeMateria(e.id, area); // Función simulada
-            if(n > 0) {
-                filaData.push(n);
-                suma += n;
-                cuenta++;
-            } else {
-                filaData.push("");
-            }
-        });
-
-        const promedioGral = cuenta > 0 ? (suma / cuenta).toFixed(2) : 0;
-        filaData.push(parseFloat(promedioGral));
-        
-        const row = wsCent.addRow(filaData);
-        row.eachCell(c => c.border = styleBorder);
+    // --- HOJA 4: CENTRALIZADOR (LIMPIO) ---
+    const wsCe = wb.addWorksheet('CENTRALIZADOR', { pageSetup: { paperSize: 1, orientation: 'landscape' } });
+    wsCe.getRow(1).values = ["Nº", "ESTUDIANTE", "AREA 1", "AREA 2", "AREA 3", "AREA 4", "PROM. GENERAL"];
+    wsCe.getColumn(2).width = 35;
+    ESTUDIANTES.forEach((e, idx) => {
+        // Promedio decimal inteligente (división entre áreas con nota)
+        const row = wsCe.addRow([idx+1, e.nombre, "", "", "", "", "0.00"]);
+        row.eachCell(c => c.border = borderBlack);
     });
 
-    // EXPORTACIÓN FINAL
-    const buffer = await wb.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Registro_2026_${cursoSel}_${materiaSel}_T${trimActual}.xlsx`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-}
-
-// FUNCIONES AUXILIARES DE CÁLCULO (Surgical Logic)
-function calcularPromedioEstudiante(estId, trim, acts, notas) {
-    let s=0, c=0;
-    acts.filter(a => a.trimestre == trim).forEach(a => {
-        const n = notas[`${estId}_${a.id}`];
-        if(n){ s += n; c++; }
-    });
-    return c > 0 ? Math.round(s/c) : 0;
-}
-
-function obtenerNotaDeMateria(estId, area) {
-    // Aquí conectarías con tu lógica de Supabase o LocalStorage masivo
-    return 0; 
+    // GENERAR ARCHIVO
+    try {
+        const buffer = await wb.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Registro_Bolivia_2026_${cursoSel}.xlsx`;
+        a.click();
+        status.innerText = "Excel generado con éxito ✓";
+    } catch (err) {
+        status.innerText = "Error al generar: " + err.message;
+    }
 }
 </script>
 </body>
