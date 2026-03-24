@@ -84,7 +84,7 @@ select:disabled{background:#f8fafc;color:#94a3b8}
   </div>
   <div class="fg">
     <label>Unidad Educativa</label>
-    <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
+    <input type="text" id="inp-ue" value="Unidad Educativa LANDIGITAL">
   </div>
 
   <hr class="divider">
@@ -256,7 +256,7 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
 
   const ws=wb.addWorksheet('Registro 1T',{
     pageSetup:{
-      paperSize:9,
+      paperSize:1,
       orientation:'landscape',
       fitToPage:false,
       scale:65,
@@ -566,8 +566,8 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
   const trimNom={'1':'1ER. TRIMESTRE','2':'2DO. TRIMESTRE','3':'3ER. TRIMESTRE'};
   const ws=wb.addWorksheet('AS.1');
   ws.pageSetup.orientation='landscape';
-  ws.pageSetup.paperSize=9;
-  ws.pageSetup.scale=80;
+  ws.pageSetup.paperSize=1;
+  ws.pageSetup.scale=75;
   ws.pageSetup.fitToPage=false;
   ws.pageSetup.margins={left:0,right:0,top:0.39,bottom:0.2,header:0.12,footer:0.12};
   ws.headerFooter={oddHeader:'',oddFooter:''};
@@ -676,26 +676,39 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
       sc(row,DS+j,est,bgM[est],fnt(true,8,txM[est]),aln('center','middle'));
     });
     for(let j=fechas.length;j<36;j++)sc(row,DS+j,'',i%2===0?WH:GR,null,aln('center','middle'));
-    sc(row,CP,'=IF(COUNTIF($D'+row+':$AM'+row+',"P")=0,"",COUNTIF($D'+row+':$AM'+row+',"P"))',PR,fnt(true,10),aln('center','middle'));
-    sc(row,CL,'=IF(COUNTIF($D'+row+':$AM'+row+',"L")=0,"",COUNTIF($D'+row+':$AM'+row+',"L"))',LC,fnt(true,10),aln('center','middle'));
-    sc(row,CA,'=IF(COUNTIF($D'+row+':$AM'+row+',"A")=0,"",COUNTIF($D'+row+':$AM'+row+',"A"))',AT,fnt(true,10),aln('center','middle'));
-    sc(row,CF,'=IF(COUNTIF($D'+row+':$AM'+row+',"F")=0,"",COUNTIF($D'+row+':$AM'+row+',"F"))',FA,fnt(true,10),aln('center','middle'));
-    sc(row,CT,'=IF($AN'+row+'="","",$AN'+row+')',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
+    // Contar directamente desde los datos ya escritos en memoria (más confiable que COUNTIF en ExcelJS)
+    const cP=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
+    const cL=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='L').length;
+    const cA=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='A').length;
+    const cF=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='F').length;
+    const cTot=cP+cL+cA+cF;
+    sc(row,CP,cP||'',PR,fnt(true,10),aln('center','middle'));
+    sc(row,CL,cL||'',LC,fnt(true,10),aln('center','middle'));
+    sc(row,CA,cA||'',AT,fnt(true,10),aln('center','middle'));
+    sc(row,CF,cF||'',FA,fnt(true,10),aln('center','middle'));
+    sc(row,CT,cTot||'',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
   });
 
-  // Fila totales
+  // Fila totales — sumar directamente desde los datos
   const rt=9+ESTUDIANTES.length;
   ws.getRow(rt).height=17;
   mg(rt,CN,NE,'TOTALES',LA,fnt(true,10),aln('center','middle'));
-  for(let j=0;j<36;j++){
-    const cl=colLetra(DS+j);
-    sc(rt,DS+j,'=COUNTIF('+cl+'9:'+cl+(rt-1)+',"P")','FFD9E1F2',fnt(false,8),aln('center','middle'));
-  }
-  sc(rt,CP,'=SUM(AN9:AN'+(rt-1)+')',PR,fnt(true,10),aln('center','middle'));
-  sc(rt,CL,'=SUM(AO9:AO'+(rt-1)+')',LC,fnt(true,10),aln('center','middle'));
-  sc(rt,CA,'=SUM(AP9:AP'+(rt-1)+')',AT,fnt(true,10),aln('center','middle'));
-  sc(rt,CF,'=SUM(AQ9:AQ'+(rt-1)+')',FA,fnt(true,10),aln('center','middle'));
-  sc(rt,CT,'=SUM(AR9:AR'+(rt-1)+')',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
+  // Contar P por cada columna de fecha
+  fechas.forEach((f,j)=>{
+    const cPcol=ESTUDIANTES.filter(e=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
+    sc(rt,DS+j,cPcol||'','FFD9E1F2',fnt(false,8),aln('center','middle'));
+  });
+  for(let j=fechas.length;j<36;j++) sc(rt,DS+j,'',GR,null,aln('center','middle'));
+  // Totales generales P/L/A/F
+  const totP=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length,0);
+  const totL=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='L').length,0);
+  const totA=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='A').length,0);
+  const totF=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='F').length,0);
+  sc(rt,CP,totP||'',PR,fnt(true,10),aln('center','middle'));
+  sc(rt,CL,totL||'',LC,fnt(true,10),aln('center','middle'));
+  sc(rt,CA,totA||'',AT,fnt(true,10),aln('center','middle'));
+  sc(rt,CF,totF||'',FA,fnt(true,10),aln('center','middle'));
+  sc(rt,CT,(totP+totL+totA+totF)||'',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
 
   ws.pageSetup.printArea='A1:'+colLetra(CT)+(rt+2);
   ws.pageSetup.showGridLines=true;
