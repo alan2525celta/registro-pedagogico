@@ -953,7 +953,7 @@ async function confirmarImport(){
   let cnt=0;
   for(const e of importData){
     if(!e.nombre) continue;
-    const obj={id:'E_'+Date.now()+'_'+cnt,id_docente:DOCENTE.id,nombre:e.nombre,codigo_rude:e.rude,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha_nac:e.fecha};
+    const obj={id:'E_'+Date.now()+'_'+cnt+'_'+Math.floor(Math.random()*9999),id_docente:DOCENTE.id,nombre:e.nombre,codigo_rude:e.rude,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha_nac:e.fecha};
     await sbUpsert('estudiantes',obj);
     ESTUDIANTES.push(obj);
     cnt++;
@@ -1089,7 +1089,7 @@ async function renderAsistResumen(){
   if(isOnline){ try{ const {data}=await sb.from('asistencia').select('*').eq('id_docente',DOCENTE.id); if(data) saveLocalAll('asistencia',data); }catch(e){} }
   const allAsist=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia);
   // Cada fecha puede aparecer varias veces si hubo múltiples llamadas — mostrar todas como columnas separadas
-  const todasFechas=allAsist.map(a=>a.fecha+'-'+a.id_estudiante).map(x=>x.split('-')[0]);
+  const todasFechas=allAsist.map(a=>a.fecha);
   const fechas=[...new Set(allAsist.map(a=>a.fecha))].sort();
   const thead=document.getElementById('asist-resumen-thead');
   const tbody=document.getElementById('tb-asist-resumen');
@@ -1552,7 +1552,7 @@ function cerrarSesion(){
 
 // ===== ABRIR EXPORTADOR =====
 function abrirExportador(){
-  window.open('/exportar_registro.html','_blank');
+  window.open('exportar_registro.html','_blank');
 }
 
 // ===== INIT =====
