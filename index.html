@@ -53,7 +53,7 @@ th.th-saber{background:linear-gradient(135deg,#581c87,#7c3aed)}
 th.th-hacer{background:linear-gradient(135deg,#064e3b,#059669)}
 th.th-auto{background:linear-gradient(135deg,#78350f,#d97706);color:#fff}
 th.th-total{background:linear-gradient(135deg,#111827,#374151)}
-th.th-vert{writing-mode:vertical-rl;transform:rotate(180deg);height:130px;min-width:38px;max-width:46px;padding:8px 4px !important;font-size:11px !important;overflow:hidden;word-break:break-word;white-space:normal;vertical-align:bottom;line-height:1.3;font-weight:500}
+th.th-vert{writing-mode:vertical-rl;transform:rotate(180deg);max-height:110px;min-width:26px;max-width:34px;padding:5px 3px !important;font-size:9px !important;overflow:hidden;word-break:break-word;white-space:normal;vertical-align:bottom;line-height:1.2}
 th.th-nombre{text-align:left;position:sticky;left:0;z-index:3;background:var(--azul)}
 td{padding:7px 9px;border-bottom:1px solid var(--borde);text-align:center}
 td.td-nombre{text-align:left;font-weight:500;position:sticky;left:0;background:#fff;z-index:1;min-width:160px}
@@ -155,7 +155,7 @@ tr:last-child td{border-bottom:none}
   <div class="login-box">
     <div class="logo-big">🎓</div>
     <h1>Registro Pedagógico 2026</h1>
-    <p class="sub">DIGITAL_LAN</p>
+    <p class="sub">Sistema de Evaluación — Ley 070</p>
 
     <!-- PANEL: Login normal (usuario + contraseña) -->
     <div id="panel-login">
@@ -174,10 +174,10 @@ tr:last-child td{border-bottom:none}
       <div style="background:#fef3c7;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#92400e">
         🔑 Ingresa el código de activación que te entregó el administrador
       </div>
-      <div class="fg"><label>Código de Activación</label><input id="l-codigo" placeholder="Ej: AC2026-001" autocapitalize="characters"></div>
+      <div class="fg"><label>Código de Activación</label><input id="l-codigo" placeholder="Ej: FT2026-001" autocapitalize="characters"></div>
       <div class="fg"><label>Nombre completo</label><input id="l-nombre" placeholder="APELLIDO NOMBRE" autocapitalize="characters"></div>
-      <div class="fg"><label>Unidad Educativa</label><input id="l-ue" value="U.E. LANEDU"></div>
-      <div class="fg"><label>Crear usuario (sin espacios)</label><input id="l-usuario-nuevo" placeholder="Ej: acalcina" autocapitalize="none"></div>
+      <div class="fg"><label>Unidad Educativa</label><input id="l-ue" value="Franz Tamayo de Chachacomani"></div>
+      <div class="fg"><label>Crear usuario (sin espacios)</label><input id="l-usuario-nuevo" placeholder="Ej: jperez" autocapitalize="none"></div>
       <div class="fg" style="position:relative">
         <label>Crear contraseña (mín. 6 caracteres)</label>
         <input id="l-pass-nuevo" type="password" placeholder="Tu contraseña">
@@ -547,25 +547,13 @@ tr:last-child td{border-bottom:none}
     <input type="date" id="asist-fecha-input">
     <div style="font-size:11px;color:var(--gris2);margin-top:4px">Puedes cambiar la fecha si necesitas registrar una clase anterior</div>
   </div>
+  <!-- Aviso si ya existe — solo informativo, siempre reemplaza -->
   <div id="asist-dup-msg" style="display:none;background:#fef3c7;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:#92400e">
-    ⚠️ Ya existe una asistencia registrada para esta fecha en este curso.
-  </div>
-  <div class="fg">
-    <label>Tipo de registro</label>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-        <input type="radio" name="asist-tipo" id="asist-opt-reemplazar" value="reemplazar" checked>
-        <span><strong>Reemplazar</strong> — actualiza la asistencia existente del día</span>
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-        <input type="radio" name="asist-tipo" id="asist-opt-nueva" value="nueva">
-        <span><strong>Nueva llamada</strong> — crea una segunda columna con sufijo L2, L3...</span>
-      </label>
-    </div>
+    ⚠️ Ya existe asistencia para esta fecha. Se actualizará con los nuevos datos.
   </div>
   <div class="fa">
     <button class="btn" onclick="closeModal('modal-asist-guardar')">Cancelar</button>
-    <button class="btn btn-p" onclick="confirmarGuardarAsistencia()">✓ Confirmar</button>
+    <button class="btn btn-p" onclick="confirmarGuardarAsistencia()">💾 Guardar</button>
   </div>
 </div></div>
 
@@ -1058,36 +1046,25 @@ async function guardarAsistencia(){
   if(!cursoCurrent){ showToast('Selecciona un curso primero'); return; }
   const lista=getEstCurso();
   if(!lista.length){ showToast('No hay estudiantes'); return; }
-  // Fecha local del dispositivo del docente (correcta sin depender de UTC)
   const hoy=fechaLocalHoy();
   document.getElementById('asist-fecha-input').value=hoy;
-  // Verificar si ya existe asistencia para este curso y fecha
-  const yaExiste=getLocalAll('asistencia').some(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia&&a.fecha===hoy);
-  const msgDup=document.getElementById('asist-dup-msg');
-  const optReemplazar=document.getElementById('asist-opt-reemplazar');
-  const optNueva=document.getElementById('asist-opt-nueva');
-  if(yaExiste){
-    msgDup.style.display='block';
-    optReemplazar.checked=true;
-  } else {
-    msgDup.style.display='none';
-    optReemplazar.checked=true;
-  }
+  // Mostrar aviso si ya existe registro para hoy
+  const yaExiste=getLocalAll('asistencia').some(a=>
+    a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia&&a.fecha===hoy);
+  document.getElementById('asist-dup-msg').style.display=yaExiste?'block':'none';
   openModal('modal-asist-guardar');
 }
 
 async function confirmarGuardarAsistencia(){
-  // Si el input está vacío usar fecha local del dispositivo
-  const fecha=document.getElementById('asist-fecha-input').value||fechaLocalHoy();
-  const reemplazar=document.getElementById('asist-opt-reemplazar').checked;
-  let fechaId=fecha;
-  if(!reemplazar){
-    const existentes=getLocalAll('asistencia').filter(a=>a.curso===cursoCurrent.curso&&a.materia===cursoCurrent.materia&&(a.fecha===fecha||a.fecha.startsWith(fecha+'_L')));
-    const llamadasHoy=new Set(existentes.map(a=>a.fecha)).size;
-    fechaId=fecha+'_L'+(llamadasHoy+1);
+  let fecha=document.getElementById('asist-fecha-input').value||fechaLocalHoy();
+  // Sanitizar: si viene DD/MM/YYYY convertir a YYYY-MM-DD
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(fecha)){
+    const [dd,mm,yyyy]=fecha.split('/');
+    fecha=yyyy+'-'+mm+'-'+dd;
   }
   closeModal('modal-asist-guardar');
-  await ejecutarGuardarAsistencia(fechaId, reemplazar);
+  // Siempre reemplaza — un solo registro por día por curso
+  await ejecutarGuardarAsistencia(fecha, true);
 }
 
 async function ejecutarGuardarAsistencia(fechaId, esReemplazo){
@@ -1103,7 +1080,7 @@ async function ejecutarGuardarAsistencia(fechaId, esReemplazo){
     ['P','F','A','L'].forEach(t=>{ const b=document.getElementById('ab_'+t+'_'+e.id); if(b) b.className='ab'; });
   });
   actualizarContadores();
-  showToast(esReemplazo?'✓ Asistencia guardada':'✓ Nueva llamada guardada ('+fechaId+')');
+  showToast('✓ Asistencia guardada — '+fechaId);
 }
 
 async function renderAsistResumen(){
