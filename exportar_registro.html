@@ -449,7 +449,7 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
   sc(7,C_EST,'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true,8), align('center','bottom',0,true));
 
   // ===== FILAS ESTUDIANTES — mínimo 30 filas =====
-  const MIN_FILAS_1T=Math.max(30,ESTUDIANTES.length);
+  const MIN_FILAS_1T=Math.max(25,ESTUDIANTES.length);
   let aprobados=0;
   for(let i=0;i<MIN_FILAS_1T;i++){
     const e=ESTUDIANTES[i]||null;
@@ -815,43 +815,31 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
   const APROB='FFD1FAE5',REPRO='FFFEE2E2',WH='FFFFFFFF',GR='FFF1F5F9';
   const AMARILLO='FFFFC000',VERDE='FF46E281';
 
-  // Dimensiones mínimas de columnas según instrucciones
-  // SER mín 4 cols, SABER mín 9 cols, HACER mín 9 cols
+  // Calcular promedios por dimensión
   const serActs=ACTIVIDADES.filter(a=>a.dimension==='SER'&&String(a.trimestre)===String(trim));
   const sabActs=ACTIVIDADES.filter(a=>a.dimension==='SABER'&&String(a.trimestre)===String(trim));
   const hacActs=ACTIVIDADES.filter(a=>a.dimension==='HACER'&&String(a.trimestre)===String(trim));
-  const nSER=Math.max(4,serActs.length);
-  const nSAB=Math.max(9,sabActs.length);
-  const nHAC=Math.max(9,hacActs.length);
 
-  // Layout columnas: A=Nº, B-C=Nombre, D..=SER, PSER, SAB, PSAB, HAC, PHAC, TOTAL, AUTO, PROM, PROM_FINAL, LITERAL, OBS
+  // Layout fijo: A=Nº | B-C=Nombre | D=Ser | E=Saber | F=Hacer | G=EVAL.TOT | H=AUTO | I=PROM.TRIM | J=PROM.FINAL | K=LITERAL | L=OBS
   const CA=1,CNS=2,CNE=3;
-  const CS_S=4, CS_E=4+nSER-1;           // SER actividades
-  const C_PSER=CS_E+1;                    // Promedio SER
-  const CB_S=C_PSER+1, CB_E=CB_S+nSAB-1; // SABER actividades
-  const C_PSAB=CB_E+1;
-  const CH_S=C_PSAB+1, CH_E=CH_S+nHAC-1; // HACER actividades
-  const C_PHAC=CH_E+1;
-  const C_TOT=C_PHAC+1,C_AUTO=C_TOT+1,C_PROM=C_AUTO+1;
-  const C_PF=C_PROM+1,C_LIT=C_PF+1,C_OBS=C_LIT+1;
+  const C_SER=4, C_SAB=5, C_HAC=6;      // Una sola col por dimensión
+  const C_TOT=7,C_AUTO=8,C_PROM=9;
+  const C_PF=10,C_LIT=11,C_OBS=12;
   const NCOLS=C_OBS;
 
-  // Anchos
-  ws.getColumn(CA).width=3.6;
-  ws.getColumn(CNS).width=22;
-  ws.getColumn(CNE).width=12;
-  for(let i=CS_S;i<=CS_E;i++) ws.getColumn(i).width=6.7;
-  ws.getColumn(C_PSER).width=7.7;
-  for(let i=CB_S;i<=CB_E;i++) ws.getColumn(i).width=6.7;
-  ws.getColumn(C_PSAB).width=7.7;
-  for(let i=CH_S;i<=CH_E;i++) ws.getColumn(i).width=6.7;
-  ws.getColumn(C_PHAC).width=7.7;
-  ws.getColumn(C_TOT).width=7.7;
-  ws.getColumn(C_AUTO).width=6.7;
-  ws.getColumn(C_PROM).width=9.7;
-  ws.getColumn(C_PF).width=9.7;
-  ws.getColumn(C_LIT).width=17.9;
-  ws.getColumn(C_OBS).width=4.4;
+  // Anchos fijos compactos
+  ws.getColumn(CA).width=4;
+  ws.getColumn(CNS).width=28;
+  ws.getColumn(CNE).width=8;
+  ws.getColumn(C_SER).width=8;
+  ws.getColumn(C_SAB).width=8;
+  ws.getColumn(C_HAC).width=8;
+  ws.getColumn(C_TOT).width=8;
+  ws.getColumn(C_AUTO).width=7;
+  ws.getColumn(C_PROM).width=9;
+  ws.getColumn(C_PF).width=9;
+  ws.getColumn(C_LIT).width=18;
+  ws.getColumn(C_OBS).width=12;
 
   // === FILA 1: UE ===
   ws.getRow(1).height=9;
@@ -874,9 +862,9 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
   ws.getRow(5).height=15.75;
   ws.getRow(6).height=14.1;
   mgBlock(5,6,CA,1,'MAESTR@:',LABEL,fnt(true,10),aln('right','middle'));
-  mgBlock(5,6,CNS,C_PROM,DOCENTE.nombre,WH,fnt(false,10),aln('left','middle'));
-  mgBlock(5,6,C_PF,C_PF,'CURSO:',LABEL,fnt(true,9),aln('center','middle'));
-  mgBlock(5,6,C_LIT,C_OBS,curso,WH,fnt(true,12),aln('center','middle'));
+  mgBlock(5,6,CNS,C_HAC,DOCENTE.nombre,WH,fnt(false,10),aln('left','middle'));
+  mgBlock(5,6,C_TOT,C_TOT,'CURSO:',LABEL,fnt(true,9),aln('center','middle'));
+  mgBlock(5,6,C_PROM,C_OBS,curso,WH,fnt(true,12),aln('center','middle'));
 
   // === FILA 7: AREA ===
   ws.getRow(7).height=14.1;
@@ -887,26 +875,26 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
   ws.getRow(8).height=21.75;
 
   // === FILA 9: ENCABEZADOS PRINCIPALES ===
-  ws.getRow(9).height=13.5;
+  ws.getRow(9).height=20;
   mgBlock(9,10,CA,CA,'No.',WH,fnt(false,9),aln('center','middle'));
-  mgBlock(9,10,CNS,CNE,'APELLIDOS Y NOMBRES',WH,fnt(true,10),aln('center','middle'));
-  mg(9,CS_S,C_PSER,'Dimensiones',AMARILLO,fnt(true,10),aln('center','middle'));
+  mgBlock(9,10,CNS,CNE,'APELLIDOS Y\nNOMBRES',WH,fnt(true,10),aln('center','middle',0,true));
+  mg(9,C_SER,C_HAC,'Dimensiones',AMARILLO,fnt(true,10),aln('center','middle'));
   mgBlock(9,10,C_TOT,C_TOT,'EVAL.\nTOTAL',AMARILLO,fnt(true,9),aln('center','middle',0,true));
-  mgBlock(9,10,C_AUTO,C_AUTO,'AUTO\nEV.',WH,fnt(true,9),aln('center','middle',0,true));
-  mgBlock(9,10,C_PROM,C_PROM,'PROM.\nTRIM.',WH,fnt(true,9),aln('center','middle',0,true));
+  mgBlock(9,10,C_AUTO,C_AUTO,'AUTO\nEV.',AUTO,fnt(true,9),aln('center','middle',0,true));
+  mgBlock(9,10,C_PROM,C_PROM,'PROM.\nTRIM.',PROM,fnt(true,9),aln('center','middle',0,true));
   mgBlock(9,10,C_PF,C_PF,'PROM.\nTRIM.\nFINAL',VERDE,fnt(true,8,'FFFFFFFF'),aln('center','middle',0,true));
   mgBlock(9,10,C_LIT,C_LIT,'LITERAL',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
   mgBlock(9,10,C_OBS,C_OBS,'OBS.',WH,fnt(true,8),aln('center','middle',0,true));
 
-  // === FILA 10: SER / SABER / HACER ===
-  ws.getRow(10).height=27.75;
-  mg(10,CS_S,C_PSER,'Ser',SER_BG,fnt(true,9),aln('center','middle'));
-  mg(10,CB_S,C_PSAB,'Saber',SAB_BG,fnt(true,9),aln('center','middle'));
-  mg(10,CH_S,C_PHAC,'Hacer',HAC_BG,fnt(true,9),aln('center','middle'));
+  // === FILA 10: Ser | Saber | Hacer ===
+  ws.getRow(10).height=20;
+  sc(10,C_SER,'Ser',SER_BG,fnt(true,9),aln('center','middle'));
+  sc(10,C_SAB,'Saber',SAB_BG,fnt(true,9),aln('center','middle'));
+  sc(10,C_HAC,'Hacer',HAC_BG,fnt(true,9),aln('center','middle'));
 
-  // === MÍNIMO 40 FILAS DE ESTUDIANTES (fila 11 a 50) ===
+  // === MÍNIMO 25 FILAS DE ESTUDIANTES ===
   const FILA_INICIO=11;
-  const MIN_FILAS=40;
+  const MIN_FILAS=Math.max(25,ESTUDIANTES.length);
 
   for(let i=0;i<MIN_FILAS;i++){
     const row=FILA_INICIO+i;
@@ -938,18 +926,12 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
         Math.round((pSer||0)+(pSabConv||0)+(pHacConv||0)):null;
       const promFinal=evalTot!==null?Math.round(evalTot+(auto||0)):null;
 
-      // Solo mostrar las notas por dimensión (SER, SABER prom, HACER prom)
-      sc(row,CS_S,pSer!==null?Math.round(pSer):'',SER_BG,fnt(true,10),aln('center','middle'));
-      for(let j=1;j<nSER;j++) sc(row,CS_S+j,'',SER_BG,null,aln('center','middle'));
-      sc(row,C_PSER,pSer!==null?Math.round(pSer):'',SER_MED,fnt(true,10),aln('center','middle'));
-      sc(row,CB_S,pSabConv!==null?pSabConv:'',SAB_BG,fnt(true,10),aln('center','middle'));
-      for(let j=1;j<nSAB;j++) sc(row,CB_S+j,'',SAB_BG,null,aln('center','middle'));
-      sc(row,C_PSAB,pSabConv!==null?pSabConv:'',SAB_MED,fnt(true,10),aln('center','middle'));
-      sc(row,CH_S,pHacConv!==null?pHacConv:'',HAC_BG,fnt(true,10),aln('center','middle'));
-      for(let j=1;j<nHAC;j++) sc(row,CH_S+j,'',HAC_BG,null,aln('center','middle'));
-      sc(row,C_PHAC,pHacConv!==null?pHacConv:'',HAC_MED,fnt(true,10),aln('center','middle'));
+      // Una sola columna por dimensión: promedio ponderado
+      sc(row,C_SER,pSer!==null?Math.round(pSer):'',SER_BG,fnt(true,10),aln('center','middle'));
+      sc(row,C_SAB,pSabConv!==null?pSabConv:'',SAB_BG,fnt(true,10),aln('center','middle'));
+      sc(row,C_HAC,pHacConv!==null?pHacConv:'',HAC_BG,fnt(true,10),aln('center','middle'));
 
-      // Totales — solo nota final
+      // Totales
       sc(row,C_TOT,evalTot!==null?evalTot:'',TOTAL,fnt(true,11),aln('center','middle'));
       sc(row,C_AUTO,auto!==null?auto:'',AUTO,fnt(true,11),aln('center','middle'));
       sc(row,C_PROM,promFinal!==null?promFinal:'',PROM,fnt(true,11),aln('center','middle'));
@@ -964,13 +946,10 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
       if(promFinal!==null){estado=promFinal>=51?'APROBADO':'REPROBADO';estBg=promFinal>=51?APROB:REPRO;}
       sc(row,C_OBS,estado,estBg,fnt(true,7,promFinal>=51?'FF065F46':'FF991B1B'),aln('center','middle',0,true));
     } else {
-      // Fila vacía con colores de dimensiones
-      for(let j=0;j<nSER;j++) sc(row,CS_S+j,'',SER_BG,null,aln('center','middle'));
-      sc(row,C_PSER,'',SER_MED,null,null);
-      for(let j=0;j<nSAB;j++) sc(row,CB_S+j,'',SAB_BG,null,aln('center','middle'));
-      sc(row,C_PSAB,'',SAB_MED,null,null);
-      for(let j=0;j<nHAC;j++) sc(row,CH_S+j,'',HAC_BG,null,aln('center','middle'));
-      sc(row,C_PHAC,'',HAC_MED,null,null);
+      // Fila vacía — mantener colores de dimensiones
+      sc(row,C_SER,'',SER_BG,null,aln('center','middle'));
+      sc(row,C_SAB,'',SAB_BG,null,aln('center','middle'));
+      sc(row,C_HAC,'',HAC_BG,null,aln('center','middle'));
       sc(row,C_TOT,'',TOTAL,null,null);
       sc(row,C_AUTO,'',AUTO,null,null);
       sc(row,C_PROM,'',PROM,null,null);
@@ -1098,7 +1077,7 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   const CB=2,CNS=3,CNE=4,CNIV=5,CSEX=6;
   const CM_S=7; // inicio materias
   const CM_E=CM_S+todasMaterias.length-1;
-  const C_PROM=CM_E+1,C_PROM2=C_PROM+1,C_OBS=C_PROM2+1;
+  const C_PROM=CM_E+1,C_OBS=C_PROM+1;
   const NCOLS=C_OBS;
 
   // Anchos
@@ -1109,9 +1088,8 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   ws.getColumn(CNIV).width=6.1;
   ws.getColumn(CSEX).width=3.4;
   for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=2.7;
-  ws.getColumn(C_PROM).width=4;
-  ws.getColumn(C_PROM2).width=4;
-  ws.getColumn(C_OBS).width=2.3;
+  ws.getColumn(C_PROM).width=5;
+  ws.getColumn(C_OBS).width=3;
 
   // === FILAS ENCABEZADO ===
   ws.getRow(1).height=15.6;
@@ -1126,19 +1104,20 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   ws.getRow(4).height=15;
   mg(4,CB,3,'DISTRITO:',LA,fnt(true,9),aln('right','middle'));
   mg(4,4,CNIV,'Batallas',WH,fnt(false,9),aln('left','middle'));
-  mg(4,CSEX,C_PROM2,'AÑO DE ESCOLARIDAD: '+curso,LA,fnt(true,9),aln('center','middle'));
+  mg(4,CSEX,C_PROM,'AÑO DE ESCOLARIDAD: '+curso,LA,fnt(true,9),aln('center','middle'));
 
   ws.getRow(5).height=15;
   mg(5,CB,3,'PROFESOR(A):',LA,fnt(true,9),aln('right','middle'));
   mg(5,4,CNIV,DOCENTE.nombre,WH,fnt(false,9),aln('left','middle'));
-  mg(5,CSEX,C_PROM2,'NIVEL: Educación Secundaria Comunitaria Productiva',LA,fnt(true,8),aln('center','middle'));
+  mg(5,CSEX,C_PROM,'NIVEL: Educación Secundaria Comunitaria Productiva',LA,fnt(true,8),aln('center','middle'));
 
   // === FILA 6: NÚMERO/NOMBRE + CAMPOS GENERALES ===
   ws.getRow(6).height=15.6;
   mg(6,CB,1,'NUMERO',AZ,fnt(true,8,'FFFFFFFF'),aln('center','middle'));
   mg(6,CNS,CNE,'APELLIDOS   Y   NOMBRES',AZ,fnt(true,8,'FFFFFFFF'),aln('center','middle'));
   mg(6,CNIV,CSEX,'',AZ,null,null);
-  mg(6,CM_S,NCOLS,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  mg(6,CM_S,C_PROM,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  sc(6,C_OBS,'OBS.',AZ,fnt(true,7,'FFFFFFFF'),aln('center','middle'));
 
   // === FILA 7: sub-campos ===
   ws.getRow(7).height=15.75;
@@ -1151,7 +1130,6 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   // Cosmos: cols CM_S+13 a CM_S+14
   mg(7,CM_S+13,CM_S+14,'COSMOS Y PENSAMIENTO',AM,fnt(true,7,'FFFFFFFF'),aln('center','middle'));
   sc(7,C_PROM,'',AZ,null,null);
-  sc(7,C_PROM2,'',AZ,null,null);
   sc(7,C_OBS,'',AZ,null,null);
 
   // === FILA 8: materias rotadas 90° ===
@@ -1167,7 +1145,6 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
     sc(8,col,mat,esActual?AM:AZ,fnt(esActual,7,'FFFFFFFF'),aln('center','bottom',90,false));
   });
   sc(8,C_PROM,'PROMEDIO',AZ,fnt(true,7,'FFFFFFFF'),aln('center','bottom',90,false));
-  sc(8,C_PROM2,'PROMEDIO',AZ,fnt(true,7,'FFFFFFFF'),aln('center','bottom',90,false));
   sc(8,C_OBS,'OBS.',AZ,fnt(true,7,'FFFFFFFF'),aln('center','bottom',90,false));
 
   // === FILAS ESTUDIANTES (mínimo 40) ===
@@ -1219,7 +1196,6 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
       return Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+(AUTOEVALS[ESTUDIANTES[i].id]||0));
     })()) : null;
     sc(row,C_PROM,promEst!==null?promEst:'',promEst!==null?'FFFFE699':bg,fnt(true,8),aln('center','middle'));
-    sc(row,C_PROM2,'',bg,null,aln('center','middle'));
     sc(row,C_OBS,'',bg,null,aln('center','middle'));
   }
 
@@ -1249,7 +1225,6 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
     if(j!==idxMateria) sc(rowProm,CM_S+j,0,LA,fnt(false,8),aln('center','middle'));
   }
   sc(rowProm,C_PROM,'',LA,null,null);
-  sc(rowProm,C_PROM2,'',LA,null,null);
   sc(rowProm,C_OBS,'',LA,null,null);
 
   ws.pageSetup.printArea='B1:'+colL(NCOLS)+(rowProm+2);
