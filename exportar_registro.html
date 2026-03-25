@@ -398,25 +398,38 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
   merge(4,C1,C_NOM_E,'ASIGNATURA:', null, font(true,11), align('right','middle'));
   merge(4,C_SER_S,C_EST, materia.toUpperCase(), C.WHITE, font(true,12), align('left','middle'));
 
-  // ===== FILA 5: TRIMESTRE + col headers top =====
-  ws.getRow(5).height=18;
-  merge(5,C1,C_NOM_E,'', C.GRIS, null, null);
-  merge(5,C_SER_S,C_PHAC, trimNombres[trim], C.SER_BG, font(true,11), align('center','middle'));
-  sc(5,C_TOTAL,'EVAL.\nTOTAL', C.TOTAL, font(true,8), align('center','middle',0,true));
-  sc(5,C_AUTO,'AUTO\nEVAL.', C.AUTO, font(true,8), align('center','middle',0,true));
-  sc(5,C_PROM,'PROM.\nFINAL', C.PROM, font(true,8), align('center','middle',0,true));
-  sc(5,C_EST,'ESTADO', 'FFE2EFDA', font(true,8), align('center','middle',0,true));
-
-  // ===== FILA 6: SER / SABER / HACER =====
-  ws.getRow(6).height=16;
-  merge(6,C1,C_NOM_E,'Valoración del Docente', 'FFE2EFDA', font(false,9), align('center','middle'));
-  merge(6,C_SER_S,C_PSER,'SER — 10 pts', C.SER_BG, font(true,10), align('center','middle'));
-  merge(6,C_SAB_S,C_PSAB,'SABER — 45 pts', C.SAB_BG, font(true,10), align('center','middle'));
-  merge(6,C_HAC_S,C_PHAC,'HACER — 40 pts', C.HAC_BG, font(true,10), align('center','middle'));
-  sc(6,C_TOTAL,'', C.TOTAL, null, null);
-  sc(6,C_AUTO,'', C.AUTO, null, null);
-  sc(6,C_PROM,'', C.PROM, null, null);
-  sc(6,C_EST,'', 'FFE2EFDA', null, null);
+ // ===== FILA 5 y 6: COMBINACIÓN VERTICAL PARA TÍTULOS FINALES =====
+ws.getRow(5).height = 20;
+ws.getRow(6).height = 20; // La suma de ambas dará un espacio alto y limpio
+// 1. Mantener los bloques de la izquierda y centro igual
+merge(5, C1, C_NOM_E, '', C.GRIS, null, null);
+merge(6, C1, C_NOM_E, 'Valoración del Docente', 'FFE2EFDA', font(false, 9), align('center', 'middle'));
+merge(5, C_SER_S, C_PHAC, trimNombres[trim], C.SER_BG, font(true, 11), align('center', 'middle'));
+merge(6, C_SER_S, C_PSER, 'SER — 10 pts', C.SER_BG, font(true, 10), align('center', 'middle'));
+merge(6, C_SAB_S, C_PSAB, 'SABER — 45 pts', C.SAB_BG, font(true, 10), align('center', 'middle'));
+merge(6, C_HAC_S, C_PHAC, 'HACER — 40 pts', C.HAC_BG, font(true, 10), align('center', 'middle'));
+// 2. CAMBIO CLAVE: Combinación Vertical (Merge de Fila 5 a Fila 6)
+// Usamos merge(filaInicio, colInicio, filaFin, colFin, ...) si tu función lo permite, 
+// o directamente la API de ExcelJS:
+const titulosFinales = [
+  { col: C_TOTAL, txt: 'EVAL.\nTOTAL', color: C.TOTAL },
+  { col: C_AUTO,  txt: 'AUTO\nEVAL.', color: C.AUTO },
+  { col: C_PROM,  txt: 'PROM.\nFINAL', color: C.PROM },
+  { col: C_EST,   txt: 'ESTADO',      color: 'FFE2EFDA' }
+];
+titulosFinales.forEach(t => {
+  // Combinamos celda de fila 5 con la de fila 6 en la misma columna
+  ws.mergeCells(5, t.col, 6, t.col); 
+    // Aplicamos el estilo a la celda resultante (la 5 es la maestra)
+  const cell = ws.getCell(5, t.col);
+  cell.value = t.txt;
+  cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: t.color.replace('#','') } };
+  cell.font = font(true, 8.5);
+  cell.alignment = align('center', 'middle', 0, true);
+  cell.border = {
+    top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'}
+  };
+});
 
   // ===== FILA 7: ENCABEZADOS ACTIVIDADES (texto vertical rotado 90°) =====
   ws.getRow(7).height=135;
