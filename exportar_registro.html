@@ -431,36 +431,38 @@ titulosFinales.forEach(t => {
   };
 });
 
-  // ===== FILA 7: ENCABEZADOS ACTIVIDADES (texto vertical rotado 90°) =====
-  ws.getRow(7).height=135;
-  merge(7,C1,C_NOM_E,'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true,10), align('center','bottom',0,true));
+ // ===== FILA 7: ENCABEZADOS ACTIVIDADES (ACTUALIZADO DINÁMICO) =====
+ws.getRow(7).height = 145; // Un poco más alto para que el texto vertical respire
+merge(7, C1, C_NOM_E, 'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true, 10), align('center', 'bottom', 0, true));
+// SER actividades — dinámico
+for(let i = 0; i < nSER_1T; i++) {
+  const act = serActs[i];
+  // Bajamos fuente a 8.5 y aseguramos wrapText para que las actividades largas se vean bien
+  sc(7, C_SER_S + i, act ? act.nombre_actividad : '', C.SER_BG, font(false, 8.5), align('center', 'bottom', 90, true));
+}
+// CAMBIO: Promedio SER ahora es VERTICAL (90°)
+sc(7, C_PSER, 'PROMEDIO\nSER', C.SER_MED, font(true, 9), align('center', 'bottom', 90, true));
+// SABER actividades — dinámico
+for(let i = 0; i < nSAB_1T; i++) {
+  const act = saberActs[i];
+  sc(7, C_SAB_S + i, act ? act.nombre_actividad : '', C.SAB_BG, font(false, 8.5), align('center', 'bottom', 90, true));
+}
+// CAMBIO: Promedio SABER ahora es VERTICAL (90°)
+sc(7, C_PSAB, 'PROMEDIO\nSABER', C.SAB_MED, font(true, 9), align('center', 'bottom', 90, true));
+// HACER actividades — dinámico
+for(let i = 0; i < nHAC_1T; i++) {
+  const act = hacerActs[i];
+  sc(7, C_HAC_S + i, act ? act.nombre_actividad : '', C.HAC_BG, font(false, 8.5), align('center', 'bottom', 90, true));
+}
+// CAMBIO: Promedio HACER ahora es VERTICAL (90°)
+sc(7, C_PHAC, 'PROMEDIO\nHACER', C.HAC_MED, font(true, 9), align('center', 'bottom', 90, true));
+// CAMBIO: Todos los encabezados finales ahora son VERTICALES (90°)
+sc(7, C_TOTAL, 'VALORACIÓN\nTOTAL', C.TOTAL, font(true, 9), align('center', 'bottom', 90, true));
+sc(7, C_AUTO, 'AUTO\nEVAL. (5)', C.AUTO, font(true, 9), align('center', 'bottom', 90, true));
+sc(7, C_PROM, 'PROM.\nTRIM.', C.PROM, font(true, 10), align('center', 'bottom', 90, true));
+sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 9), align('center', 'bottom', 90, true));
 
-  // SER actividades — mínimo 4 cols
-  for(let i=0;i<nSER_1T;i++){
-    const act=serActs[i];
-    sc(7,C_SER_S+i,act?act.nombre_actividad:'',C.SER_BG,font(false,9),align('center','bottom',90,true));
-  }
-  sc(7,C_PSER,'PROMEDIO\nSER',C.SER_MED,font(true,8),align('center','bottom',0,true));
-
-  // SABER actividades — mínimo 9 cols
-  for(let i=0;i<nSAB_1T;i++){
-    const act=saberActs[i];
-    sc(7,C_SAB_S+i,act?act.nombre_actividad:'',C.SAB_BG,font(false,9),align('center','bottom',90,true));
-  }
-  sc(7,C_PSAB,'PROMEDIO\nSABER',C.SAB_MED,font(true,8),align('center','bottom',0,true));
-
-  // HACER actividades — mínimo 9 cols
-  for(let i=0;i<nHAC_1T;i++){
-    const act=hacerActs[i];
-    sc(7,C_HAC_S+i,act?act.nombre_actividad:'',C.HAC_BG,font(false,9),align('center','bottom',90,true));
-  }
-  sc(7,C_PHAC,'PROMEDIO\nHACER',C.HAC_MED,font(true,8),align('center','bottom',0,true));
-
-  sc(7,C_TOTAL,'VALORACIÓN\nTOTAL', C.TOTAL, font(true,8), align('center','bottom',0,true));
-  sc(7,C_AUTO,'AUTO\nEVAL.(5)', C.AUTO, font(true,8), align('center','bottom',0,true));
-  sc(7,C_PROM,'PROM.\nTRIM.', C.PROM, font(true,8), align('center','bottom',0,true));
-  sc(7,C_EST,'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true,8), align('center','bottom',0,true));
-
+  
   // ===== FILAS ESTUDIANTES — mínimo 30 filas =====
   const MIN_FILAS_1T=Math.max(25,ESTUDIANTES.length);
   let aprobados=0;
@@ -477,37 +479,37 @@ titulosFinales.forEach(t => {
     for(let j=0;j<nSER_1T;j++){
       const act=serActs[j];
       const n=e&&act?NOTAS[e.id]?.[act.id]:undefined;
-      sc(row,C_SER_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFEFF6FF':'FFE1EFFE', font(false,9), align('center','middle'));
+      sc(row,C_SER_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFEFF6FF':'FFE1EFFE', font(true,11), align('center', 'middle', 0, false));
     }
     const pSer=e?promDim(e.id,serActs,NOTAS):null;
-    sc(row,C_PSER, pSer!==null?Math.round(pSer):'', C.SER_MED, font(true,10), align('center','middle'));
+    sc(row,C_PSER, pSer!==null?Math.round(pSer):'', C.SER_MED, font(true,11), align('center','middle'));
 
     // SABER — mínimo 9 cols
     for(let j=0;j<nSAB_1T;j++){
       const act=saberActs[j];
       const n=e&&act?NOTAS[e.id]?.[act.id]:undefined;
-      sc(row,C_SAB_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF5F3FF':'FFEDE9FE', font(false,9), align('center','middle'));
+      sc(row,C_SAB_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF5F3FF':'FFEDE9FE', font(true,11), align('center', 'middle', 0, false));
     }
     const pSab=e?promDim(e.id,saberActs,NOTAS):null;
     const pSabConv=pSab!==null?Math.round(pSab*0.45):null;
-    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,10), align('center','middle'));
+    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,11), align('center','middle'));
 
     // HACER — mínimo 9 cols
     for(let j=0;j<nHAC_1T;j++){
       const act=hacerActs[j];
       const n=e&&act?NOTAS[e.id]?.[act.id]:undefined;
-      sc(row,C_HAC_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF0FDF4':'FFE6FAF2', font(false,9), align('center','middle'));
+      sc(row,C_HAC_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF0FDF4':'FFE6FAF2', font(true,11), align('center', 'middle', 0, false));
     }
     const pHac=e?promDim(e.id,hacerActs,NOTAS):null;
     const pHacConv=pHac!==null?Math.round(pHac*0.40):null;
-    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,10), align('center','middle'));
+    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,11), align('center','middle'));
 
     const total=e&&(pSer!==null||pSabConv!==null||pHacConv!==null)?
       Math.round((pSer||0)+(pSabConv||0)+(pHacConv||0)):null;
-    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,10), align('center','middle'));
+    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,11), align('center','middle'));
 
     const auto=e&&AUTOEVALS[e.id]!==undefined?AUTOEVALS[e.id]:null;
-    sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(false,9), align('center','middle'));
+    sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(true,11), align('center','middle'));
 
     const promFinal=total!==null?Math.round(total+(auto||0)):null;
     sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,11), align('center','middle'));
