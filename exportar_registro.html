@@ -925,7 +925,7 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   ws.pageSetup.paperSize = 1;            // Carta
   ws.pageSetup.fitToPage=false;
   ws.pageSetup.scale = 72;               // Ajuste para que quepa el ancho
- s.pageSetup.margins = {left:0.2, right:0.2, top:0.4, bottom:0.4};
+ ws.pageSetup.margins = {left:0.2, right:0.2, top:0.4, bottom:0.4};
   ws.headerFooter={oddHeader:'',oddFooter:''};
 
   const brd={style:'thin',color:{argb:'FF000000'}};
