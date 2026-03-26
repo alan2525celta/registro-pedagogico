@@ -677,8 +677,8 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
   for(let j=fechas.length;j<(DE-DS+1);j++) sc(rt,DS+j,'',GR,null,null);
 
   // ===== FIRMA Y FECHA (EN UNA SOLA LÍNEA) =====
-  const rowFirma=rt+3;
-  ws.getRow(rowFirma).height=45;
+  const rowFirma=rt+1;
+  ws.getRow(rowFirma).height=20;
   mg(rowFirma, 1, 6, '_______________________________', WH, fnt(false, 10), aln('center', 'bottom'));
   const fechaHoy=new Intl.DateTimeFormat('es-ES',{dateStyle:'full'}).format(new Date());
   mg(rowFirma, 20, CT, 'FECHA: Lugar, '+ fechaHoy, WH, fnt(false, 10), aln('right', 'bottom'));
@@ -819,7 +819,7 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
   mgBlock(9,10,C_TOT,C_TOT,'EVAL.\nTOTAL',AMARILLO,fnt(true,9),aln('center','middle',0,true));
   mgBlock(9,10,C_AUTO,C_AUTO,'AUTO\nEV.',AUTO,fnt(true,9),aln('center','middle',0,true));
   mgBlock(9,10,C_PROM,C_PROM,'PROM.\nTRIM.',PROM,fnt(true,9),aln('center','middle',0,true));
-  mgBlock(9,10,C_PF,C_PF,'PROM.\nTRIM.\nFINAL',VERDE,fnt(true,8,'FFFFFFFF'),aln('center','middle',0,true));
+  mgBlock(9,10,C_PF,C_PF,'PROM.\nTRIM.\nFINAL','FF065F46',fnt(true,8,'FFFFFFFF'),aln('center','middle',0,true));
   mgBlock(9, 10, C_LIT, C_LIT, 'LITERAL', AZ, fnt(true, 9, WH), aln('center', 'middle'));
   mgBlock(9,10,C_OBS,C_OBS,'OBS.',WH,fnt(true,8),aln('center','middle',0,true));
   ws.getRow(10).height=20;
@@ -855,7 +855,7 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
       sc(row,C_HAC,pHacConv!==null?pHacConv:'',HAC_BG,fnt(false,10),aln('center','middle'));
       sc(row,C_TOT,evalTot!==null?evalTot:'',TOTAL,fnt(true,11),aln('center','middle'));
       sc(row,C_AUTO,auto!==null?auto:'',AUTO,fnt(false,11),aln('center','middle'));
-      sc(row,C_PROM,promFinal!==null?promFinal:'','FF065F46',fnt(true,11),aln('center','middle'));
+      sc(row,C_PROM,promFinal!==null?promFinal:'','PROM',fnt(true,11),aln('center','middle'));
       sc(row,C_PF,promFinal!==null?promFinal:'','FF065F46',fnt(true,12,'FFFFFFFF'),aln('center','middle'));
       
       // Convertimos el promedio final a palabras usando la nueva función
@@ -920,10 +920,12 @@ ws.pageSetup.printTitlesRow = '1:10';
 async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,curso,materia,trim,ue,DOCENTE}){
   function colL(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
   const trimNom={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
-  const ws=wb.addWorksheet('Cent.'+trim+'er TRIM');
-  ws.pageSetup.orientation='landscape';ws.pageSetup.paperSize=1;ws.pageSetup.scale=80;
+  const ws = wb.addWorksheet('Cent.' + trim + 'er TRIM');
+ ws.pageSetup.orientation = 'portrait'; // Vertical
+  ws.pageSetup.paperSize = 1;            // Carta
   ws.pageSetup.fitToPage=false;
-  ws.pageSetup.margins={left:0.2,right:0,top:0.39,bottom:0,header:0.12,footer:0.12};
+  ws.pageSetup.scale = 72;               // Ajuste para que quepa el ancho
+ s.pageSetup.margins = {left:0.2, right:0.2, top:0.4, bottom:0.4};
   ws.headerFooter={oddHeader:'',oddFooter:''};
 
   const brd={style:'thin',color:{argb:'FF000000'}};
@@ -961,10 +963,10 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
 
  ws.getColumn(1).width = 0.7;
   ws.getColumn(CB).width = 4;    // N°
-  ws.getColumn(CNS).width = 45;   // Aumentamos mucho el ancho para los nombres
+  ws.getColumn(CNS).width = 40;   // Aumentamos mucho el ancho para los nombres
   
   // Ancho de materias
-  for(let i = CM_S; i <= CM_E; i++) ws.getColumn(i).width = 3.2; 
+  for(let i = CM_S; i <= CM_E; i++) ws.getColumn(i).width = 3; 
   
   ws.getColumn(C_PROM).width = 6;
   ws.getColumn(C_OBS).width = 4;
@@ -978,28 +980,26 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   ws.getRow(4).height=15;
   
 // Fila 4: Distrito y Curso
+  // FILA 4: Distrito a la izquierda, Curso a la derecha
   ws.getRow(4).height = 20;
-  mg(4, CB, CNS, 'DISTRITO: ', LA, fnt(true, 10), aln('left', 'middle'));
+  mg(4, CB, CNS, '  DISTRITO: Batallas', LA, fnt(true, 10), aln('left', 'middle'));
   mg(4, CM_S, NCOLS, 'AÑO DE ESCOLARIDAD: ' + curso, LA, fnt(true, 10), aln('center', 'middle'));
 
-  // Fila 5: Profesor (Ahora tiene todo el ancho de la izquierda)
+  // FILA 5: Tu nombre usa todo el ancho de la columna de nombres
   ws.getRow(5).height = 20;
-  mg(5, CB, 3, 'PROFESOR(A):', LA, fnt(true, 10), aln('right', 'middle'));
-  // El nombre ahora puede ser larguísimo (de columna 4 a la 15)
-  mg(5, 4, 15, DOCENTE.nombre, WH, fnt(true, 11), aln('left', 'middle'));
-  mg(5, 16, NCOLS, 'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA', LA, fnt(true, 9), aln('center', 'middle'));
+  mg(5, CB, CNS, '  PROFESOR(A): ' + DOCENTE.nombre, WH, fnt(true, 10), aln('left', 'middle'));
+  mg(5, CM_S, NCOLS, 'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA', LA, fnt(true, 9), aln('center', 'middle'));
   ws.getRow(6).height=15.6;
-  // Fila 6
-  mg(6, CB, 2, 'N°', AZ, fnt(true, 8, WH), aln('center', 'middle'));
-  mg(6, CNS, 3, 'APELLIDOS Y NOMBRES', AZ, fnt(true, 9, WH), aln('center', 'middle'));
+ // Fila 6: Títulos de columnas
+  mg(6, CB, CB, 'N°', AZ, fnt(true, 8, WH), aln('center', 'middle'));
+  mg(6, CNS, CNS, 'APELLIDOS Y NOMBRES', AZ, fnt(true, 9, WH), aln('center', 'middle'));
   mg(6, CM_S, C_PROM, 'CAMPOS DE SABERES Y CONOCIMIENTOS', AZ, fnt(true, 9, WH), aln('center', 'middle'));
 
-  // Fila 7: Ajuste de grupos de materias (ahora empiezan en CM_S)
+  // Fila 7: Bloques de colores de los Campos
   mg(7, CM_S, CM_S + 5, 'COMUNIDAD Y SOCIEDAD', AM, fnt(true, 7, WH), aln('center', 'middle'));
   mg(7, CM_S + 6, CM_S + 8, 'C. TEC. Y PRODUCCION', AM, fnt(true, 7, WH), aln('center', 'middle'));
   mg(7, CM_S + 9, CM_S + 12, 'VIDA TIERRA Y TERRITORIO', AM, fnt(true, 7, WH), aln('center', 'middle'));
   mg(7, CM_S + 13, CM_S + 14, 'COSMOS Y PENSAMIENTO', AM, fnt(true, 7, WH), aln('center', 'middle'));
-
   // Fila 8: Limpiar columnas sobrantes
   sc(8, CB, '', AZ); 
   sc(8, CNS, '', AZ);
