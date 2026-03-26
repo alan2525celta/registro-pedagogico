@@ -992,14 +992,15 @@ mg(5, 11, NCOLS, 'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA', LA, fnt(true, 9), a
  // Fila 6: Títulos de columnas
 
   // FILA 6 - solo hasta CM_E (sin incluir PROM y OBS en el merge):
-mg(6, CM_S, CM_E, 'CAMPOS DE SABERES Y CONOCIMIENTOS', AZ, fnt(true, 9, WH), aln('center', 'middle'));
-sc(6, C_PROM, 'PROM.', AZ, fnt(true, 8, WH), aln('center', 'middle'));
-sc(6, C_OBS,  'OBS.',  AZ, fnt(true, 8, WH), aln('center', 'middle'));
-sc(6, CB, 'N°', AZ, fnt(true, 8, WH), aln('center', 'middle'));
-sc(6, CNS, 'APELLIDOS Y NOMBRES', AZ, fnt(true, 9, WH), aln('center', 'middle'));
+// REEMPLAZAR el bloque completo de fila 6:
+  ws.getRow(6).height=15.6;
+  sc(6, CB,  'N°', AZ, fnt(true, 8, WH), aln('center', 'middle'));
+  sc(6, CNS, 'APELLIDOS Y NOMBRES', AZ, fnt(true, 9, WH), aln('center', 'middle'));
+  mg(6, CM_S, CM_E, 'CAMPOS DE SABERES Y CONOCIMIENTOS', AZ, fnt(true, 9, WH), aln('center', 'middle'));
+  sc(6, C_PROM, 'PROM.', AZ, fnt(true, 8, WH), aln('center', 'middle'));
+  sc(6, C_OBS,  'OBS.',  AZ, fnt(true, 8, WH), aln('center', 'middle'));
   // Fila 7: Bloques de colores de los Campos
-  // POR ESTE BLOQUE CORREGIDO:
-  // AGREGAR al inicio del bloque de fila 7:
+ 
 ws.getRow(7).height = 15;
 sc(7, CB,  '', AZ, null, null);   // ← celda N° en fila 7
 sc(7, CNS, '', AZ, null, null);   // ← celda NOMBRES en fila 7
@@ -1011,8 +1012,9 @@ sc(7, C_PROM, '', AZ, null, null);  // ← celda PROMEDIO fila 7
 sc(7, C_OBS,  '', AZ, null, null);  // ← celda OBS fila 7
 
   // Fila 8: Limpiar columnas sobrantes
-  sc(8, CB, '', AZ); 
-  sc(8, CNS, '', AZ);
+ ws.getRow(8).height = 93.75;
+  sc(8, CB,  'N°',  AZ, fnt(true,7,'FFFFFFFF'), aln('center','bottom',90,false));
+  sc(8, CNS, 'APELLIDOS Y NOMBRES', AZ, fnt(true,7,'FFFFFFFF'), aln('center','bottom',90,false));
   todasMaterias.forEach((mat,i)=>{
     const esActual=mat.toLowerCase()===materia.toLowerCase();
     sc(8,CM_S+i,mat,esActual?AM:AZ,fnt(esActual,7,'FFFFFFFF'),aln('center','bottom',90,false));
