@@ -579,11 +579,16 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
   ws.getRow(2).height=18;
   mg(2,CN,CT,'CUADRO DE ASISTENCIA — GESTIÓN 2026', AM, fnt(false,12,WH), aln('center','middle'));
 
-  ws.getRow(3).height=22;
-  mg(3,CN,3,'MAESTRA(O):', GR, fnt(true,9), aln('right','middle'));
-  mg(3,4,20, DOCENTE.nombre, WH, fnt(false,10), aln('left','middle'));
-  sc(3,21,'CURSO:', GR, fnt(true,10), aln('center','middle'));
-  mg(3,22,CT, curso, WH, fnt(true,11), aln('center','middle'));
+// ===== FILA 3: CORRECCIÓN DE POSICIÓN PARA QUE "CURSO:" SE VEA BIEN =====
+  ws.getRow(3).height = 22;
+  // 1. Etiqueta MAESTRA(O) (Columnas 1 a 3)
+  mg(3, CN, 3, 'MAESTRA(O):', 'FFF1F5F9', fnt(true, 9), aln('right', 'middle'));
+  // 2. Nombre del Docente (Columnas 4 a 30) -> Le damos bastante espacio pero sin pasarnos
+  mg(3, 4, 30, DOCENTE.nombre, 'FFFFFFFF', fnt(false, 10), aln('left', 'middle'));
+  // 3. Etiqueta CURSO (Columnas 31 a 33) -> La movemos un poco a la derecha para que no choque
+  mg(3, 31, 33, 'CURSO:', 'FFF1F5F9', fnt(true, 10), aln('center', 'middle'));
+  // 4. Dato del CURSO (Desde Columna 34 hasta el final CT)
+  mg(3, 34, CT, curso, 'FFFFFFFF', fnt(true, 11), aln('center', 'middle'));
 
   ws.getRow(4).height=18;
   mg(4,CN,3,'ASIGNATURA:', GR, fnt(true,9), aln('right','middle'));
