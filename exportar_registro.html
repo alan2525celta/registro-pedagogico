@@ -753,23 +753,32 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
   ws.getColumn(C_TOT).width=8;ws.getColumn(C_AUTO).width=7;ws.getColumn(C_PROM).width=9;
   ws.getColumn(C_PF).width=9;ws.getColumn(C_LIT).width=18;ws.getColumn(C_OBS).width=12;
 
-  ws.getRow(1).height=9;
-  mg(1,CA,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICO "FRANZ TAMAYO DE CHACHACOMANI"',WH,fnt(false,8),aln('center','middle'));
-  ws.getRow(2).height=14.25;
-  ws.getRow(3).height=29.25;
-  sc(3,CA,'CUADRO DE CALIFICACIONES',WH,fnt(true,14,'FF833C00'),aln('left','middle'));
-  mg(3,CNS,C_LIT,'',WH,null,null,false);
-  sc(3,NCOLS,trim==='1'?'1T':trim==='2'?'2T':'3T',WH,fnt(true,11,'FF833C00'),aln('center','middle'));
-  ws.getRow(4).height=25.2;
-  mg(4,CA,NCOLS,trimNom[trim],WH,fnt(true,12,'FF833C00'),aln('left','middle'));
-  ws.getRow(5).height=15.75;ws.getRow(6).height=14.1;
-  mgBlock(5,6,CA,1,'MAESTR@:',LABEL,fnt(true,10),aln('right','middle'));
-  mgBlock(5,6,CNS,C_HAC,DOCENTE.nombre,WH,fnt(false,10),aln('left','middle'));
-  mgBlock(5,6,C_TOT,C_TOT,'CURSO:',LABEL,fnt(true,9),aln('center','middle'));
-  mgBlock(5,6,C_PROM,C_OBS,curso,WH,fnt(true,12),aln('center','middle'));
-  ws.getRow(7).height=14.1;
-  mg(7,CA,1,'AREA:',LABEL,fnt(true,10),aln('right','middle'));
-  mg(7,CNS,NCOLS,materia.toUpperCase(),WH,fnt(false,10),aln('left','middle'));
+  // ===== ENCABEZADO REFORMULADO (REEMPLAZAR DESDE FILA 1 HASTA 7) =====
+  // Fila 1: Nombre de la Institución
+  ws.getRow(1).height = 20;
+  mg(1, CA, NCOLS, 'UNIDAD EDUCATIVA "' + ue.toUpperCase() + '"', AZ, fnt(true, 11, WH), aln('center', 'middle'));
+  // Fila 2: Separador
+  ws.getRow(2).height = 5;
+  // Fila 3: Título y Cuadro de Trimestre (1T, 2T, 3T)
+  ws.getRow(3).height = 30;
+  mg(3, CA, C_PROM, 'CUADRO DE CALIFICACIONES', WH, fnt(true, 16, 'FF833C00'), aln('left', 'middle'));
+  // Cuadrito a la derecha
+  mgBlock(3, 3, C_PF, NCOLS, trim === '1' ? '1T' : trim === '2' ? '2T' : '3T', WH, fnt(true, 14, 'FF833C00'), aln('center', 'middle'));
+ // Fila 4: Nombre del Trimestre en Grande
+  ws.getRow(4).height = 28;
+  mg(4, CA, NCOLS, trimNom[trim].toUpperCase(), WH, fnt(true, 13, 'FF833C00'), aln('left', 'middle'));
+ // Fila 5 y 6: Maestro y Curso
+  ws.getRow(5).height = 15; ws.getRow(6).height = 15;
+  mgBlock(5, 6, CA, 1, 'MAESTR@:', LABEL, fnt(true, 10), aln('right', 'middle'));
+  mgBlock(5, 6, CNS, C_HAC, DOCENTE.nombre, WH, fnt(false, 11), aln('left', 'middle'));
+  // CURSO: Usamos las columnas finales para que no se encime
+  mgBlock(5, 6, C_TOT, C_TOT, 'CURSO:', LABEL, fnt(true, 9), aln('center', 'middle'));
+  mgBlock(5, 6, C_PROM, NCOLS, curso, WH, fnt(true, 13), aln('center', 'middle'));
+  // Fila 7: Área / Materia
+  ws.getRow(7).height = 18;
+  mg(7, CA, 1, 'ÁREA:', LABEL, fnt(true, 10), aln('right', 'middle'));
+  mg(7, CNS, NCOLS, materia.toUpperCase(), WH, fnt(false, 11), aln('left', 'middle'));
+  
   ws.getRow(8).height=21.75;
   ws.getRow(9).height=20;
   mgBlock(9,10,CA,CA,'No.',WH,fnt(false,9),aln('center','middle'));
