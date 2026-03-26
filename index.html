@@ -577,6 +577,7 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
 let DOCENTE=null,CURSOS=[],ESTUDIANTES=[],ACTIVIDADES=[],NOTAS={},ASIST_TEMP={};
+let obsYaCargadas=false;
 let cursoCurrent=null;
 let dimActual='RESUMEN',trimActual=1;
 let selectedRowId=null;
@@ -618,8 +619,14 @@ async function sbUpsert(tabla,data){
 
 async function sbDelete(tabla,id){
   deleteLocal(tabla,id);
-  if(isOnline){ showSync(); sb.from(tabla).delete().eq('id',id).then(({error})=>{ if(error) console.error(error); }); }
-  else{ pendingQueue.push({type:'delete',tabla,id}); localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue)); }
+  if(isOnline){
+    showSync();
+    const {error}=await sb.from(tabla).delete().eq('id',id);
+    if(error){ console.error('sbDelete',tabla,error); pendingQueue.push({type:'delete',tabla,id}); localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue)); }
+  } else {
+    pendingQueue.push({type:'delete',tabla,id});
+    localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue));
+  }
 }
 
 async function sbGet(tabla,filtros={}){
@@ -734,7 +741,7 @@ async function cargarDatos(){
   NOTAS={};
   notasArr.forEach(n=>{ if(!NOTAS[n.id_estudiante]) NOTAS[n.id_estudiante]={}; NOTAS[n.id_estudiante][n.id_actividad]=parseFloat(n.nota); });
   const autoArr=await sbGet('autoevaluacion',{id_docente:DOCENTE.id});
-  autoArr.forEach(a=>{ localStorage.setItem('auto_'+a.id_estudiante+'_'+a.trimestre,a.nota); });
+  autoArr.forEach(a=>{ saveLocal('autoevaluacion',{id:'AE_'+a.id_estudiante+'_'+a.trimestre,id_docente:DOCENTE.id,id_estudiante:a.id_estudiante,curso:a.curso,materia:a.materia,trimestre:a.trimestre,nota:parseFloat(a.nota)}); });
   // preload asistencia y observaciones para offline
   if(isOnline){
     try{
@@ -797,7 +804,7 @@ function renderInicio(){
   }).join('');
 }
 
-function seleccionarCurso(id){
+function seleccionarCurso(id){ obsYaCargadas=false;
   cursoCurrent=CURSOS.find(c=>c.id===id);
   if(!cursoCurrent) return;
   const badge=document.getElementById('curso-badge');
@@ -957,7 +964,6 @@ async function confirmarImport(){
     await sbUpsert('estudiantes',obj);
     ESTUDIANTES.push(obj);
     cnt++;
-    await new Promise(r=>setTimeout(r,50)); // small delay to avoid id collision
   }
   ESTUDIANTES.sort((a,b)=>a.nombre.localeCompare(b.nombre));
   closeModal('modal-import');
@@ -1179,7 +1185,8 @@ async function guardarEditAct(){
 
 // ===== NOTAS =====
 function getAutoEval(estId){
-  return parseFloat(localStorage.getItem('auto_'+estId+'_'+trimActual))||null;
+  const reg=getLocalAll('autoevaluacion').find(a=>a.id_estudiante===estId&&String(a.trimestre)===String(trimActual));
+  return reg?parseFloat(reg.nota):null;
 }
 
 function renderNotas(){
@@ -1290,7 +1297,6 @@ async function saveAutoEval(estId,val,curso,materia,inputEl){
     if(inputEl){ inputEl.classList.add('invalid'); setTimeout(()=>inputEl.classList.remove('invalid'),2000); }
     showToast('⚠️ Autoevaluación: 0 a 5'); return;
   }
-  localStorage.setItem('auto_'+estId+'_'+trimActual,num);
   await sbUpsert('autoevaluacion',{id:'AE_'+estId+'_'+trimActual,id_docente:DOCENTE.id,id_estudiante:estId,curso,materia,trimestre:String(trimActual),nota:num});
 }
 
@@ -1312,17 +1318,17 @@ function setDim(dim,btn,cls){
 }
 
 // ===== OBSERVACIONES =====
-async function renderObservaciones(){
+async function renderObservaciones(forzarRecarga=false){
   if(!cursoCurrent){ document.getElementById('lista-obs').innerHTML='<div class="empty"><div class="ei">💬</div><p>Selecciona un curso desde Inicio</p></div>'; return; }
-  // Refresh from Supabase if online, merge with local pending
-  if(isOnline){
+  // Solo recargar de Supabase la primera vez o cuando se fuerza (al guardar/editar)
+  if(isOnline&&(!obsYaCargadas||forzarRecarga)){
     try{
       const {data}=await sb.from('observaciones').select('*').eq('id_docente',DOCENTE.id);
       if(data){
-        // Merge: keep local records not yet in Supabase (pendingQueue)
         const remoteIds=new Set(data.map(x=>x.id));
         const localPending=getLocalAll('observaciones').filter(x=>!remoteIds.has(x.id));
         saveLocalAll('observaciones',[...data,...localPending]);
+        obsYaCargadas=true;
       }
     }catch(e){}
   }
@@ -1350,7 +1356,7 @@ async function toggleVisObs(id,actual){
   const nuevo=actual==='SI'?'NO':'SI';
   const all=getLocalAll('observaciones');
   const obs=all.find(o=>o.id===id);
-  if(obs){ obs.visible_padre=nuevo; await sbUpsert('observaciones',obs); await renderObservaciones(); }
+  if(obs){ obs.visible_padre=nuevo; await sbUpsert('observaciones',obs); await renderObservaciones(true); }
 }
 
 async function agregarObservacion(){
@@ -1367,7 +1373,7 @@ async function agregarObservacion(){
   closeModal('modal-obs');
   // Clear form
   document.getElementById('fo-texto').value='';
-  await renderObservaciones();
+  await renderObservaciones(true);
   showToast('Observación guardada ✓');
 }
 
@@ -1544,9 +1550,17 @@ function showToast(msg){
 }
 
 // ===== CERRAR SESIÓN =====
-function cerrarSesion(){
-  if(!confirm('¿Cerrar sesión? Se borrarán los datos locales de este dispositivo.')) return;
+async function cerrarSesion(){
+  if(pendingQueue.length>0){
+    const seguir=confirm('⚠️ Tienes '+pendingQueue.length+' cambio(s) sin sincronizar con internet.\n\n¿Cerrar sesión de todas formas? Se perderán esos cambios.');
+    if(!seguir) return;
+  } else {
+    if(!confirm('¿Cerrar sesión? Se borrarán los datos locales de este dispositivo.')) return;
+  }
+  // Guardar solo el pendingQueue si existe para no perder datos
+  const pq=localStorage.getItem('pendingQueue');
   localStorage.clear();
+  // No restauramos pendingQueue — el usuario confirmó cerrar sesión
   location.reload();
 }
 
