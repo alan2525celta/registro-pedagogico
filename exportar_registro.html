@@ -756,28 +756,30 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
   // ===== ENCABEZADO REFORMULADO (REEMPLAZAR DESDE FILA 1 HASTA 7) =====
   // Fila 1: Nombre de la Institución
   ws.getRow(1).height = 20;
-  mg(1, CA, NCOLS, 'UNIDAD EDUCATIVA "' + ue.toUpperCase() + '"', AZ, fnt(true, 11, WH), aln('center', 'middle'));
+  mg(1, CA, NCOLS, 'UNIDAD EDUCATIVA "' + ue.toUpperCase() + '"', AZ, fnt(true, 12, WH), aln('center', 'middle'));
   // Fila 2: Separador
-  ws.getRow(2).height = 5;
+  ws.getRow(2).height = 1;
   // Fila 3: Título y Cuadro de Trimestre (1T, 2T, 3T)
   ws.getRow(3).height = 30;
-  mg(3, CA, C_PROM, 'CUADRO DE CALIFICACIONES', WH, fnt(true, 16, 'FF833C00'), aln('left', 'middle'));
+  mg(3, CA, C_PROM, 'CUADRO DE CALIFICACIONES', AM, fnt(true, 16, 'FFFFFF'), aln('center', 'middle'));
   // Cuadrito a la derecha
-  mgBlock(3, 3, C_PF, NCOLS, trim === '1' ? '1T' : trim === '2' ? '2T' : '3T', WH, fnt(true, 14, 'FF833C00'), aln('center', 'middle'));
+  mgBlock(3, 3, C_PF, NCOLS, trim === '1' ? '1T' : trim === '2' ? '2T' : '3T', WH, fnt(true, 16, 'FF833C00'), aln('center', 'middle'));
  // Fila 4: Nombre del Trimestre en Grande
   ws.getRow(4).height = 28;
-  mg(4, CA, NCOLS, trimNom[trim].toUpperCase(), WH, fnt(true, 13, 'FF833C00'), aln('left', 'middle'));
+  mg(4, CA, NCOLS, trimNom[trim].toUpperCase(), WH, fnt(true, 14, 'FF833C00'), aln('center', 'middle'));
  // Fila 5 y 6: Maestro y Curso
-  ws.getRow(5).height = 15; ws.getRow(6).height = 15;
-  mgBlock(5, 6, CA, 1, 'MAESTR@:', LABEL, fnt(true, 10), aln('right', 'middle'));
-  mgBlock(5, 6, CNS, C_HAC, DOCENTE.nombre, WH, fnt(false, 11), aln('left', 'middle'));
+ ws.getRow(5).height = 15; ws.getRow(6).height = 15;
+  // Etiqueta Maestro (Columna 1)
+  mgBlock(5, 6, CA, CA, 'MAESTR@:', LABEL, fnt(true, 9), aln('center', 'middle'));
+  // Nombre del Maestro (Columnas 2 a 6)
+  mgBlock(5, 6, CNS, C_HAC, DOCENTE.nombre, WH, fnt(false, 10), aln('left', 'middle'));
   // CURSO: Usamos las columnas finales para que no se encime
   mgBlock(5, 6, C_TOT, C_TOT, 'CURSO:', LABEL, fnt(true, 9), aln('center', 'middle'));
   mgBlock(5, 6, C_PROM, NCOLS, curso, WH, fnt(true, 13), aln('center', 'middle'));
   // Fila 7: Área / Materia
-  ws.getRow(7).height = 18;
-  mg(7, CA, 1, 'ÁREA:', LABEL, fnt(true, 10), aln('right', 'middle'));
-  mg(7, CNS, NCOLS, materia.toUpperCase(), WH, fnt(false, 11), aln('left', 'middle'));
+ ws.getRow(7).height = 18;
+  mg(7, CA, CA, 'ÁREA:', LABEL, fnt(true, 9), aln('center', 'middle'));
+  mg(7, CNS, NCOLS, materia.toUpperCase(), WH, fnt(false, 10), aln('left', 'middle'));
   
   ws.getRow(8).height=21.75;
   ws.getRow(9).height=20;
