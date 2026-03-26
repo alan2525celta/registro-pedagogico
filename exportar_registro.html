@@ -455,12 +455,12 @@ for(let i = 0; i < nHAC_1T; i++) {
   sc(7, C_HAC_S + i, act ? act.nombre_actividad : '', C.HAC_BG, font(false, 8.5), align('center', 'bottom', 90, true));
 }
 // CAMBIO: Promedio HACER ahora es VERTICAL (90°)
-sc(7, C_PHAC, 'PROMEDIO\nHACER', C.HAC_MED, font(true, 9), align('center', 'bottom', 90, true));
+sc(7, C_PHAC, 'PROMEDIO\nHACER', C.HAC_MED, font(true, 10), align('center', 'bottom', 90, true));
 // CAMBIO: Todos los encabezados finales ahora son VERTICALES (90°)
-sc(7, C_TOTAL, 'VALORACIÓN\nTOTAL', C.TOTAL, font(true, 9), align('center', 'bottom', 90, true));
-sc(7, C_AUTO, 'AUTO\nEVAL. (5)', C.AUTO, font(true, 9), align('center', 'bottom', 90, true));
+sc(7, C_TOTAL, 'VALORACIÓN\nTOTAL', C.TOTAL, font(true, 10), align('center', 'bottom', 90, true));
+sc(7, C_AUTO, 'AUTO\nEVAL. (5)', C.AUTO, font(true, 10), align('center', 'bottom', 90, true));
 sc(7, C_PROM, 'PROM.\nTRIM.', C.PROM, font(true, 10), align('center', 'bottom', 90, true));
-sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 9), align('center', 'bottom', 90, true));
+sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 10), align('center', 'bottom', 90, true));
 
   
   // ===== FILAS ESTUDIANTES — mínimo 30 filas =====
@@ -482,7 +482,7 @@ sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 9), align('center'
       sc(row,C_SER_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFEFF6FF':'FFE1EFFE', font(true,11), align('center', 'middle', 0, false));
     }
     const pSer=e?promDim(e.id,serActs,NOTAS):null;
-    sc(row,C_PSER, pSer!==null?Math.round(pSer):'', C.SER_MED, font(true,11), align('center','middle'));
+    sc(row,C_PSER, pSer!==null?Math.round(pSer):'', C.SER_MED, font(false,11), align('center','middle'));
 
     // SABER — mínimo 9 cols
     for(let j=0;j<nSAB_1T;j++){
@@ -492,7 +492,7 @@ sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 9), align('center'
     }
     const pSab=e?promDim(e.id,saberActs,NOTAS):null;
     const pSabConv=pSab!==null?Math.round(pSab*0.45):null;
-    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,11), align('center','middle'));
+    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(false,11), align('center','middle'));
 
     // HACER — mínimo 9 cols
     for(let j=0;j<nHAC_1T;j++){
@@ -502,17 +502,17 @@ sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 9), align('center'
     }
     const pHac=e?promDim(e.id,hacerActs,NOTAS):null;
     const pHacConv=pHac!==null?Math.round(pHac*0.40):null;
-    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,11), align('center','middle'));
+    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(false,11), align('center','middle'));
 
     const total=e&&(pSer!==null||pSabConv!==null||pHacConv!==null)?
       Math.round((pSer||0)+(pSabConv||0)+(pHacConv||0)):null;
-    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,11), align('center','middle'));
+    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,12), align('center','middle'));
 
     const auto=e&&AUTOEVALS[e.id]!==undefined?AUTOEVALS[e.id]:null;
-    sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(true,11), align('center','middle'));
+    sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(true,12), align('center','middle'));
 
     const promFinal=total!==null?Math.round(total+(auto||0)):null;
-    sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,11), align('center','middle'));
+    sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,12), align('center','middle'));
 
     let estado='', estBg=C.WHITE, estColor='FF000000';
     if(promFinal!==null){
@@ -523,62 +523,72 @@ sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 9), align('center'
   }
 
   // ===== FILA TOTALES =====
-  const rowTot=8+MIN_FILAS_1T;
-  ws.getRow(rowTot).height=14;
-  merge(rowTot,C1,C_NOM_E, 'TOTAL: '+ESTUDIANTES.length+' estudiantes',
-    'FFDCE6F1', font(true,9), align('left','middle'));
-  merge(rowTot,C_SER_S,C_PHAC,'',C.GRIS,null,null);
-  sc(rowTot,C_TOTAL,'',C.GRIS,null,null);
-  sc(rowTot,C_AUTO,'',C.GRIS,null,null);
-  sc(rowTot,C_PROM,'',C.GRIS,null,null);
-  sc(rowTot,C_EST,'Aprobados: '+aprobados+'/'+ESTUDIANTES.length,
-    C.APROBADO, font(true,9,'FF065F46'), align('center','middle',0,true));
-
-  // ===== FILA FIRMA =====
-  const rowFirma=rowTot+2;
-  ws.getRow(rowFirma).height=30;
-  merge(rowFirma,C1,Math.floor(NCOLS/2)-1,'',C.WHITE,null,null);
-  merge(rowFirma,Math.floor(NCOLS/2),NCOLS,'',C.WHITE,null,null);
-  ws.getRow(rowFirma+1).height=12;
-  merge(rowFirma+1,C1,Math.floor(NCOLS/2)-1,'_______________________________',C.WHITE,font(false,9),align('center','top'));
-  merge(rowFirma+1,Math.floor(NCOLS/2),NCOLS,'_______________________________',C.WHITE,font(false,9),align('center','top'));
-  ws.getRow(rowFirma+2).height=12;
-  merge(rowFirma+2,C1,Math.floor(NCOLS/2)-1,'Firma del Docente',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
-  merge(rowFirma+2,Math.floor(NCOLS/2),NCOLS,'Sello y Firma de Dirección',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
-
-  // ===== CONFIGURAR ÁREA DE IMPRESIÓN AUTOMÁTICA =====
-  // Solo incluir celdas con datos (hasta última fila de estudiantes + totales + firma)
-  // Convertir número de columna a letra Excel
-  function numToCol(n){ let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26); } return s; }
-  // ===== CUADRO RESUMEN FINAL (imagen 2) =====
-  const rowRes=rowFirma+4;
-  const reprobados1T=ESTUDIANTES.length-aprobados;
-  const pctApro=ESTUDIANTES.length?Math.round(aprobados/ESTUDIANTES.length*100):0;
-  const pctRepr=ESTUDIANTES.length?Math.round(reprobados1T/ESTUDIANTES.length*100):0;
-  const resData=[
-    ['TOTAL DE ESTUDIANTES .....',ESTUDIANTES.length],
-    ['TOTAL APROBADOS ...........',aprobados],
-    ['TOTAL REPROBADOS ..........',reprobados1T],
-    ['TOTAL RETIRADOS ...........',0],
-    ['PORCENTAJE DE APROBADOS ...',pctApro+'%'],
-    ['PORCENTAJE DE REPROBADOS ..',pctRepr+'%'],
-  ];
-  const colResS=Math.floor(NCOLS/2);
-  resData.forEach((fila,idx)=>{
-    const r=rowRes+idx;
-    ws.getRow(r).height=13;
-    merge(r,colResS,NCOLS-1,fila[0],idx%2===0?'FFF1F5F9':'FFFFFFFF',font(false,8),align('left','middle'));
-    sc(r,NCOLS,fila[1],idx%2===0?'FFD9E1F2':'FFFFFFFF',font(true,9),align('center','middle'));
-  });
-
-  const lastRowPrint = rowRes+resData.length+1;
-  function numToCol(n){ let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26); } return s; }
-  ws.pageSetup.printArea = 'A1:'+numToCol(NCOLS)+lastRowPrint;
-
-  // Cuadrícula visible en impresión
-  ws.pageSetup.showGridLines = true;
-  ws.pageSetup.blackAndWhite = false;
-  ws.pageSetup.draft = false;
+ // 1. Posición inicial justo después del último estudiante
+const rowTot = 8 + MIN_FILAS_1T; 
+// ===== SECCIÓN 1: CUADRO DE ESTADÍSTICA (PEGADO A LA LISTA) =====
+const rowRes = rowTot; 
+const reprobados1T = ESTUDIANTES.length - aprobados;
+const pctApro = ESTUDIANTES.length ? Math.round((aprobados / ESTUDIANTES.length) * 100) : 0;
+const pctRepr = ESTUDIANTES.length ? Math.round((reprobados1T / ESTUDIANTES.length) * 100) : 0;
+const resData = [
+  ['TOTAL ESTUDIANTES', ESTUDIANTES.length],
+  ['EFECTIVOS', ESTUDIANTES.length],
+  ['APROBADOS', aprobados],
+  ['REPROBADOS', reprobados1T],
+  ['RETIRADOS', 0],
+  ['PORCENTAJE DE APROBADOS', pctApro + '%'],
+  ['PORCENTAJE DE REPROBADOS', pctRepr + '%']
+];
+// Encabezado del cuadro estadístico (Fondo Azul Oscuro, Texto Blanco)
+ws.getRow(rowRes).height = 18;
+merge(rowRes, Math.floor(NCOLS/2), NCOLS-1, 'ESTADÍSTICA', 'FF1F3D6A', font(true, 9, 'FFFFFFFF'), align('center', 'middle'));
+sc(rowRes, NCOLS, (trim + 1) + 'DO. TRIM.', 'FF1F3D6A', font(true, 9, 'FFFFFFFF'), align('center', 'middle'));
+// Dibujar las filas de la tabla estadística
+resData.forEach((fila, idx) => {
+  const r = rowRes + 1 + idx;
+  ws.getRow(r).height = 15;
+   // Etiqueta (Lado izquierdo del cuadro)
+  merge(r, Math.floor(NCOLS/2), NCOLS-1, fila[0], 'FFFFFFFF', font(false, 8, 'FF334155'), align('left', 'middle'));
+    // Valor (Lado derecho del cuadro, en negrita)
+  sc(r, NCOLS, fila[1], 'FFFFFFFF', font(true, 10, 'FF1F3D6A'), align('center', 'middle'));
+    // Aplicar bordes delgados a los valores para que parezca tabla
+  ws.getCell(r, NCOLS).border = { 
+    top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} 
+  };
+});
+// ===== SECCIÓN 2: LÍNEA ÚNICA DE FIRMA Y FECHA =====
+const rowFinal = rowRes + resData.length + 3; // Espacio prudencial después de la estadística
+ws.getRow(rowFinal).height = 45; // Altura para que el sello quepa bien
+// Firma (Lado izquierdo)
+merge(rowFinal, 1, 5, '_______________________________', 'FFFFFFFF', font(false, 10), align('center', 'bottom'));
+// Fecha (Lado derecho - dinámica según el sistema)
+const fechaHoy = new Intl.DateTimeFormat('es-ES', { 
+    dateStyle: 'full' 
+}).format(new Date());
+const textoFecha = 'Chachacomani, ' + fechaHoy;
+merge(rowFinal, Math.floor(NCOLS/2), NCOLS, 'FECHA: ' + textoFecha, 'FFFFFFFF', font(false, 10), align('right', 'bottom'));
+// Subtítulo debajo de la línea de firma
+ws.getRow(rowFinal + 1).height = 15;
+merge(rowFinal + 1, 1, 5, 'FIRMA / SELLO', 'FFFFFFFF', font(false, 8, 'FF64748B'), align('center', 'top'));
+// ===== SECCIÓN 3: CONFIGURACIÓN DE IMPRESIÓN Y VISTA =====
+const lastRowPrint = rowFinal + 2;
+// Función para convertir número de columna a letra (A, B, C...)
+function numToCol(n) { 
+    let s = ''; 
+    while (n > 0) { 
+        s = String.fromCharCode(65 + (n - 1) % 26) + s; 
+        n = Math.floor((n - 1) / 26); 
+    } 
+    return s; 
+}
+// Configurar Área de Impresión
+ws.pageSetup.printArea = 'A1:' + numToCol(NCOLS) + lastRowPrint;
+// Ajustes finales de página
+ws.pageSetup.showGridLines = false; // Desactivamos cuadrícula para que se vea limpio como la imagen
+ws.pageSetup.horizontalCentered = true; // Centrar el reporte en la hoja
+ws.pageSetup.fitToPage = true;
+ws.pageSetup.fitToWidth = 1;
+ws.pageSetup.fitToHeight = 0;
 
 
 
