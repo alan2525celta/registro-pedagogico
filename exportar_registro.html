@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -84,7 +83,7 @@ select:disabled{background:#f8fafc;color:#94a3b8}
   </div>
   <div class="fg">
     <label>Unidad Educativa</label>
-    <input type="text" id="inp-ue" value="Lan Calcina 2026">
+    <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
   </div>
 
   <hr class="divider">
@@ -375,6 +374,7 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
     cell.border=allBorder;
     return cell;
   }
+
 
   // ===== FILA 1: UE =====
   ws.getRow(1).height=22;
