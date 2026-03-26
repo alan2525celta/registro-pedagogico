@@ -330,7 +330,7 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
 
   // ===== FILAS DE ENCABEZADO =====
   ws.getRow(1).height=22;
-  merge(1,1,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(),
+  merge(1,1,NCOLS,'UNIDAD EDUCATIVA: '+ue.toUpperCase(),
     C.HDR_AZUL,font(true,14,'FFFFFFFF'),align('center','middle',0,false));
 
   ws.getRow(2).height=20;
@@ -679,7 +679,7 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
   const rowFirma=rt+3;
   ws.getRow(rowFirma).height=45;
   mg(rowFirma, 1, 6, '_______________________________', WH, fnt(false, 10), aln('center', 'bottom'));
-  const fechaHoy = "Chachacomani, miércoles, 25 de marzo de 2026";
+  const fechaHoy=new Intl.DateTimeFormat('es-ES',{dateStyle:'full'}).format(new Date());
   mg(rowFirma, 20, CT, 'FECHA: ' + fechaHoy, WH, fnt(false, 10), aln('right', 'bottom'));
   
   ws.getRow(rowFirma+1).height=15;
