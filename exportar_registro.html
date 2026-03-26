@@ -523,36 +523,52 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
 
 
 // =====================================================================
-// HOJA AS.1 — CUADRO DE ASISTENCIA
+// HOJA AS.1 — CUADRO DE ASISTENCIA (VERSIÓN MEJORADA)
 // =====================================================================
 async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,DOCENTE}){
   function colLetra(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
   const trimNom={'1':'1ER. TRIMESTRE','2':'2DO. TRIMESTRE','3':'3ER. TRIMESTRE'};
   const ws=wb.addWorksheet('AS.1');
+  
+  // Configuración de página profesional
   ws.pageSetup.orientation='landscape';
-  ws.pageSetup.paperSize=1;
+  ws.pageSetup.paperSize=1; // Carta/Letter
   ws.pageSetup.scale=75;
-  ws.pageSetup.fitToPage=false;
-  ws.pageSetup.margins={left:0,right:0,top:0.39,bottom:0.2,header:0.12,footer:0.12};
-  ws.headerFooter={oddHeader:'',oddFooter:''};
+  ws.pageSetup.margins={left:0.2,right:0.2,top:0.3,bottom:0.3,header:0,footer:0};
 
-  const todasFechas=Object.keys(asistenciaData).length>0
-    ?[...new Set(Object.values(asistenciaData).flatMap(d=>Object.keys(d)))].sort()
-    :[];
-  const fechas=todasFechas.slice(0,50);
+  // Paleta de colores consistente
+  const C = {
+    HDR_AZUL: 'FF1F3D6A', // Azul Institucional
+    HDR_MED: 'FF2563EB',  // Azul Medio
+    LABEL: 'FFF1F5F9',    // Gris para etiquetas
+    WHITE: 'FFFFFFFF',
+    GRIS: 'FFF1F5F9',     // Gris cebra
+    BORDE: 'FF000000'
+  };
 
-  const brd={style:'thin',color:{argb:'FF000000'}};
-  const allB={top:brd,left:brd,bottom:brd,right:brd};
-  function fill(a){return{type:'pattern',pattern:'solid',fgColor:{argb:a}};}
-  function fnt(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
-  function aln(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
-  function sc(r,col,val,bg,fn,al,borde=true){
+  const CN=1, NS=2, NE=3, DS=4, DE=39, CP=40, CL=41, CA=42, CF=43, CT=44;
+
+  // Configuración de anchos
+  ws.getColumn(CN).width=3.5;
+  ws.getColumn(NS).width=17;
+  ws.getColumn(NE).width=15;
+  for(let i=DS;i<=DE;i++) ws.getColumn(i).width=2.8;
+  ws.getColumn(CP).width=4; ws.getColumn(CL).width=4;
+  ws.getColumn(CA).width=4; ws.getColumn(CF).width=4; ws.getColumn(CT).width=6.5;
+
+  // Funciones de formato
+  const fill=(c)=>({type:'pattern',pattern:'solid',fgColor:{argb:c}});
+  const font=(b,s,c='FF000000')=>({bold:b,size:s,name:'Calibri',color:{argb:c}});
+  const align=(h,v,r,w)=>({horizontal:h,vertical:v,textRotation:r||0,wrapText:!!w});
+  const border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+
+  function sc(r,col,val,bg,fn,al){
     const cell=ws.getCell(r,col);
-    if(val!==null&&val!==undefined)cell.value=val;
-    if(bg)cell.fill=fill(bg);
-    if(fn)cell.font=fn;
-    if(al)cell.alignment=al;
-    if(borde)cell.border=allB;
+    if(val!==null && val!==undefined) cell.value=val;
+    if(bg) cell.fill=fill(bg);
+    if(fn) cell.font=fn;
+    if(al) cell.alignment=al;
+    cell.border=border;
     return cell;
   }
   function mg(r,c1,c2,val,bg,fn,al){
@@ -560,125 +576,125 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
     return sc(r,c1,val,bg,fn,al);
   }
 
-  const AZ='FF1A3A6B',AM='FF2563EB',LA='FFF2CF50',PR='FFFFC000',
-        LC='FF92D050',AT='FFFDE9D9',FA='FFFFC7CE',WH='FFFFFFFF',GR='FFF1F5F9';
-  const CN=1,NS=2,NE=3,DS=4,DE=39,CP=40,CL=41,CA=42,CF=43,CT=44;
+  // ===== ENCABEZADO INSTITUCIONAL (FILAS 1-4) =====
+  ws.getRow(1).height=20;
+  mg(1,CN,CT,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(), C.HDR_AZUL, font(true,11,'FFFFFFFF'), align('center','middle'));
 
-  ws.getColumn(CN).width=3.5;
-  ws.getColumn(NS).width=16;
-  ws.getColumn(NE).width=15;
-  for(let i=DS;i<=DE;i++)ws.getColumn(i).width=2.7;
-  ws.getColumn(CP).width=3.7;ws.getColumn(CL).width=4;
-  ws.getColumn(CA).width=4;ws.getColumn(CF).width=4;ws.getColumn(CT).width=5.7;
+  ws.getRow(2).height=18;
+  mg(2,CN,CT,'CUADRO DE ASISTENCIA — GESTIÓN 2026', C.HDR_MED, font(false,12,'FFFFFFFF'), align('center','middle'));
 
-  ws.getRow(1).height=15;
-  mg(1,CN,3,'UNIDAD EDUCATIVA: '+ue.toUpperCase(),AZ,fnt(true,10,'FFFFFFFF'),aln('left','middle'));
-  mg(1,5,30,trimNom[trim],AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
-  mg(1,38,CT,'2026',AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
+  ws.getRow(3).height=22;
+  mg(3,CN,3,'MAESTRA(O):', C.LABEL, font(true,9), align('right','middle'));
+  mg(3,4,20, DOCENTE.nombre, C.WHITE, font(false,10), align('left','middle'));
+  sc(3,21,'CURSO:', C.LABEL, font(true,10), align('center','middle'));
+  mg(3,22,CT, curso, C.WHITE, font(true,11), align('center','middle'));
 
-  ws.getRow(2).height=14;
-  mg(2,CN,CT,'CUADRO DE ASISTENCIA',AZ,fnt(true,12,'FFFFFFFF'),aln('center','middle'));
+  ws.getRow(4).height=18;
+  mg(4,CN,3,'ASIGNATURA:', C.LABEL, font(true,9), align('right','middle'));
+  mg(4,4,CT, materia.toUpperCase(), C.WHITE, font(false,10), align('left','middle'));
 
-  ws.getRow(3).height=27;
-  mg(3,CN,4,'MAESTRA(O):',LA,fnt(true,9),aln('right','middle'));
-  mg(3,5,Math.max(30,fechas.length+CN+4),DOCENTE.nombre,WH,fnt(false,10),aln('left','middle'));
-  mg(3,Math.max(35,fechas.length+CN+5),CT,'CURSO: '+curso,LA,fnt(true,10),aln('center','middle'));
+  ws.getRow(5).height=5;
 
-  ws.getRow(4).height=19.5;
-  mg(4,CN,4,'ASIGNATURA:',LA,fnt(true,9),aln('right','middle'));
-  mg(4,5,CT,materia.toUpperCase(),WH,fnt(false,10),aln('left','middle'));
+  // ===== FILA 6, 7 y 8: ENCABEZADOS COMBINADOS VERTICALMENTE =====
+  ws.getRow(6).height=20;
+  ws.getRow(7).height=40;
+  ws.getRow(8).height=40;
 
-  ws.getRow(5).height=4.5;
+  // N° y Nombres (Combinados 6 al 8)
+  ws.mergeCells(6,CN,8,CN);
+  sc(6,CN,'N°', C.HDR_AZUL, font(true,9,'FFFFFFFF'), align('center','middle'));
+  ws.mergeCells(6,NS,8,NE);
+  sc(6,NS,'APELLIDOS Y NOMBRES', C.HDR_AZUL, font(true,10,'FFFFFFFF'), align('center','middle'));
 
-  ws.getRow(6).height=25;
-  sc(6,CN,'N°',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
-  mg(6,NS,NE,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
-  mg(6,DS,DE,'ASISTENCIA — '+fechas.length+' días registrados',AM,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
-  sc(6,CP,'P',PR,fnt(true,9),aln('center','middle'));
-  sc(6,CL,'L',LC,fnt(true,9),aln('center','middle'));
-  sc(6,CA,'A',AT,fnt(true,9),aln('center','middle'));
-  sc(6,CF,'F',FA,fnt(true,9),aln('center','middle'));
-  mg(6,CT,CT,'TOTAL\nDIAS',AZ,fnt(true,8,'FFFFFFFF'),aln('center','middle',0,true));
+  // Título de Asistencia
+  const todasFechas=Object.keys(asistenciaData).length>0 ? [...new Set(Object.values(asistenciaData).flatMap(d=>Object.keys(d)))].sort() : [];
+  const fechas=todasFechas.slice(0,36);
+  mg(6,DS,DE,'ASISTENCIA — '+trimNom[trim], C.HDR_MED, font(true,10,'FFFFFFFF'), align('center','middle'));
 
-  ws.getRow(7).height=12.75;
-  sc(7,CN,'',GR,null,null);
-  mg(7,NS,NE,'',GR,null,null);
-  for(let i=DS;i<=DE;i++)sc(7,i,'',GR,null,null);
-  sc(7,CP,'P / PRESENTE',PR,fnt(true,8),aln('center','middle',90,true));
-  sc(7,CL,'L / LICENCIA',LC,fnt(true,8),aln('center','middle',90,true));
-  sc(7,CA,'A / ATRASO',AT,fnt(true,8),aln('center','middle',90,true));
-  sc(7,CF,'F / FALTA',FA,fnt(true,8),aln('center','middle',90,true));
-  sc(7,CT,'',AZ,null,null);
-
-  ws.getRow(8).height=58.5;
-  sc(8,CN,'',GR,null,aln('center','bottom'));
-  mg(8,NS,NE,'',GR,null,null);
+  // Fechas Combinadas (Fila 7 y 8)
   fechas.forEach((f,i)=>{
     const p=f.split('-');
     const lbl=p.length===3?p[2]+'/'+p[1]:f;
-    const bg=i%2===0?'FFD9E1F2':'FFE8F4FD';
-    sc(8,DS+i,lbl,bg,fnt(false,9),aln('center','bottom',90,false));
+    const col=DS+i;
+    ws.mergeCells(7,col,8,col);
+    sc(7,col,lbl, i%2===0?'FFD9E1F2':C.WHITE, font(false,9), align('center','middle',90));
   });
-  for(let i=fechas.length;i<36;i++)sc(8,DS+i,'',GR,null,aln('center','bottom'));
-  sc(8,CP,'',PR,null,null);sc(8,CL,'',LC,null,null);
-  sc(8,CA,'',AT,null,null);sc(8,CF,'',FA,null,null);sc(8,CT,'',AZ,null,null);
+  for(let i=fechas.length;i<(DE-DS+1);i++) {
+    ws.mergeCells(7,DS+i,8,DS+i);
+    sc(7,DS+i,'',C.WHITE,null,null);
+  }
 
-  const MIN_AS1=Math.max(30,ESTUDIANTES.length);
+  // Totales y Leyendas Combinadas (Fila 6 al 8)
+  const leyendas=[
+    {c:CP, t:'P - PRESENTE', b:'FFF2CF50'},
+    {c:CL, t:'L - LICENCIA', b:'FF92D050'},
+    {c:CA, t:'A - ATRASO',   b:'FFFDE9D9'},
+    {c:CF, t:'F - FALTA',    b:'FFFFC7CE'}
+  ];
+  leyendas.forEach(l=>{
+    ws.mergeCells(6,l.c,8,l.c);
+    sc(6,l.c,l.t, l.b, font(true,8), align('center','middle',90,true));
+  });
+  ws.mergeCells(6,CT,8,CT);
+  sc(6,CT,'TOTAL\nDÍAS', C.HDR_AZUL, font(true,8,'FFFFFFFF'), align('center','middle',0,true));
+
+  // ===== FILAS ESTUDIANTES =====
+  const MIN_AS1=Math.max(35,ESTUDIANTES.length);
   for(let idx=0;idx<MIN_AS1;idx++){
     const e=ESTUDIANTES[idx]||null;
     const row=9+idx;
     ws.getRow(row).height=17.4;
-    const bg=idx%2===0?WH:GR;
-    sc(row,CN,e?idx+1:'',bg,fnt(true,9),aln('center','middle'));
-    mg(row,NS,NE,e?e.nombre:'',bg,fnt(false,9),aln('left','middle'));
+    const bg=idx%2===0?C.WHITE:C.GRIS;
+
+    sc(row,CN,e?idx+1:'',bg,font(true,9),align('center','middle'));
+    mg(row,NS,NE,e?e.nombre:'',bg,font(false,9),align('left','middle'));
 
     if(e){
+      let cP=0, cL=0, cA=0, cF=0;
       fechas.forEach((f,j)=>{
         const est=(asistenciaData[e.id]&&asistenciaData[e.id][f])||'';
-        const bgM={'P':'FFE8F5E9','L':'FFF1F8E9','A':'FFFFF9E6','F':'FFFCE4EC','':(idx%2===0?WH:GR)};
-        const txM={'P':'FF2E7D32','L':'FF33691E','A':'FFE65100','F':'FFC62828','':(idx%2===0?'FF333333':'FF555555')};
-        sc(row,DS+j,est,bgM[est],fnt(true,8,txM[est]),aln('center','middle'));
+        if(est==='P') cP++; if(est==='L') cL++; if(est==='A') cA++; if(est==='F') cF++;
+        const bgM={'P':'FFE8F5E9','L':'FFF1F8E9','A':'FFFFF9E6','F':'FFFCE4EC'};
+        const txM={'P':'FF2E7D32','L':'FF33691E','A':'FFE65100','F':'FFC62828'};
+        sc(row,DS+j,est,est?bgM[est]:bg,font(true,8,est?txM[est]:'FF333333'),align('center','middle'));
       });
-      for(let j=fechas.length;j<36;j++)sc(row,DS+j,'',bg,null,aln('center','middle'));
-      const cP=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
-      const cL=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='L').length;
-      const cA=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='A').length;
-      const cF=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='F').length;
-      sc(row,CP,cP||'',PR,fnt(true,10),aln('center','middle'));
-      sc(row,CL,cL||'',LC,fnt(true,10),aln('center','middle'));
-      sc(row,CA,cA||'',AT,fnt(true,10),aln('center','middle'));
-      sc(row,CF,cF||'',FA,fnt(true,10),aln('center','middle'));
-      sc(row,CT,(cP+cL+cA+cF)||'',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
+      for(let j=fechas.length;j<(DE-DS+1);j++) sc(row,DS+j,'',bg,null,null);
+      
+      sc(row,CP,cP||'','FFF2CF50',font(true,10),align('center','middle'));
+      sc(row,CL,cL||'','FF92D050',font(true,10),align('center','middle'));
+      sc(row,CA,cA||'','FFFDE9D9',font(true,10),align('center','middle'));
+      sc(row,CF,cF||'','FFFFC7CE',font(true,10),align('center','middle'));
+      sc(row,CT,(cP+cL+cA+cF)||'',C.HDR_AZUL,font(true,10,'FFFFFFFF'),align('center','middle'));
     } else {
-      for(let j=0;j<Math.max(fechas.length,1);j++) sc(row,DS+j,'',bg,null,aln('center','middle'));
-      for(let j=fechas.length;j<50;j++) sc(row,DS+j,'',bg,null,aln('center','middle'));
-      sc(row,CP,'',PR,null,null);sc(row,CL,'',LC,null,null);
-      sc(row,CA,'',AT,null,null);sc(row,CF,'',FA,null,null);
-      sc(row,CT,'',AZ,null,null);
+      for(let col=DS; col<=CT; col++) sc(row,col,'',bg,null,null);
     }
   }
 
-  const rt=9+ESTUDIANTES.length;
-  ws.getRow(rt).height=17;
-  mg(rt,CN,NE,'TOTALES',LA,fnt(true,10),aln('center','middle'));
+  // ===== FILA TOTALES INFERIORES =====
+  const rt=9+MIN_AS1;
+  ws.getRow(rt).height=18;
+  mg(rt,CN,NE,'TOTALES POR DÍA', C.HDR_AZUL, font(true,9,'FFFFFFFF'), align('center','middle'));
   fechas.forEach((f,j)=>{
     const cPcol=ESTUDIANTES.filter(e=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
-    sc(rt,DS+j,cPcol||'','FFD9E1F2',fnt(false,8),aln('center','middle'));
+    sc(rt,DS+j,cPcol||'','FFD9E1F2',font(true,8,C.HDR_AZUL),align('center','middle'));
   });
-  for(let j=fechas.length;j<36;j++) sc(rt,DS+j,'',GR,null,aln('center','middle'));
-  const totP=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length,0);
-  const totL=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='L').length,0);
-  const totA=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='A').length,0);
-  const totF=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='F').length,0);
-  sc(rt,CP,totP||'',PR,fnt(true,10),aln('center','middle'));
-  sc(rt,CL,totL||'',LC,fnt(true,10),aln('center','middle'));
-  sc(rt,CA,totA||'',AT,fnt(true,10),aln('center','middle'));
-  sc(rt,CF,totF||'',FA,fnt(true,10),aln('center','middle'));
-  sc(rt,CT,(totP+totL+totA+totF)||'',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
+  for(let j=fechas.length;j<(DE-DS+1);j++) sc(rt,DS+j,'',C.GRIS,null,null);
 
-  const lastAS1Row=rt+2;
-  ws.pageSetup.printArea='A1:'+colLetra(CT)+lastAS1Row;
-  ws.pageSetup.showGridLines=true;
+  // ===== FIRMA Y FECHA (EN UNA SOLA LÍNEA) =====
+  const rowFirma=rt+3;
+  ws.getRow(rowFirma).height=45;
+  // Firma Maestro
+  merge(rowFirma, 1, 6, '_______________________________', C.WHITE, font(false, 10), align('center', 'bottom'));
+  // Fecha
+  const fechaHoy = "Chachacomani, miércoles, 25 de marzo de 2026";
+  merge(rowFirma, 20, CT, 'FECHA: ' + fechaHoy, C.WHITE, font(false, 10), align('right', 'bottom'));
+  
+  ws.getRow(rowFirma+1).height=15;
+  merge(rowFirma+1, 1, 6, 'FIRMA DEL MAESTRO(A)', C.WHITE, font(false, 8, 'FF64748B'), align('center', 'top'));
+
+  // Configuración de Impresión Final
+  ws.pageSetup.printArea='A1:'+colLetra(CT)+(rowFirma+2);
+  ws.pageSetup.showGridLines=false;
   ws.pageSetup.printTitlesRow='1:8';
 }
 
