@@ -910,7 +910,7 @@ mg(rowFirma + 1, 1, 6, 'FIRMA DEL MAESTRO(A)', WH, fnt(false, 8, 'FF64748B'), al
 // Configuración de Impresión
 ws.pageSetup.printArea = 'A1:' + colL(NCOLS) + (rowFirma + 2);
 ws.pageSetup.showGridLines = false;
-ws.pageSetup.printTitlesRow = '1:8';
+ws.pageSetup.printTitlesRow = '1:10';
 }
 
 
@@ -1040,42 +1040,56 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
     sc(row,C_OBS,'',bg,null,aln('center','middle'));
   }
 
-  const rowProm=9+MIN_FILAS;
-  ws.getRow(rowProm).height=15;
-  mg(rowProm,CB,CNE,'PROMEDIO DE APROVECHAMIENTO',LA,fnt(true,8),aln('center','middle'));
-  sc(rowProm,CNIV,'',LA,null,null);sc(rowProm,CSEX,'',LA,null,null);
-  if(idxMateria>=0){
-    const col=CM_S+idxMateria;
-    const promats=ESTUDIANTES.map(e=>{
-      const serA=ACTIVIDADES.filter(a=>a.dimension==='SER'&&String(a.trimestre)===String(trim));
-      const sabA=ACTIVIDADES.filter(a=>a.dimension==='SABER'&&String(a.trimestre)===String(trim));
-      const hacA=ACTIVIDADES.filter(a=>a.dimension==='HACER'&&String(a.trimestre)===String(trim));
-      function pr(acts){if(!acts.length)return null;const hay=acts.some(a=>NOTAS[e.id]?.[a.id]!==undefined&&NOTAS[e.id]?.[a.id]!=='');if(!hay)return null;const s=acts.reduce((s,a)=>{const n=NOTAS[e.id]?.[a.id];return s+(n!==undefined&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);},0);return s/acts.length;}
-      const pS=pr(serA),pB=pr(sabA),pH=pr(hacA);
-      const auto=AUTOEVALS[e.id]||0;
-      return pS!==null||pB!==null||pH!==null?Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto):null;
-    }).filter(v=>v!==null);
-    const promedio=promats.length?(promats.reduce((a,b)=>a+b,0)/promats.length).toFixed(2):0;
-    sc(rowProm,col,parseFloat(promedio),LA,fnt(true,8),aln('center','middle'));
+ // ===== 1. CÁLCULO DE PROMEDIOS DE APROVECHAMIENTO (TU CÓDIGO ACTUAL) =====
+  const rowProm = 9 + MIN_FILAS;
+  ws.getRow(rowProm).height = 15;
+  mg(rowProm, CB, CNE, 'PROMEDIO DE APROVECHAMIENTO', LA, fnt(true, 8), aln('center', 'middle'));
+  sc(rowProm, CNIV, '', LA, null, null); sc(rowProm, CSEX, '', LA, null, null);
+
+  if (idxMateria >= 0) {
+    const col = CM_S + idxMateria;
+    const promats = ESTUDIANTES.map(e => {
+      const serA = ACTIVIDADES.filter(a => a.dimension === 'SER' && String(a.trimestre) === String(trim));
+      const sabA = ACTIVIDADES.filter(a => a.dimension === 'SABER' && String(a.trimestre) === String(trim));
+      const hacA = ACTIVIDADES.filter(a => a.dimension === 'HACER' && String(a.trimestre) === String(trim));
+      function pr(acts) { if (!acts.length) return null; const hay = acts.some(a => NOTAS[e.id]?.[a.id] !== undefined && NOTAS[e.id]?.[a.id] !== ''); if (!hay) return null; const s = acts.reduce((s, a) => { const n = NOTAS[e.id]?.[a.id]; return s + (n !== undefined && n !== '' && !isNaN(parseFloat(n)) ? parseFloat(n) : 0); }, 0); return s / acts.length; }
+      const pS = pr(serA), pB = pr(sabA), pH = pr(hacA);
+      const auto = AUTOEVALS[e.id] || 0;
+      return pS !== null || pB !== null || pH !== null ? Math.round((pS || 0) + (pB !== null ? Math.round(pB * 0.45) : 0) + (pH !== null ? Math.round(pH * 0.40) : 0) + auto) : null;
+    }).filter(v => v !== null);
+    const promedio = promats.length ? (promats.reduce((a, b) => a + b, 0) / promats.length).toFixed(2) : 0;
+    sc(rowProm, col, parseFloat(promedio), LA, fnt(true, 8), aln('center', 'middle'));
   }
-  for(let j=0;j<todasMaterias.length;j++){
-    if(j!==idxMateria) sc(rowProm,CM_S+j,0,LA,fnt(false,8),aln('center','middle'));
+
+  // Limpiar el resto de la fila de promedios
+  for (let j = 0; j < todasMaterias.length; j++) {
+    if (j !== idxMateria) sc(rowProm, CM_S + j, '', LA, fnt(false, 8), aln('center', 'middle'));
   }
-  sc(rowProm,C_PROM,'',LA,null,null);sc(rowProm,C_OBS,'',LA,null,null);
-  ws.pageSetup.printArea='B1:'+colL(NCOLS)+(rowProm+2);
-  ws.pageSetup.showGridLines=true;
+  sc(rowProm, C_PROM, '', LA, null, null); sc(rowProm, C_OBS, '', LA, null, null);
+
+  // ===== 2. FIRMA Y FECHA DINÁMICA (CORRECCIÓN) =====
+  const rowFirma = rowProm + 3; // Dejamos 2 filas de espacio después del promedio
+  ws.getRow(rowFirma).height = 45;
+
+  // Firma del maestro
+  mg(rowFirma, CB, 5, '_______________________________', WH, fnt(false, 10), aln('center', 'bottom'));
+  
+  // Fecha automática alineada a la derecha de la tabla
+  const fechaHoy = new Intl.DateTimeFormat('es-ES', { dateStyle: 'full' }).format(new Date());
+  mg(rowFirma, 7, NCOLS, 'FECHA: Chachacomani, ' + fechaHoy, WH, fnt(false, 10), aln('right', 'bottom'));
+
+  ws.getRow(rowFirma + 1).height = 15;
+  mg(rowFirma + 1, CB, 5, 'FIRMA DEL MAESTRO(A)', WH, fnt(false, 8, 'FF64748B'), aln('center', 'top'));
+
+  // ===== 3. CONFIGURACIÓN DE IMPRESIÓN =====
+  // Usamos colL que es como definiste la función al inicio de este bloque
+  ws.pageSetup.printArea = 'B1:' + colL(NCOLS) + (rowFirma + 2);
+  ws.pageSetup.showGridLines = false; // False para que no se impriman las celdas vacías fuera de la tabla
+  ws.pageSetup.printTitlesRow = '1:8';
 }
 
 
-function getLiteral(nota){
-  if(nota>=91&&nota<=100) return 'Excelente';
-  if(nota>=81&&nota<=90)  return 'Muy Bueno';
-  if(nota>=71&&nota<=80)  return 'Bueno';
-  if(nota>=61&&nota<=70)  return 'Aceptable';
-  if(nota>=51&&nota<=60)  return 'Regular';
-  if(nota>=1&&nota<=50)   return 'Insuficiente';
-  return '';
-}
+
 
 // ===== INICIAR =====
 init();
