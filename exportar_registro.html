@@ -763,23 +763,25 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
   ws.getRow(3).height = 30;
   mg(3, CA, C_PROM, 'CUADRO DE CALIFICACIONES', AM, fnt(true, 16, 'FFFFFF'), aln('center', 'middle'));
   // Cuadrito a la derecha
-  mgBlock(3, 3, C_PF, NCOLS, trim === '1' ? '1T' : trim === '2' ? '2T' : '3T', WH, fnt(true, 16, 'FF833C00'), aln('center', 'middle'));
+  mgBlock(3, 3, C_PF, NCOLS, trim === '1' ? '1T' : trim === '2' ? '2T' : '3T', AM, fnt(true, 16, 'FFFFFF'), aln('center', 'middle'));
  // Fila 4: Nombre del Trimestre en Grande
   ws.getRow(4).height = 28;
   mg(4, CA, NCOLS, trimNom[trim].toUpperCase(), WH, fnt(true, 14, 'FF833C00'), aln('center', 'middle'));
  // Fila 5 y 6: Maestro y Curso
- ws.getRow(5).height = 15; ws.getRow(6).height = 15;
-  // Etiqueta Maestro (Columna 1)
-  mgBlock(5, 6, CA, CA, 'MAESTR@:', LABEL, fnt(true, 9), aln('center', 'middle'));
-  // Nombre del Maestro (Columnas 2 a 6)
-  mgBlock(5, 6, CNS, C_HAC, DOCENTE.nombre, WH, fnt(false, 10), aln('left', 'middle'));
-  // CURSO: Usamos las columnas finales para que no se encime
+ ws.getRow(5).height = 16; ws.getRow(6).height = 16;
+ // Maestro: Combinamos columnas 1 y 2 para que quepa la palabra completa
+  mgBlock(5, 6, CA, 2, 'MAESTR@:', LABEL, fnt(true, 9), aln('center', 'middle'));
+  // El nombre del maestro ahora empieza en la columna 3 (CNE)
+  mgBlock(5, 6, 3, 6, DOCENTE.nombre, WH, fnt(false, 10), aln('left', 'middle'));
+    // Curso: Etiqueta en columna 7 y dato hasta el final
   mgBlock(5, 6, C_TOT, C_TOT, 'CURSO:', LABEL, fnt(true, 9), aln('center', 'middle'));
-  mgBlock(5, 6, C_PROM, NCOLS, curso, WH, fnt(true, 13), aln('center', 'middle'));
+  mgBlock(5, 6, C_AUTO, NCOLS, curso, WH, fnt(true, 12), aln('center', 'middle'));
   // Fila 7: Área / Materia
- ws.getRow(7).height = 18;
-  mg(7, CA, CA, 'ÁREA:', LABEL, fnt(true, 9), aln('center', 'middle'));
-  mg(7, CNS, NCOLS, materia.toUpperCase(), WH, fnt(false, 10), aln('left', 'middle'));
+  ws.getRow(7).height = 18;
+  // Combinamos columnas 1 y 2 para "ÁREA:"
+  mg(7, CA, 2, 'ÁREA:', LABEL, fnt(true, 9), aln('center', 'middle'));
+  // El dato de la materia empieza en la columna 3
+  mg(7, 3, NCOLS, materia.toUpperCase(), WH, fnt(false, 10), aln('left', 'middle'));
   
   ws.getRow(8).height=21.75;
   ws.getRow(9).height=20;
