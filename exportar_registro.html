@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -375,10 +376,9 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
     return cell;
   }
 
-
   // ===== FILA 1: UE =====
   ws.getRow(1).height=22;
-  merge(1,1,NCOLS,'UNIDAD EDUCATIVA: '+ue.toUpperCase(),
+  merge(1,1,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(),
     C.HDR_AZUL, font(true,14,'FFFFFFFF'), align('center','middle',0,false));
 
   // ===== FILA 2: REGISTRO DE EVALUACIÓN =====
@@ -391,78 +391,63 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
   merge(3,C1,C_NOM_E,'MAESTRA(O):', C.LABEL, font(true,11), align('right','middle'));
   merge(3,C_SER_S,C_PHAC, DOCENTE.nombre, C.WHITE, font(false,11), align('left','middle'));
   sc(3,C_TOTAL,'CURSO:', C.LABEL, font(true,10), align('center','middle'));
-  merge(3, C_AUTO, NCOLS, curso, C.WHITE, font(true, 12), align('center', 'middle'));
+  merge(3,C_AUTO,C_EST, curso, C.WHITE, font(true,12), align('center','middle'));
 
   // ===== FILA 4: ASIGNATURA =====
   ws.getRow(4).height=20;
   merge(4,C1,C_NOM_E,'ASIGNATURA:', null, font(true,11), align('right','middle'));
   merge(4,C_SER_S,C_EST, materia.toUpperCase(), C.WHITE, font(true,12), align('left','middle'));
 
- // ===== FILA 5 y 6: COMBINACIÓN VERTICAL PARA TÍTULOS FINALES =====
-ws.getRow(5).height = 20;
-ws.getRow(6).height = 20; // La suma de ambas dará un espacio alto y limpio
-// 1. Mantener los bloques de la izquierda y centro igual
-merge(5, C1, C_NOM_E, '', C.GRIS, null, null);
-merge(6, C1, C_NOM_E, 'Valoración del Docente', 'FFE2EFDA', font(false, 9), align('center', 'middle'));
-merge(5, C_SER_S, C_PHAC, trimNombres[trim], C.SER_BG, font(true, 11), align('center', 'middle'));
-merge(6, C_SER_S, C_PSER, 'SER — 10 pts', C.SER_BG, font(true, 10), align('center', 'middle'));
-merge(6, C_SAB_S, C_PSAB, 'SABER — 45 pts', C.SAB_BG, font(true, 10), align('center', 'middle'));
-merge(6, C_HAC_S, C_PHAC, 'HACER — 40 pts', C.HAC_BG, font(true, 10), align('center', 'middle'));
-// 2. CAMBIO CLAVE: Combinación Vertical (Merge de Fila 5 a Fila 6)
-// Usamos merge(filaInicio, colInicio, filaFin, colFin, ...) si tu función lo permite, 
-// o directamente la API de ExcelJS:
-const titulosFinales = [
-  { col: C_TOTAL, txt: 'EVAL.\nTOTAL', color: C.TOTAL },
-  { col: C_AUTO,  txt: 'AUTO\nEVAL.', color: C.AUTO },
-  { col: C_PROM,  txt: 'PROM.\nFINAL', color: C.PROM },
-  { col: C_EST,   txt: 'ESTADO',      color: 'FFE2EFDA' }
-];
-titulosFinales.forEach(t => {
-  // Combinamos celda de fila 5 con la de fila 6 en la misma columna
-  ws.mergeCells(5, t.col, 6, t.col); 
-    // Aplicamos el estilo a la celda resultante (la 5 es la maestra)
-  const cell = ws.getCell(5, t.col);
-  cell.value = t.txt;
-  cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: t.color.replace('#','') } };
-  cell.font = font(true, 8.5);
-  cell.alignment = align('center', 'middle', 0, true);
-  cell.border = {
-    top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'}
-  };
-});
+  // ===== FILA 5: TRIMESTRE + col headers top =====
+  ws.getRow(5).height=18;
+  merge(5,C1,C_NOM_E,'', C.GRIS, null, null);
+  merge(5,C_SER_S,C_PHAC, trimNombres[trim], C.SER_BG, font(true,11), align('center','middle'));
+  sc(5,C_TOTAL,'EVAL.\nTOTAL', C.TOTAL, font(true,8), align('center','middle',0,true));
+  sc(5,C_AUTO,'AUTO\nEVAL.', C.AUTO, font(true,8), align('center','middle',0,true));
+  sc(5,C_PROM,'PROM.\nFINAL', C.PROM, font(true,8), align('center','middle',0,true));
+  sc(5,C_EST,'ESTADO', 'FFE2EFDA', font(true,8), align('center','middle',0,true));
 
- // ===== FILA 7: ENCABEZADOS ACTIVIDADES (ACTUALIZADO DINÁMICO) =====
-ws.getRow(7).height = 145; // Un poco más alto para que el texto vertical respire
-merge(7, C1, C_NOM_E, 'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true, 13), align('center', 'bottom', 0, true));
-// SER actividades — dinámico
-for(let i = 0; i < nSER_1T; i++) {
-  const act = serActs[i];
-  // Bajamos fuente a 8.5 y aseguramos wrapText para que las actividades largas se vean bien
-  sc(7, C_SER_S + i, act ? act.nombre_actividad : '', C.SER_BG, font(false, 8.5), align('center', 'bottom', 90, true));
-}
-// CAMBIO: Promedio SER ahora es VERTICAL (90°)
-sc(7, C_PSER, '  PROMEDIO\n  SER', C.SER_MED, font(true, 12), align('center', 'bottom', 90, true));
-// SABER actividades — dinámico
-for(let i = 0; i < nSAB_1T; i++) {
-  const act = saberActs[i];
-  sc(7, C_SAB_S + i, act ? act.nombre_actividad : '', C.SAB_BG, font(false, 8.5), align('center', 'bottom', 90, true));
-}
-// CAMBIO: Promedio SABER ahora es VERTICAL (90°)
-sc(7, C_PSAB, '  PROMEDIO\n  SABER', C.SAB_MED, font(true, 12), align('center', 'bottom', 90, true));
-// HACER actividades — dinámico
-for(let i = 0; i < nHAC_1T; i++) {
-  const act = hacerActs[i];
-  sc(7, C_HAC_S + i, act ? act.nombre_actividad : '', C.HAC_BG, font(false, 8.5), align('center', 'bottom', 90, true));
-}
-// CAMBIO: Promedio HACER ahora es VERTICAL (90°)
-sc(7, C_PHAC, '  PROMEDIO\n  HACER', C.HAC_MED, font(true, 12), align('center', 'bottom', 90, true));
-// CAMBIO: Todos los encabezados finales ahora son VERTICALES (90°)
-sc(7, C_TOTAL, '  VALORACIÓN\n  TOTAL', C.TOTAL, font(true, 12), align('center', 'bottom', 90, true));
-sc(7, C_AUTO, 'AUTOEVALUACION (5)', C.AUTO, font(true, 12), align('center', 'bottom', 90, true));
-sc(7, C_PROM, '  PROMEDIO\n  TRIMESTRAL', C.PROM, font(true, 12), align('center', 'bottom', 90, true));
-sc(7, C_EST, ' ESTADO DEL\n  ESTUDIANTE', 'FFE2EFDA', font(true, 12), align('center', 'bottom', 90, true));
+  // ===== FILA 6: SER / SABER / HACER =====
+  ws.getRow(6).height=16;
+  merge(6,C1,C_NOM_E,'Valoración del Docente', 'FFE2EFDA', font(false,9), align('center','middle'));
+  merge(6,C_SER_S,C_PSER,'SER — 10 pts', C.SER_BG, font(true,10), align('center','middle'));
+  merge(6,C_SAB_S,C_PSAB,'SABER — 45 pts', C.SAB_BG, font(true,10), align('center','middle'));
+  merge(6,C_HAC_S,C_PHAC,'HACER — 40 pts', C.HAC_BG, font(true,10), align('center','middle'));
+  sc(6,C_TOTAL,'', C.TOTAL, null, null);
+  sc(6,C_AUTO,'', C.AUTO, null, null);
+  sc(6,C_PROM,'', C.PROM, null, null);
+  sc(6,C_EST,'', 'FFE2EFDA', null, null);
 
-  
+  // ===== FILA 7: ENCABEZADOS ACTIVIDADES (texto vertical rotado 90°) =====
+  ws.getRow(7).height=135;
+  merge(7,C1,C_NOM_E,'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true,10), align('center','bottom',0,true));
+
+  // SER actividades — mínimo 4 cols
+  for(let i=0;i<nSER_1T;i++){
+    const act=serActs[i];
+    sc(7,C_SER_S+i,act?act.nombre_actividad:'',C.SER_BG,font(false,9),align('center','bottom',90,true));
+  }
+  sc(7,C_PSER,'PROMEDIO\nSER',C.SER_MED,font(true,8),align('center','bottom',0,true));
+
+  // SABER actividades — mínimo 9 cols
+  for(let i=0;i<nSAB_1T;i++){
+    const act=saberActs[i];
+    sc(7,C_SAB_S+i,act?act.nombre_actividad:'',C.SAB_BG,font(false,9),align('center','bottom',90,true));
+  }
+  sc(7,C_PSAB,'PROMEDIO\nSABER',C.SAB_MED,font(true,8),align('center','bottom',0,true));
+
+  // HACER actividades — mínimo 9 cols
+  for(let i=0;i<nHAC_1T;i++){
+    const act=hacerActs[i];
+    sc(7,C_HAC_S+i,act?act.nombre_actividad:'',C.HAC_BG,font(false,9),align('center','bottom',90,true));
+  }
+  sc(7,C_PHAC,'PROMEDIO\nHACER',C.HAC_MED,font(true,8),align('center','bottom',0,true));
+
+  sc(7,C_TOTAL,'VALORACIÓN\nTOTAL', C.TOTAL, font(true,8), align('center','bottom',0,true));
+  sc(7,C_AUTO,'AUTO\nEVAL.(5)', C.AUTO, font(true,8), align('center','bottom',0,true));
+  sc(7,C_PROM,'PROM.\nTRIM.', C.PROM, font(true,8), align('center','bottom',0,true));
+  sc(7,C_EST,'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true,8), align('center','bottom',0,true));
+
   // ===== FILAS ESTUDIANTES — mínimo 30 filas =====
   const MIN_FILAS_1T=Math.max(25,ESTUDIANTES.length);
   let aprobados=0;
@@ -479,40 +464,40 @@ sc(7, C_EST, ' ESTADO DEL\n  ESTUDIANTE', 'FFE2EFDA', font(true, 12), align('cen
     for(let j=0;j<nSER_1T;j++){
       const act=serActs[j];
       const n=e&&act?NOTAS[e.id]?.[act.id]:undefined;
-      sc(row,C_SER_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFEFF6FF':'FFE1EFFE', font(false,11), align('center', 'middle', 0, false));
+      sc(row,C_SER_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFEFF6FF':'FFE1EFFE', font(false,9), align('center','middle'));
     }
     const pSer=e?promDim(e.id,serActs,NOTAS):null;
-    sc(row,C_PSER, pSer!==null?Math.round(pSer):'', C.SER_MED, font(true,12), align('center','middle'));
+    sc(row,C_PSER, pSer!==null?Math.round(pSer):'', C.SER_MED, font(true,10), align('center','middle'));
 
     // SABER — mínimo 9 cols
     for(let j=0;j<nSAB_1T;j++){
       const act=saberActs[j];
       const n=e&&act?NOTAS[e.id]?.[act.id]:undefined;
-      sc(row,C_SAB_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF5F3FF':'FFEDE9FE', font(false,11), align('center', 'middle', 0, false));
+      sc(row,C_SAB_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF5F3FF':'FFEDE9FE', font(false,9), align('center','middle'));
     }
     const pSab=e?promDim(e.id,saberActs,NOTAS):null;
     const pSabConv=pSab!==null?Math.round(pSab*0.45):null;
-    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,12), align('center','middle'));
+    sc(row,C_PSAB, pSabConv!==null?pSabConv:'', C.SAB_MED, font(true,10), align('center','middle'));
 
     // HACER — mínimo 9 cols
     for(let j=0;j<nHAC_1T;j++){
       const act=hacerActs[j];
       const n=e&&act?NOTAS[e.id]?.[act.id]:undefined;
-      sc(row,C_HAC_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF0FDF4':'FFE6FAF2', font(false,11), align('center', 'middle', 0, false));
+      sc(row,C_HAC_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF0FDF4':'FFE6FAF2', font(false,9), align('center','middle'));
     }
     const pHac=e?promDim(e.id,hacerActs,NOTAS):null;
     const pHacConv=pHac!==null?Math.round(pHac*0.40):null;
-    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,12), align('center','middle'));
+    sc(row,C_PHAC, pHacConv!==null?pHacConv:'', C.HAC_MED, font(true,10), align('center','middle'));
 
     const total=e&&(pSer!==null||pSabConv!==null||pHacConv!==null)?
       Math.round((pSer||0)+(pSabConv||0)+(pHacConv||0)):null;
-    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,12), align('center','middle'));
+    sc(row,C_TOTAL, total!==null?total:'', C.TOTAL, font(true,10), align('center','middle'));
 
     const auto=e&&AUTOEVALS[e.id]!==undefined?AUTOEVALS[e.id]:null;
-    sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(true,11), align('center','middle'));
+    sc(row,C_AUTO, auto!==null?auto:'', C.AUTO, font(false,9), align('center','middle'));
 
     const promFinal=total!==null?Math.round(total+(auto||0)):null;
-    sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,12), align('center','middle'));
+    sc(row,C_PROM, promFinal!==null?promFinal:'', C.PROM, font(true,11), align('center','middle'));
 
     let estado='', estBg=C.WHITE, estColor='FF000000';
     if(promFinal!==null){
@@ -523,262 +508,262 @@ sc(7, C_EST, ' ESTADO DEL\n  ESTUDIANTE', 'FFE2EFDA', font(true, 12), align('cen
   }
 
   // ===== FILA TOTALES =====
- // 1. Posición inicial justo después del último estudiante
-const rowTot = 8 + MIN_FILAS_1T; 
-// ===== SECCIÓN 1: CUADRO DE ESTADÍSTICA (PEGADO A LA LISTA) =====
-const rowRes = rowTot; 
-const reprobados1T = ESTUDIANTES.length - aprobados;
-const pctApro = ESTUDIANTES.length ? Math.round((aprobados / ESTUDIANTES.length) * 100) : 0;
-const pctRepr = ESTUDIANTES.length ? Math.round((reprobados1T / ESTUDIANTES.length) * 100) : 0;
-const resData = [
-  ['TOTAL ESTUDIANTES', ESTUDIANTES.length],
-  ['EFECTIVOS', ESTUDIANTES.length],
-  ['APROBADOS', aprobados],
-  ['REPROBADOS', reprobados1T],
-  ['RETIRADOS', 0],
-  ['PORCENTAJE DE APROBADOS', pctApro + '%'],
-  ['PORCENTAJE DE REPROBADOS', pctRepr + '%']
-];
-// Encabezado del cuadro estadístico (Fondo Azul Oscuro, Texto Blanco)
-ws.getRow(rowRes).height = 18;
-merge(rowRes, Math.floor(NCOLS/2), NCOLS-1, 'ESTADÍSTICA', 'FF1F3D6A', font(true, 9, 'FFFFFFFF'), align('center', 'middle'));
-sc(rowRes, NCOLS, (trim + 1) + 'DO. TRIM.', 'FF1F3D6A', font(true, 9, 'FFFFFFFF'), align('center', 'middle'));
-// Dibujar las filas de la tabla estadística
-resData.forEach((fila, idx) => {
-  const r = rowRes + 1 + idx;
-  ws.getRow(r).height = 15;
-   // Etiqueta (Lado izquierdo del cuadro)
-  merge(r, Math.floor(NCOLS/2), NCOLS-1, fila[0], 'FFFFFFFF', font(false, 8, 'FF334155'), align('left', 'middle'));
-    // Valor (Lado derecho del cuadro, en negrita)
-  sc(r, NCOLS, fila[1], 'FFFFFFFF', font(true, 10, 'FF1F3D6A'), align('center', 'middle'));
-    // Aplicar bordes delgados a los valores para que parezca tabla
-  ws.getCell(r, NCOLS).border = { 
-    top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} 
-  };
-});
-// ===== SECCIÓN 2: LÍNEA ÚNICA DE FIRMA Y FECHA =====
-const rowFinal = rowRes + resData.length + 3; // Espacio prudencial después de la estadística
-ws.getRow(rowFinal).height = 45; // Altura para que el sello quepa bien
-// Firma (Lado izquierdo)
-merge(rowFinal, 1, 5, '_______________________________', 'FFFFFFFF', font(false, 10), align('center', 'bottom'));
-// Fecha (Lado derecho - dinámica según el sistema)
-const fechaHoy = new Intl.DateTimeFormat('es-ES', { 
-    dateStyle: 'full' 
-}).format(new Date());
-const textoFecha = 'Lugar, ' + fechaHoy;
-merge(rowFinal, Math.floor(NCOLS/2), NCOLS, 'FECHA: ' + textoFecha, 'FFFFFFFF', font(false, 10), align('right', 'bottom'));
-// Subtítulo debajo de la línea de firma
-ws.getRow(rowFinal + 1).height = 15;
-merge(rowFinal + 1, 1, 5, 'FIRMA / SELLO', 'FFFFFFFF', font(false, 8, 'FF64748B'), align('center', 'top'));
-// ===== SECCIÓN 3: CONFIGURACIÓN DE IMPRESIÓN Y VISTA =====
-const lastRowPrint = rowFinal + 2;
-// Función para convertir número de columna a letra (A, B, C...)
-function numToCol(n) { 
-    let s = ''; 
-    while (n > 0) { 
-        s = String.fromCharCode(65 + (n - 1) % 26) + s; 
-        n = Math.floor((n - 1) / 26); 
-    } 
-    return s; 
+  const rowTot=8+MIN_FILAS_1T;
+  ws.getRow(rowTot).height=14;
+  merge(rowTot,C1,C_NOM_E, 'TOTAL: '+ESTUDIANTES.length+' estudiantes',
+    'FFDCE6F1', font(true,9), align('left','middle'));
+  merge(rowTot,C_SER_S,C_PHAC,'',C.GRIS,null,null);
+  sc(rowTot,C_TOTAL,'',C.GRIS,null,null);
+  sc(rowTot,C_AUTO,'',C.GRIS,null,null);
+  sc(rowTot,C_PROM,'',C.GRIS,null,null);
+  sc(rowTot,C_EST,'Aprobados: '+aprobados+'/'+ESTUDIANTES.length,
+    C.APROBADO, font(true,9,'FF065F46'), align('center','middle',0,true));
+
+  // ===== FILA FIRMA =====
+  const rowFirma=rowTot+2;
+  ws.getRow(rowFirma).height=30;
+  merge(rowFirma,C1,Math.floor(NCOLS/2)-1,'',C.WHITE,null,null);
+  merge(rowFirma,Math.floor(NCOLS/2),NCOLS,'',C.WHITE,null,null);
+  ws.getRow(rowFirma+1).height=12;
+  merge(rowFirma+1,C1,Math.floor(NCOLS/2)-1,'_______________________________',C.WHITE,font(false,9),align('center','top'));
+  merge(rowFirma+1,Math.floor(NCOLS/2),NCOLS,'_______________________________',C.WHITE,font(false,9),align('center','top'));
+  ws.getRow(rowFirma+2).height=12;
+  merge(rowFirma+2,C1,Math.floor(NCOLS/2)-1,'Firma del Docente',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
+  merge(rowFirma+2,Math.floor(NCOLS/2),NCOLS,'Sello y Firma de Dirección',C.WHITE,font(false,8,'FF64748B'),align('center','middle'));
+
+  // ===== CONFIGURAR ÁREA DE IMPRESIÓN AUTOMÁTICA =====
+  // Solo incluir celdas con datos (hasta última fila de estudiantes + totales + firma)
+  // Convertir número de columna a letra Excel
+  function numToCol(n){ let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26); } return s; }
+  // ===== CUADRO RESUMEN FINAL (imagen 2) =====
+  const rowRes=rowFirma+4;
+  const reprobados1T=ESTUDIANTES.length-aprobados;
+  const pctApro=ESTUDIANTES.length?Math.round(aprobados/ESTUDIANTES.length*100):0;
+  const pctRepr=ESTUDIANTES.length?Math.round(reprobados1T/ESTUDIANTES.length*100):0;
+  const resData=[
+    ['TOTAL DE ESTUDIANTES .....',ESTUDIANTES.length],
+    ['TOTAL APROBADOS ...........',aprobados],
+    ['TOTAL REPROBADOS ..........',reprobados1T],
+    ['TOTAL RETIRADOS ...........',0],
+    ['PORCENTAJE DE APROBADOS ...',pctApro+'%'],
+    ['PORCENTAJE DE REPROBADOS ..',pctRepr+'%'],
+  ];
+  const colResS=Math.floor(NCOLS/2);
+  resData.forEach((fila,idx)=>{
+    const r=rowRes+idx;
+    ws.getRow(r).height=13;
+    merge(r,colResS,NCOLS-1,fila[0],idx%2===0?'FFF1F5F9':'FFFFFFFF',font(false,8),align('left','middle'));
+    sc(r,NCOLS,fila[1],idx%2===0?'FFD9E1F2':'FFFFFFFF',font(true,9),align('center','middle'));
+  });
+
+  const lastRowPrint = rowRes+resData.length+1;
+  function numToCol(n){ let s=''; while(n>0){ s=String.fromCharCode(65+(n-1)%26)+s; n=Math.floor((n-1)/26); } return s; }
+  ws.pageSetup.printArea = 'A1:'+numToCol(NCOLS)+lastRowPrint;
+
+  // Cuadrícula visible en impresión
+  ws.pageSetup.showGridLines = true;
+  ws.pageSetup.blackAndWhite = false;
+  ws.pageSetup.draft = false;
+
+  // ===== HOJA AS.1 =====
+  await generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,DOCENTE});
+  log('✓ Hoja AS.1 generada');
+
+  // ===== HOJA 1.BOL =====
+  await generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistenciaData,curso,materia,trim,ue,DOCENTE});
+  log('✓ Hoja 1.BOL generada');
+
+  // ===== HOJA CENTRALIZADOR =====
+  await generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,curso,materia,trim,ue,DOCENTE});
+  log('✓ Hoja Centralizador generada');
+
+  // ===== DESCARGAR =====
+  log('📐 Generando archivo...');
+  const buffer=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  const fname=`Registro_${curso}_${materia.replace(/[/:,\s]/g,'-')}_Trim${trim}_2026.xlsx`;
+  a.download=fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  log('📁 '+fname);
 }
-// Configurar Área de Impresión
-ws.pageSetup.printArea = 'A1:' + numToCol(NCOLS) + lastRowPrint;
-// Ajustes finales de página
-ws.pageSetup.showGridLines = false; // Desactivamos cuadrícula para que se vea limpio como la imagen
-ws.pageSetup.horizontalCentered = true; // Centrar el reporte en la hoja
-ws.pageSetup.fitToPage = true;
-ws.pageSetup.fitToWidth = 1;
-ws.pageSetup.fitToHeight = 0;
 
 
-
- // ===== HOJA AS.1 — CUADRO DE ASISTENCIA (REDiseñada) =====
+// ===== HOJA AS.1 — CUADRO DE ASISTENCIA =====
 async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,DOCENTE}){
   function colLetra(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
-  const trimNom={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
+  const trimNom={'1':'1ER. TRIMESTRE','2':'2DO. TRIMESTRE','3':'3ER. TRIMESTRE'};
   const ws=wb.addWorksheet('AS.1');
-  
-  // Configuración de página
   ws.pageSetup.orientation='landscape';
-  ws.pageSetup.paperSize=1; // Letter
-  ws.pageSetup.margins={left:0.2,right:0.2,top:0.3,bottom:0.3,header:0,footer:0};
+  ws.pageSetup.paperSize=1;
+  ws.pageSetup.scale=75;
+  ws.pageSetup.fitToPage=false;
+  ws.pageSetup.margins={left:0,right:0,top:0.39,bottom:0.2,header:0.12,footer:0.12};
+  ws.headerFooter={oddHeader:'',oddFooter:''};
 
-  // Definición de colores del Registro Anterior
-  const C = {
-    HDR_AZUL: 'FF1F3D6A', // Azul Institucional
-    HDR_MED: 'FF2563EB',  // Azul Medio
-    LABEL: 'FFF1F5F9',    // Gris muy claro para etiquetas
-    WHITE: 'FFFFFFFF',
-    GRIS: 'FFF8FAFC',     // Gris sutil para filas cebra
-    NOMBRE: 'FFF1F5F9',
-    AZUL_TEXTO: 'FF1E40AF'
-  };
+  // Si no hay datos de asistencia, igual crear estructura con 0 fechas
+  const todasFechas=Object.keys(asistenciaData).length>0
+    ?[...new Set(Object.values(asistenciaData).flatMap(d=>Object.keys(d)))].sort()
+    :[];
+  const fechas=todasFechas.slice(0,50); // hasta 50 columnas de fechas
 
-  const DS=4, DE=39, CP=40, CL=41, CA=42, CF=43, CT=44;
-
-  // Anchos de columna
-  ws.getColumn(1).width=3.5;  // N°
-  ws.getColumn(2).width=18;   // Apellidos
-  ws.getColumn(3).width=15;   // Nombres
-  for(let i=DS;i<=DE;i++) ws.getColumn(i).width=2.8;
-  ws.getColumn(CP).width=4; ws.getColumn(CL).width=4; 
-  ws.getColumn(CA).width=4; ws.getColumn(CF).width=4; 
-  ws.getColumn(CT).width=6.5;
-
-  // Funciones auxiliares consistentes
-  const fill=(c)=>({type:'pattern',pattern:'solid',fgColor:{argb:c}});
-  const font=(b,s,c='FF000000')=>({bold:b,size:s,name:'Calibri',color:{argb:c}});
-  const align=(h,v,r,w)=>({horizontal:h,vertical:v,textRotation:r||0,wrapText:!!w});
-  const border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
-
-  function sc(r,c,val,bg,fn,al){
-    const cell=ws.getCell(r,c);
-    if(val!==undefined) cell.value=val;
-    if(bg) cell.fill=fill(bg);
-    if(fn) cell.font=fn;
-    if(al) cell.alignment=al;
-    cell.border=border;
+  const brd={style:'thin',color:{argb:'FF000000'}};
+  const allB={top:brd,left:brd,bottom:brd,right:brd};
+  function fill(a){return{type:'pattern',pattern:'solid',fgColor:{argb:a}};}
+  function fnt(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
+  function aln(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
+  function sc(r,col,val,bg,fn,al,borde=true){
+    const cell=ws.getCell(r,col);
+    if(val!==null&&val!==undefined)cell.value=val;
+    if(bg)cell.fill=fill(bg);
+    if(fn)cell.font=fn;
+    if(al)cell.alignment=al;
+    if(borde)cell.border=allB;
     return cell;
   }
-  function merge(r,c1,c2,val,bg,fn,al){
-    try{ws.mergeCells(r,c1,r,c2);}catch(e){}
+  function mg(r,c1,c2,val,bg,fn,al){
+    if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
     return sc(r,c1,val,bg,fn,al);
   }
 
-  // ===== FILA 1: ENCABEZADO INSTITUCIONAL =====
-  ws.getRow(1).height=22;
-  merge(1,1,CT,'UNIDAD EDUCATIVA: '+ue.toUpperCase(), C.HDR_AZUL, font(true,12,'FFFFFFFF'), align('center','middle'));
+  const AZ='FF1A3A6B',AM='FF2563EB',LA='FFF2CF50',PR='FFFFC000',LC='FF92D050',AT='FFFDE9D9',FA='FFFFC7CE',WH='FFFFFFFF',GR='FFF1F5F9';
+  const CN=1,NS=2,NE=3,DS=4,DE=39,CP=40,CL=41,CA=42,CF=43,CT=44;
 
-  // ===== FILA 2: TÍTULO HOJA =====
-  ws.getRow(2).height=20;
-  merge(2,1,CT,'CUADRO DE ASISTENCIA — GESTIÓN 2026', C.HDR_MED, font(false,13,'FFFFFFFF'), align('center','middle'));
+  ws.getColumn(CN).width=3.5;
+  ws.getColumn(NS).width=16;
+  ws.getColumn(NE).width=15;
+  for(let i=DS;i<=DE;i++)ws.getColumn(i).width=2.7;
+  ws.getColumn(CP).width=3.7;ws.getColumn(CL).width=4;ws.getColumn(CA).width=4;ws.getColumn(CF).width=4;ws.getColumn(CT).width=5.7;
 
-  // ===== FILA 3: DOCENTE + CURSO =====
-  ws.getRow(3).height=20;
-  merge(3,1,3,'MAESTRA(O):', C.LABEL, font(true,10), align('right','middle'));
-  merge(3,4,20, DOCENTE.nombre, C.WHITE, font(false,11), align('left','middle'));
-  sc(3,21,'CURSO:', C.LABEL, font(true,10), align('center','middle'));
-  merge(3,22,CT, curso, C.WHITE, font(true,12), align('center','middle'));
+  // Fila 1
+  ws.getRow(1).height=15;
+  mg(1,CN,3,'UNIDAD EDUCATIVA TECNICO HUMANISTICA: '+ue.toUpperCase(),AZ,fnt(true,10,'FFFFFFFF'),aln('left','middle'));
+  mg(1,5,30,trimNom[trim],AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
+  mg(1,38,CT,'2026',AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
 
-  // ===== FILA 4: ASIGNATURA =====
-  ws.getRow(4).height=20;
-  merge(4,1,3,'ASIGNATURA:', C.LABEL, font(true,10), align('right','middle'));
-  merge(4,4,CT, materia.toUpperCase(), C.WHITE, font(true,11), align('left','middle'));
+  // Fila 2
+  ws.getRow(2).height=14;
+  mg(2,CN,CT,'CUADRO DE ASISTENCIA',AZ,fnt(true,12,'FFFFFFFF'),aln('center','middle'));
 
-  // ===== FILA 6: ENCABEZADOS DE TABLA =====
-  ws.getRow(6).height=20;
-  sc(6,1,'N°', C.HDR_AZUL, font(true,9,'FFFFFFFF'), align('center','middle'));
-  merge(6,2,3,'APELLIDOS Y NOMBRES', C.HDR_AZUL, font(true,13,'FFFFFFFF'), align('center','middle'));
-  
-  const fechas=Object.keys(asistenciaData).length>0 
-    ? [...new Set(Object.values(asistenciaData).flatMap(d=>Object.keys(d)))].sort().slice(0,36)
-    : [];
+  // Fila 3 — MAESTRA(O) con nombre y CURSO
+  ws.getRow(3).height=27;
+  mg(3,CN,4,'MAESTRA(O):',LA,fnt(true,9),aln('right','middle'));
+  mg(3,5,Math.max(30,fechas.length+CN+4),DOCENTE.nombre,WH,fnt(false,10),aln('left','middle'));
+  mg(3,Math.max(35,fechas.length+CN+5),CT,'CURSO: '+curso,LA,fnt(true,10),aln('center','middle'));
 
-  merge(6,DS,DE, trimNom[trim]+' — ASISTENCIA', C.HDR_MED, font(true,13,'FFFFFFFF'), align('center','middle'));
-  sc(6,CP,'P', 'FFF2CF50', font(true,12), align('center','middle'));
-  sc(6,CL,'L', 'FF92D050', font(true,12), align('center','middle'));
-  sc(6,CA,'A', 'FFFDE9D9', font(true,12), align('center','middle'));
-  sc(6,CF,'F', 'FFFFC7CE', font(true,12), align('center','middle'));
-  sc(6,CT,'TOTAL', C.HDR_AZUL, font(true,9,'FFFFFFFF'), align('center','middle'));
+  // Fila 4 — ASIGNATURA
+  ws.getRow(4).height=19.5;
+  mg(4,CN,4,'ASIGNATURA:',LA,fnt(true,9),aln('right','middle'));
+  mg(4,5,CT,materia.toUpperCase(),WH,fnt(false,10),aln('left','middle'));
 
- 
-// ===== FILA 7 y 8: COMBINACIÓN VERTICAL PARA FECHAS Y LEYENDAS =====
-ws.getRow(7).height = 40; // Ajustamos alturas para que sumen un espacio armónico
-ws.getRow(8).height = 40; 
-// 1. Combinar verticalmente las celdas de N° y Nombres
-ws.mergeCells(7, 1, 8, 1); // N°
-sc(7, 1, 'N°', C.HDR_AZUL, font(true, 9, 'FFFFFFFF'), align('center', 'middle'));
-ws.mergeCells(7, 2, 8, 3); // Apellidos y Nombres
-sc(7, 2, 'APELLIDOS Y NOMBRES', C.HDR_AZUL, font(true, 10, 'FFFFFFFF'), align('center', 'middle'));
-// 2. Combinar verticalmente las FECHAS
-fechas.forEach((f, i) => {
-  const p = f.split('-');
-  const lbl = p.length === 3 ? p[2] + '/' + p[1] : f;
-  const col = DS + i;
-  ws.mergeCells(7, col, 8, col); // Combinamos Fila 7 y 8 de la columna actual
-  const bg = i % 2 === 0 ? 'FFD9E1F2' : 'FFFFFFFF';
-  sc(7, col, lbl, bg, font(false, 9), align('center', 'middle', 90));});
-// Llenar huecos de fechas vacías (si existen) combinándolas también
-for (let i = fechas.length; i < (DE - DS + 1); i++) {
-  const col = DS + i;
-  ws.mergeCells(7, col, 8, col);
-  sc(7, col, '', C.WHITE, null, null);}
-// 3. Combinar verticalmente las LEYENDAS (P, L, A, F, TOTAL)
-const leyendas = [
-  { col: CP, txt: 'P - PRESENTE', bg: 'FFF2CF50' },
-  { col: CL, txt: 'L - LICENCIA', bg: 'FF92D050' },
-  { col: CA, txt: 'A - ATRASO',   bg: 'FFFDE9D9' },
-  { col: CF, txt: 'F - FALTA',    bg: 'FFFFC7CE' },
-  { col: CT, txt: 'TOTAL DÍAS',  bg: C.HDR_AZUL, color: 'FFFFFFFF' }
-];
-leyendas.forEach(l => {
-  ws.mergeCells(7, l.col, 8, l.col); // Unión vertical
-  sc(7, l.col, l.txt, l.bg, font(true, 8, l.color || 'FF000000'), align('center', 'middle', 90, true));
-});
+  // Fila 5 separador
+  ws.getRow(5).height=4.5;
 
-  
-  // ===== FILAS ESTUDIANTES =====
-  const MIN_AS1=Math.max(25,ESTUDIANTES.length);
-  for(let i=0;i<MIN_AS1;i++){
-    const e=ESTUDIANTES[i]||null;
-    const row=8+i;
-    ws.getRow(row).height=18;
-    const rowBg=i%2===0?C.WHITE:C.GRIS;
+  // Fila 6: encabezados
+  ws.getRow(6).height=25;
+  sc(6,CN,'N°',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  mg(6,NS,NE,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  mg(6,DS,DE,'ASISTENCIA — '+fechas.length+' dias registrados',AM,fnt(true,9,'FFFFFFFF'),aln('center','middle'));
+  sc(6,CP,'P',PR,fnt(true,9),aln('center','middle'));
+  sc(6,CL,'L',LC,fnt(true,9),aln('center','middle'));
+  sc(6,CA,'A',AT,fnt(true,9),aln('center','middle'));
+  sc(6,CF,'F',FA,fnt(true,9),aln('center','middle'));
+  mg(6,CT,CT,'TOTAL\nDIAS',AZ,fnt(true,8,'FFFFFFFF'),aln('center','middle',0,true));
 
-    sc(row,1, e?i+1:'', rowBg, font(true,9), align('center','middle'));
-    merge(row,2,3, e?e.nombre:'', rowBg, font(false,10), align('left','middle'));
+  // Fila 7: leyenda rotada
+  ws.getRow(7).height=12.75;
+  sc(7,CN,'',GR,null,null);
+  mg(7,NS,NE,'',GR,null,null);
+  for(let i=DS;i<=DE;i++)sc(7,i,'',GR,null,null);
+  sc(7,CP,'P / PRESENTE',PR,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CL,'L / LICENCIA',LC,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CA,'A / ATRASO',AT,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CF,'F / FALTA',FA,fnt(true,8),aln('center','middle',90,true));
+  sc(7,CT,'',AZ,null,null);
 
+  // Fila 8: fechas rotadas
+  ws.getRow(8).height=58.5;
+  sc(8,CN,'',GR,null,aln('center','bottom'));
+  mg(8,NS,NE,'',GR,null,null);
+  fechas.forEach((f,i)=>{
+    const p=f.split('-');
+    const lbl=p.length===3?p[2]+'/'+p[1]:f;
+    const bg=i%2===0?'FFD9E1F2':'FFE8F4FD';
+    sc(8,DS+i,lbl,bg,fnt(false,9),aln('center','bottom',90,false));
+  });
+  for(let i=fechas.length;i<36;i++)sc(8,DS+i,'',GR,null,aln('center','bottom'));
+  sc(8,CP,'',PR,null,null);sc(8,CL,'',LC,null,null);sc(8,CA,'',AT,null,null);sc(8,CF,'',FA,null,null);sc(8,CT,'',AZ,null,null);
+
+  // Filas estudiantes — mínimo 30 filas
+  const MIN_AS1=Math.max(30,ESTUDIANTES.length);
+  for(let idx=0;idx<MIN_AS1;idx++){
+    const e=ESTUDIANTES[idx]||null;
+    const i=idx;
+    const row=9+i;
+    ws.getRow(row).height=17.4;
+    const bg=i%2===0?WH:GR;
+    sc(row,CN,e?i+1:'',bg,fnt(true,9),aln('center','middle'));
+    mg(row,NS,NE,e?e.nombre:'',bg,fnt(false,9),aln('left','middle'));
+    fechas.forEach((f,j)=>{
+      const est=(asistenciaData[e.id]&&asistenciaData[e.id][f])||'';
+      const bgM={'P':'FFE8F5E9','L':'FFF1F8E9','A':'FFFFF9E6','F':'FFFCE4EC','':(i%2===0?WH:GR)};
+      const txM={'P':'FF2E7D32','L':'FF33691E','A':'FFE65100','F':'FFC62828','':(i%2===0?'FF333333':'FF555555')};
+      sc(row,DS+j,est,bgM[est],fnt(true,8,txM[est]),aln('center','middle'));
+    });
+    for(let j=fechas.length;j<36;j++)sc(row,DS+j,'',i%2===0?WH:GR,null,aln('center','middle'));
+    // Contar directamente desde los datos ya escritos en memoria (más confiable que COUNTIF en ExcelJS)
+    const cP=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
+    const cL=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='L').length;
+    const cA=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='A').length;
+    const cF=fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='F').length;
+    const cTot=cP+cL+cA+cF;
+    sc(row,CP,cP||'',PR,fnt(true,10),aln('center','middle'));
+    sc(row,CL,cL||'',LC,fnt(true,10),aln('center','middle'));
+    sc(row,CA,cA||'',AT,fnt(true,10),aln('center','middle'));
+    sc(row,CF,cF||'',FA,fnt(true,10),aln('center','middle'));
     if(e){
-      let cP=0, cL=0, cA=0, cF=0;
-      fechas.forEach((f,j)=>{
-        const est=(asistenciaData[e.id]&&asistenciaData[e.id][f])||'';
-        if(est==='P') cP++; if(est==='L') cL++; if(est==='A') cA++; if(est==='F') cF++;
-        
-        const bgM={'P':'FFE8F5E9','L':'FFF1F8E9','A':'FFFFF9E6','F':'FFFCE4EC'};
-        const txM={'P':'FF2E7D32','L':'FF33691E','A':'FFE65100','F':'FFC62828'};
-        
-        sc(row,DS+j, est, est?bgM[est]:rowBg, font(true,9,est?txM[est]:'FF000000'), align('center','middle'));
-      });
-      // Llenar columnas vacías de asistencia
-      for(let j=fechas.length;j<(DE-DS+1);j++) sc(row,DS+j,'',rowBg,null,null);
-
-      sc(row,CP,cP||'', 'FFF2CF50', font(true,10), align('center','middle'));
-      sc(row,CL,cL||'', 'FF92D050', font(true,10), align('center','middle'));
-      sc(row,CA,cA||'', 'FFFDE9D9', font(true,10), align('center','middle'));
-      sc(row,CF,cF||'', 'FFFFC7CE', font(true,10), align('center','middle'));
-      sc(row,CT,cP+cL+cA+cF||'', C.HDR_AZUL, font(true,10,'FFFFFFFF'), align('center','middle'));
+      sc(row,CT,cTot||'',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
     } else {
-      // Filas vacías para completar el formato
-      for(let col=4; col<=CT; col++) sc(row,col,'',rowBg,null,null);
+      // Fila vacía — mantener colores
+      for(let j=0;j<Math.max(fechas.length,1);j++) sc(row,DS+j,'',bg,null,aln('center','middle'));
+      for(let j=fechas.length;j<50;j++) sc(row,DS+j,'',bg,null,aln('center','middle'));
+      sc(row,CP,'',PR,null,null);sc(row,CL,'',LC,null,null);
+      sc(row,CA,'',AT,null,null);sc(row,CF,'',FA,null,null);
+      sc(row,CT,'',AZ,null,null);
     }
   }
 
-  // ===== FILA TOTALES FINALES =====
-  const rowTot=8+MIN_AS1;
-  ws.getRow(rowTot).height=18;
-  merge(rowTot,1,3,'TOTALES POR DÍA', C.HDR_AZUL, font(true,9,'FFFFFFFF'), align('center','middle'));
-  
+  // Fila totales — sumar directamente desde los datos
+  const rt=9+ESTUDIANTES.length;
+  ws.getRow(rt).height=17;
+  mg(rt,CN,NE,'TOTALES',LA,fnt(true,10),aln('center','middle'));
+  // Contar P por cada columna de fecha
   fechas.forEach((f,j)=>{
     const cPcol=ESTUDIANTES.filter(e=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
-    sc(rowTot,DS+j,cPcol||'', 'FFD9E1F2', font(true,8,C.HDR_AZUL), align('center','middle'));
+    sc(rt,DS+j,cPcol||'','FFD9E1F2',fnt(false,8),aln('center','middle'));
   });
+  for(let j=fechas.length;j<36;j++) sc(rt,DS+j,'',GR,null,aln('center','middle'));
+  // Totales generales P/L/A/F
+  const totP=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length,0);
+  const totL=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='L').length,0);
+  const totA=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='A').length,0);
+  const totF=ESTUDIANTES.reduce((s,e)=>s+fechas.filter(f=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='F').length,0);
+  sc(rt,CP,totP||'',PR,fnt(true,10),aln('center','middle'));
+  sc(rt,CL,totL||'',LC,fnt(true,10),aln('center','middle'));
+  sc(rt,CA,totA||'',AT,fnt(true,10),aln('center','middle'));
+  sc(rt,CF,totF||'',FA,fnt(true,10),aln('center','middle'));
+  sc(rt,CT,(totP+totL+totA+totF)||'',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
 
-  // ===== SECCIÓN DE FIRMAS Y FECHA (En una sola línea como la anterior) =====
-  const rowFirma = rowTot + 2;
-  ws.getRow(rowFirma).height = 40;
-  merge(rowFirma, 1, 6, '_______________________________', C.WHITE, font(false, 9), align('center', 'bottom'));
-  
-  const fechaHoy = "Chachacomani, miércoles, 25 de marzo de 2026";
-  merge(rowFirma, 15, CT, 'FECHA: ' + fechaHoy, C.WHITE, font(false, 10), align('right', 'bottom'));
-
-  ws.getRow(rowFirma+1).height = 15;
-  merge(rowFirma+1, 1, 6, 'FIRMA DEL MAESTRO(A)', C.WHITE, font(false, 8, 'FF64748B'), align('center', 'top'));
-
-  // Impresión
-  ws.pageSetup.printArea='A1:'+colLetra(CT)+(rowFirma+2);
-  ws.pageSetup.showGridLines=false;
-} 
-
+  const lastAS1Row=rt+2;
+  ws.pageSetup.printArea='A1:'+colLetra(CT)+lastAS1Row;
+  ws.pageSetup.showGridLines=true;
+  ws.pageSetup.printTitlesRow='1:8';
+}
 
 
 // ===== HOJA 1.BOL — CUADRO DE CALIFICACIONES =====
