@@ -994,10 +994,14 @@ sc(6, CNS, 'APELLIDOS Y NOMBRES', AZ, fnt(true, 9, WH), aln('center', 'middle'))
 // Los campos deben empezar exactamente en CM_S (4)
 mg(6, CM_S, NCOLS, 'CAMPOS DE SABERES Y CONOCIMIENTOS', AZ, fnt(true, 9, WH), aln('center', 'middle'));
   // Fila 7: Bloques de colores de los Campos
-  mg(7, CM_S, CM_S + 5, 'COMUNIDAD Y SOCIEDAD', AM, fnt(true, 7, WH), aln('center', 'middle'));
-  mg(7, CM_S + 6, CM_S + 8, 'C. TEC. Y PRODUCCION', AM, fnt(true, 7, WH), aln('center', 'middle'));
-  mg(7, CM_S + 9, CM_S + 12, 'VIDA TIERRA Y TERRITORIO', AM, fnt(true, 7, WH), aln('center', 'middle'));
-  mg(7, CM_S + 13, CM_S + 14, 'COSMOS Y PENSAMIENTO', AM, fnt(true, 7, WH), aln('center', 'middle'));
+  // POR ESTE BLOQUE CORREGIDO:
+ws.getRow(7).height = 15;
+mg(7, CM_S,     CM_S + 5,  'COMUNIDAD Y SOCIEDAD',    AM, fnt(true, 7, WH), aln('center', 'middle'));
+mg(7, CM_S + 6, CM_S + 8,  'C. TEC. Y PRODUCCIÓN',   AM, fnt(true, 7, WH), aln('center', 'middle'));
+mg(7, CM_S + 9, CM_S + 12, 'VIDA TIERRA Y TERRITORIO',AM, fnt(true, 7, WH), aln('center', 'middle'));
+mg(7, CM_S + 13,CM_S + 14, 'COSMOS Y PENSAMIENTO',   AM, fnt(true, 7, WH), aln('center', 'middle'));
+sc(7, C_PROM, '', AZ, null, null);   // ← celda PROMEDIO en fila 7 sin merge
+sc(7, C_OBS,  '', AZ, null, null);   // ← celda OBS en fila 7 sin merge
   // Fila 8: Limpiar columnas sobrantes
   sc(8, CB, '', AZ); 
   sc(8, CNS, '', AZ);
