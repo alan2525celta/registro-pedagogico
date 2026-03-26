@@ -896,17 +896,7 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
     sc(r,C_LIT,fila[1],idx===0?AZ:WH,fnt(true,10,idx===0?'FFFFFFFF':'FF1A3A6B'),aln('center','middle'));
   });
   // ===== FIRMA Y FECHA (EN UNA SOLA LÍNEA) =====
-  const rowFirma=rt+3;
-  ws.getRow(rowFirma).height=45;
-  mg(rowFirma, 1, 6, '_______________________________', WH, fnt(false, 10), aln('center', 'bottom'));
-  const fechaHoy=new Intl.DateTimeFormat('es-ES',{dateStyle:'full'}).format(new Date());
-  mg(rowFirma, 20, CT, 'FECHA: Lugar, '+ fechaHoy, WH, fnt(false, 10), aln('right', 'bottom'));
-  ws.getRow(rowFirma+1).height=15;
-  mg(rowFirma+1, 1, 6, 'FIRMA DEL MAESTRO(A)', WH, fnt(false, 8, 'FF64748B'), aln('center', 'top'));
-
-  ws.pageSetup.printArea='A1:'+colL(NCOLS)+(rowFecha+3);
-  ws.pageSetup.showGridLines=true;
-  ws.pageSetup.printTitlesRow='1:10';
+  
 }
 
 
