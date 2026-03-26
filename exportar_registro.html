@@ -855,7 +855,7 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
       sc(row,C_HAC,pHacConv!==null?pHacConv:'',HAC_BG,fnt(false,10),aln('center','middle'));
       sc(row,C_TOT,evalTot!==null?evalTot:'',TOTAL,fnt(true,11),aln('center','middle'));
       sc(row,C_AUTO,auto!==null?auto:'',AUTO,fnt(false,11),aln('center','middle'));
-      sc(row,C_PROM,promFinal!==null?promFinal:'','PROM',fnt(true,11),aln('center','middle'));
+      sc(row,C_PROM,promFinal!==null?promFinal:'',PROM,fnt(true,11),aln('center','middle'));
       sc(row,C_PF,promFinal!==null?promFinal:'','FF065F46',fnt(true,12,'FFFFFFFF'),aln('center','middle'));
       
       // Convertimos el promedio final a palabras usando la nueva función
@@ -980,21 +980,19 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   ws.getRow(4).height=15;
   
 // Fila 4: Distrito y Curso
-  // FILA 4: Distrito a la izquierda, Curso a la derecha
-  ws.getRow(4).height = 20;
-  mg(4, CB, CNS, '  DISTRITO: Batallas', LA, fnt(true, 10), aln('left', 'middle'));
-  mg(4, CM_S, NCOLS, 'AÑO DE ESCOLARIDAD: ' + curso, LA, fnt(true, 10), aln('center', 'middle'));
+  // Aumentamos el rango hasta la columna 10 para que el texto respire
+mg(4, CB, 10, '  DISTRITO: Batallas', LA, fnt(true, 10), aln('left', 'middle'));
+mg(4, 11, NCOLS, 'AÑO DE ESCOLARIDAD: ' + curso, LA, fnt(true, 10), aln('center', 'middle'));
 
-  // FILA 5: Tu nombre usa todo el ancho de la columna de nombres
-  ws.getRow(5).height = 20;
-  mg(5, CB, CNS, '  PROFESOR(A): ' + DOCENTE.nombre, WH, fnt(true, 10), aln('left', 'middle'));
-  mg(5, CM_S, NCOLS, 'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA', LA, fnt(true, 9), aln('center', 'middle'));
+// Lo mismo para el profesor
+mg(5, CB, 10, '  PROFESOR(A): ' + DOCENTE.nombre, WH, fnt(true, 10), aln('left', 'middle'));
+mg(5, 11, NCOLS, 'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA', LA, fnt(true, 9), aln('center', 'middle'));
   ws.getRow(6).height=15.6;
  // Fila 6: Títulos de columnas
-  mg(6, CB, CB, 'N°', AZ, fnt(true, 8, WH), aln('center', 'middle'));
-  mg(6, CNS, CNS, 'APELLIDOS Y NOMBRES', AZ, fnt(true, 9, WH), aln('center', 'middle'));
-  mg(6, CM_S, C_PROM, 'CAMPOS DE SABERES Y CONOCIMIENTOS', AZ, fnt(true, 9, WH), aln('center', 'middle'));
-
+sc(6, CB, 'N°', AZ, fnt(true, 8, WH), aln('center', 'middle'));
+sc(6, CNS, 'APELLIDOS Y NOMBRES', AZ, fnt(true, 9, WH), aln('center', 'middle'));
+// Los campos deben empezar exactamente en CM_S (4)
+mg(6, CM_S, NCOLS, 'CAMPOS DE SABERES Y CONOCIMIENTOS', AZ, fnt(true, 9, WH), aln('center', 'middle'));
   // Fila 7: Bloques de colores de los Campos
   mg(7, CM_S, CM_S + 5, 'COMUNIDAD Y SOCIEDAD', AM, fnt(true, 7, WH), aln('center', 'middle'));
   mg(7, CM_S + 6, CM_S + 8, 'C. TEC. Y PRODUCCION', AM, fnt(true, 7, WH), aln('center', 'middle'));
