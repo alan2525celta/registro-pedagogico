@@ -667,6 +667,7 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
 
   // ===== TOTALES POR DÍA =====
   const rt=9+MIN_AS1;
+  
   ws.getRow(rt).height=18;
   mg(rt,CN,NE,'TOTALES POR DÍA', AZ, fnt(true,9,WH), aln('center','middle'));
   fechas.forEach((f,j)=>{
