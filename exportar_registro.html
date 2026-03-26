@@ -684,16 +684,20 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
   const rowFirma = rt + 3;
   ws.getRow(rowFirma).height = 45;
 
-  // Firma Maestro (Usando tu función mg)
-  mg(rowFirma, 1, 6, '_______________________________', WH, fnt(false, 10), aln('center', 'bottom'));
+ // ===== BLOQUE DE FIRMA Y FECHA (CORRECCIÓN DEFINITIVA) =====
+  const rowFirma = rt + 3;
+  ws.getRow(rowFirma).height = 45;
 
-  // Fecha (Usando tu función mg)
+  // Firma Maestro - Usando color hexadecimal directo para evitar el error 'WH is not defined'
+  mg(rowFirma, 1, 6, '_______________________________', 'FFFFFFFF', fnt(false, 10), aln('center', 'bottom'));
+
+  // Fecha - Alineada a la derecha
   const fechaHoy = "Chachacomani, miércoles, 25 de marzo de 2026";
-  mg(rowFirma, 20, CT, 'FECHA: ' + fechaHoy, WH, fnt(false, 10), aln('right', 'bottom'));
+  mg(rowFirma, 20, CT, 'FECHA: ' + fechaHoy, 'FFFFFFFF', fnt(false, 10), aln('right', 'bottom'));
   
+  // Etiqueta debajo de la firma
   ws.getRow(rowFirma + 1).height = 15;
-  mg(rowFirma + 1, 1, 6, 'FIRMA DEL MAESTRO(A)', WH, fnt(false, 8, 'FF64748B'), aln('center', 'top'));
-
+  mg(rowFirma + 1, 1, 6, 'FIRMA DEL MAESTRO(A)', 'FFFFFFFF', fnt(false, 8, 'FF64748B'), aln('center', 'top'));
   // Configuración de Impresión Final
   ws.pageSetup.printArea='A1:'+colLetra(CT)+(rowFirma+2);
   ws.pageSetup.showGridLines=false;
