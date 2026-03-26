@@ -57,7 +57,7 @@ select:disabled{background:#f8fafc;color:#94a3b8}
   </div>
 
   <div class="fg" id="fg-email" style="display:none">
-    <label>Email del docente</label>
+    <label>Identificador del docente</label>
     <input type="email" id="inp-email" placeholder="docente@gmail.com">
     <button class="btn-sm" onclick="buscarDocente()">🔍 Buscar</button>
   </div>
@@ -84,7 +84,7 @@ select:disabled{background:#f8fafc;color:#94a3b8}
   </div>
   <div class="fg">
     <label>Unidad Educativa</label>
-    <input type="text" id="inp-ue" value="Franz Tamayo de Chachacomani">
+    <input type="text" id="inp-ue" value="Lan Calcina 2026">
   </div>
 
   <hr class="divider">
@@ -138,7 +138,7 @@ function mostrarDocente(doc){
   document.getElementById('docente-badge').style.display='block';
   document.getElementById('badge-nombre').textContent='👤 '+doc.nombre;
   document.getElementById('badge-ue').textContent='📍 '+(doc.unidad_educativa||'');
-  document.getElementById('inp-ue').value=doc.unidad_educativa||'Franz Tamayo de Chachacomani';
+  document.getElementById('inp-ue').value=doc.unidad_educativa||'LAN CALCINA 2026';
 }
 
 function mostrarCampoEmail(){
@@ -378,7 +378,7 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
 
   // ===== FILA 1: UE =====
   ws.getRow(1).height=22;
-  merge(1,1,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(),
+  merge(1,1,NCOLS,'UNIDAD EDUCATIVA: '+ue.toUpperCase(),
     C.HDR_AZUL, font(true,14,'FFFFFFFF'), align('center','middle',0,false));
 
   // ===== FILA 2: REGISTRO DE EVALUACIÓN =====
@@ -433,7 +433,7 @@ titulosFinales.forEach(t => {
 
  // ===== FILA 7: ENCABEZADOS ACTIVIDADES (ACTUALIZADO DINÁMICO) =====
 ws.getRow(7).height = 145; // Un poco más alto para que el texto vertical respire
-merge(7, C1, C_NOM_E, 'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true, 10), align('center', 'bottom', 0, true));
+merge(7, C1, C_NOM_E, 'Nº  |  APELLIDOS Y NOMBRES', C.NOMBRE, font(true, 13), align('center', 'bottom', 0, true));
 // SER actividades — dinámico
 for(let i = 0; i < nSER_1T; i++) {
   const act = serActs[i];
@@ -441,26 +441,26 @@ for(let i = 0; i < nSER_1T; i++) {
   sc(7, C_SER_S + i, act ? act.nombre_actividad : '', C.SER_BG, font(false, 8.5), align('center', 'bottom', 90, true));
 }
 // CAMBIO: Promedio SER ahora es VERTICAL (90°)
-sc(7, C_PSER, 'PROMEDIO\nSER', C.SER_MED, font(true, 9), align('center', 'bottom', 90, true));
+sc(7, C_PSER, '  PROMEDIO\n  SER', C.SER_MED, font(true, 12), align('center', 'bottom', 90, true));
 // SABER actividades — dinámico
 for(let i = 0; i < nSAB_1T; i++) {
   const act = saberActs[i];
   sc(7, C_SAB_S + i, act ? act.nombre_actividad : '', C.SAB_BG, font(false, 8.5), align('center', 'bottom', 90, true));
 }
 // CAMBIO: Promedio SABER ahora es VERTICAL (90°)
-sc(7, C_PSAB, 'PROMEDIO\nSABER', C.SAB_MED, font(true, 9), align('center', 'bottom', 90, true));
+sc(7, C_PSAB, '  PROMEDIO\n  SABER', C.SAB_MED, font(true, 12), align('center', 'bottom', 90, true));
 // HACER actividades — dinámico
 for(let i = 0; i < nHAC_1T; i++) {
   const act = hacerActs[i];
   sc(7, C_HAC_S + i, act ? act.nombre_actividad : '', C.HAC_BG, font(false, 8.5), align('center', 'bottom', 90, true));
 }
 // CAMBIO: Promedio HACER ahora es VERTICAL (90°)
-sc(7, C_PHAC, 'PROMEDIO\nHACER', C.HAC_MED, font(true, 10), align('center', 'bottom', 90, true));
+sc(7, C_PHAC, '  PROMEDIO\n  HACER', C.HAC_MED, font(true, 12), align('center', 'bottom', 90, true));
 // CAMBIO: Todos los encabezados finales ahora son VERTICALES (90°)
-sc(7, C_TOTAL, 'VALORACIÓN\nTOTAL', C.TOTAL, font(true, 10), align('center', 'bottom', 90, true));
-sc(7, C_AUTO, 'AUTO\nEVAL. (5)', C.AUTO, font(true, 10), align('center', 'bottom', 90, true));
-sc(7, C_PROM, 'PROM.\nTRIM.', C.PROM, font(true, 10), align('center', 'bottom', 90, true));
-sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 10), align('center', 'bottom', 90, true));
+sc(7, C_TOTAL, '  VALORACIÓN\n  TOTAL', C.TOTAL, font(true, 12), align('center', 'bottom', 90, true));
+sc(7, C_AUTO, 'AUTOEVALUACION (5)', C.AUTO, font(true, 12), align('center', 'bottom', 90, true));
+sc(7, C_PROM, '  PROMEDIO\n  TRIMESTRAL', C.PROM, font(true, 12), align('center', 'bottom', 90, true));
+sc(7, C_EST, ' ESTADO DEL\n  ESTUDIANTE', 'FFE2EFDA', font(true, 12), align('center', 'bottom', 90, true));
 
   
   // ===== FILAS ESTUDIANTES — mínimo 30 filas =====
@@ -488,7 +488,7 @@ sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 10), align('center
     for(let j=0;j<nSAB_1T;j++){
       const act=saberActs[j];
       const n=e&&act?NOTAS[e.id]?.[act.id]:undefined;
-      sc(row,C_SAB_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF5F3FF':'FFEDE9FE', font(true,11), align('center', 'middle', 0, false));
+      sc(row,C_SAB_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF5F3FF':'FFEDE9FE', font(true,12), align('center', 'middle', 0, false));
     }
     const pSab=e?promDim(e.id,saberActs,NOTAS):null;
     const pSabConv=pSab!==null?Math.round(pSab*0.45):null;
@@ -498,7 +498,7 @@ sc(7, C_EST, 'ESTADO DEL\nESTUDIANTE', 'FFE2EFDA', font(true, 10), align('center
     for(let j=0;j<nHAC_1T;j++){
       const act=hacerActs[j];
       const n=e&&act?NOTAS[e.id]?.[act.id]:undefined;
-      sc(row,C_HAC_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF0FDF4':'FFE6FAF2', font(true,11), align('center', 'middle', 0, false));
+      sc(row,C_HAC_S+j, n!==undefined&&n!==null?n:'', i%2===0?'FFF0FDF4':'FFE6FAF2', font(true,12), align('center', 'middle', 0, false));
     }
     const pHac=e?promDim(e.id,hacerActs,NOTAS):null;
     const pHacConv=pHac!==null?Math.round(pHac*0.40):null;
