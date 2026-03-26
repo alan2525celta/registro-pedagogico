@@ -855,7 +855,7 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
       sc(row,C_TOT,evalTot!==null?evalTot:'',TOTAL,fnt(true,11),aln('center','middle'));
       sc(row,C_AUTO,auto!==null?auto:'',AUTO,fnt(false,11),aln('center','middle'));
       sc(row,C_PROM,promFinal!==null?promFinal:'',PROM,fnt(true,11),aln('center','middle'));
-      sc(row,C_PF,promFinal!==null?promFinal:'',FF065F46,fnt(true,12,'FFFFFFFF'),aln('center','middle'));
+      sc(row,C_PF,promFinal!==null?promFinal:'','FF065F46',fnt(true,12,'FFFFFFFF'),aln('center','middle'));
       
       // Convertimos el promedio final a palabras usando la nueva función
       const textoLiteral = promFinal !== null ? numeroALiteral(promFinal) : '';
