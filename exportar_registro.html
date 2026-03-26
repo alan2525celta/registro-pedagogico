@@ -523,32 +523,48 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
 
 
 // =====================================================================
-// HOJA AS.1 — CUADRO DE ASISTENCIA (VERSIÓN MEJORADA)
+// HOJA AS.1 — CUADRO DE ASISTENCIA (CORRECCIÓN DEFINITIVA)
 // =====================================================================
 async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,DOCENTE}){
   function colLetra(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
   const trimNom={'1':'1ER. TRIMESTRE','2':'2DO. TRIMESTRE','3':'3ER. TRIMESTRE'};
   const ws=wb.addWorksheet('AS.1');
   
-  // Configuración de página profesional
+  // Configuración de página
   ws.pageSetup.orientation='landscape';
-  ws.pageSetup.paperSize=1; // Carta/Letter
+  ws.pageSetup.paperSize=1;
   ws.pageSetup.scale=75;
   ws.pageSetup.margins={left:0.2,right:0.2,top:0.3,bottom:0.3,header:0,footer:0};
 
-  // Paleta de colores consistente
-  const C = {
-    HDR_AZUL: 'FF1F3D6A', // Azul Institucional
-    HDR_MED: 'FF2563EB',  // Azul Medio
-    LABEL: 'FFF1F5F9',    // Gris para etiquetas
-    WHITE: 'FFFFFFFF',
-    GRIS: 'FFF1F5F9',     // Gris cebra
-    BORDE: 'FF000000'
-  };
-
+  // Definición de Colores (Para evitar errores de "not defined")
+  const AZ='FF1A3A6B', AM='FF2563EB', LA='FFF2CF50', PR='FFFFC000',
+        LC='FF92D050', AT='FFFDE9D9', FA='FFFFC7CE', WH='FFFFFFFF', GR='FFF1F5F9';
+  
   const CN=1, NS=2, NE=3, DS=4, DE=39, CP=40, CL=41, CA=42, CF=43, CT=44;
 
-  // Configuración de anchos
+  // Funciones de formato (Asegurando compatibilidad con tu sistema)
+  const brd={style:'thin',color:{argb:'FF000000'}};
+  const allB={top:brd,left:brd,bottom:brd,right:brd};
+  function fill(a){return{type:'pattern',pattern:'solid',fgColor:{argb:a}};}
+  function fnt(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
+  function aln(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
+  
+  function sc(r,col,val,bg,fn,al){
+    const cell=ws.getCell(r,col);
+    if(val!==null && val!==undefined) cell.value=val;
+    if(bg) cell.fill=fill(bg);
+    if(fn) cell.font=fn;
+    if(al) cell.alignment=al;
+    cell.border=allB;
+    return cell;
+  }
+  
+  function mg(r,c1,c2,val,bg,fn,al){
+    if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
+    return sc(r,c1,val,bg,fn,al);
+  }
+
+  // Anchos de columna
   ws.getColumn(CN).width=3.5;
   ws.getColumn(NS).width=17;
   ws.getColumn(NE).width=15;
@@ -556,98 +572,72 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
   ws.getColumn(CP).width=4; ws.getColumn(CL).width=4;
   ws.getColumn(CA).width=4; ws.getColumn(CF).width=4; ws.getColumn(CT).width=6.5;
 
-  // Funciones de formato
-  const fill=(c)=>({type:'pattern',pattern:'solid',fgColor:{argb:c}});
-  const font=(b,s,c='FF000000')=>({bold:b,size:s,name:'Calibri',color:{argb:c}});
-  const align=(h,v,r,w)=>({horizontal:h,vertical:v,textRotation:r||0,wrapText:!!w});
-  const border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
-
-  function sc(r,col,val,bg,fn,al){
-    const cell=ws.getCell(r,col);
-    if(val!==null && val!==undefined) cell.value=val;
-    if(bg) cell.fill=fill(bg);
-    if(fn) cell.font=fn;
-    if(al) cell.alignment=al;
-    cell.border=border;
-    return cell;
-  }
-  function mg(r,c1,c2,val,bg,fn,al){
-    if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
-    return sc(r,c1,val,bg,fn,al);
-  }
-
-  // ===== ENCABEZADO INSTITUCIONAL (FILAS 1-4) =====
+  // ===== ENCABEZADO INSTITUCIONAL =====
   ws.getRow(1).height=20;
-  mg(1,CN,CT,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(), C.HDR_AZUL, font(true,11,'FFFFFFFF'), align('center','middle'));
+  mg(1,CN,CT,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICA: '+ue.toUpperCase(), AZ, fnt(true,11,WH), aln('center','middle'));
 
   ws.getRow(2).height=18;
-  mg(2,CN,CT,'CUADRO DE ASISTENCIA — GESTIÓN 2026', C.HDR_MED, font(false,12,'FFFFFFFF'), align('center','middle'));
+  mg(2,CN,CT,'CUADRO DE ASISTENCIA — GESTIÓN 2026', AM, fnt(false,12,WH), aln('center','middle'));
 
   ws.getRow(3).height=22;
-  mg(3,CN,3,'MAESTRA(O):', C.LABEL, font(true,9), align('right','middle'));
-  mg(3,4,20, DOCENTE.nombre, C.WHITE, font(false,10), align('left','middle'));
-  sc(3,21,'CURSO:', C.LABEL, font(true,10), align('center','middle'));
-  mg(3,22,CT, curso, C.WHITE, font(true,11), align('center','middle'));
+  mg(3,CN,3,'MAESTRA(O):', GR, fnt(true,9), aln('right','middle'));
+  mg(3,4,20, DOCENTE.nombre, WH, fnt(false,10), aln('left','middle'));
+  sc(3,21,'CURSO:', GR, fnt(true,10), aln('center','middle'));
+  mg(3,22,CT, curso, WH, fnt(true,11), aln('center','middle'));
 
   ws.getRow(4).height=18;
-  mg(4,CN,3,'ASIGNATURA:', C.LABEL, font(true,9), align('right','middle'));
-  mg(4,4,CT, materia.toUpperCase(), C.WHITE, font(false,10), align('left','middle'));
+  mg(4,CN,3,'ASIGNATURA:', GR, fnt(true,9), aln('right','middle'));
+  mg(4,4,CT, materia.toUpperCase(), WH, fnt(false,10), aln('left','middle'));
 
   ws.getRow(5).height=5;
 
-  // ===== FILA 6, 7 y 8: ENCABEZADOS COMBINADOS VERTICALMENTE =====
+  // ===== ENCABEZADOS DE TABLA (FILA 6 AL 8 COMBINADOS) =====
   ws.getRow(6).height=20;
   ws.getRow(7).height=40;
   ws.getRow(8).height=40;
 
-  // N° y Nombres (Combinados 6 al 8)
-  ws.mergeCells(6,CN,8,CN);
-  sc(6,CN,'N°', C.HDR_AZUL, font(true,9,'FFFFFFFF'), align('center','middle'));
-  ws.mergeCells(6,NS,8,NE);
-  sc(6,NS,'APELLIDOS Y NOMBRES', C.HDR_AZUL, font(true,10,'FFFFFFFF'), align('center','middle'));
+  ws.mergeCells(6,CN,8,CN); sc(6,CN,'N°', AZ, fnt(true,9,WH), aln('center','middle'));
+  ws.mergeCells(6,NS,8,NE); sc(6,NS,'APELLIDOS Y NOMBRES', AZ, fnt(true,10,WH), aln('center','middle'));
 
-  // Título de Asistencia
   const todasFechas=Object.keys(asistenciaData).length>0 ? [...new Set(Object.values(asistenciaData).flatMap(d=>Object.keys(d)))].sort() : [];
   const fechas=todasFechas.slice(0,36);
-  mg(6,DS,DE,'ASISTENCIA — '+trimNom[trim], C.HDR_MED, font(true,10,'FFFFFFFF'), align('center','middle'));
+  mg(6,DS,DE,'ASISTENCIA — '+trimNom[trim], AM, fnt(true,10,WH), aln('center','middle'));
 
-  // Fechas Combinadas (Fila 7 y 8)
+  // Fechas Verticales Combinadas
   fechas.forEach((f,i)=>{
     const p=f.split('-');
     const lbl=p.length===3?p[2]+'/'+p[1]:f;
     const col=DS+i;
     ws.mergeCells(7,col,8,col);
-    sc(7,col,lbl, i%2===0?'FFD9E1F2':C.WHITE, font(false,9), align('center','middle',90));
+    sc(7,col,lbl, i%2===0?'FFD9E1F2':WH, fnt(false,9), aln('center','middle',90));
   });
-  for(let i=fechas.length;i<(DE-DS+1);i++) {
+  for(let i=fechas.length;i<(DE-DS+1);i++){
     ws.mergeCells(7,DS+i,8,DS+i);
-    sc(7,DS+i,'',C.WHITE,null,null);
+    sc(7,DS+i,'',WH,null,null);
   }
 
-  // Totales y Leyendas Combinadas (Fila 6 al 8)
+  // Leyendas P, L, A, F y Total
   const leyendas=[
-    {c:CP, t:'P - PRESENTE', b:'FFF2CF50'},
-    {c:CL, t:'L - LICENCIA', b:'FF92D050'},
-    {c:CA, t:'A - ATRASO',   b:'FFFDE9D9'},
-    {c:CF, t:'F - FALTA',    b:'FFFFC7CE'}
+    {c:CP, t:'P - PRESENTE', b:LA}, {c:CL, t:'L - LICENCIA', b:LC},
+    {c:CA, t:'A - ATRASO',   b:AT}, {c:CF, t:'F - FALTA',    b:FA}
   ];
   leyendas.forEach(l=>{
     ws.mergeCells(6,l.c,8,l.c);
-    sc(6,l.c,l.t, l.b, font(true,8), align('center','middle',90,true));
+    sc(6,l.c,l.t, l.b, fnt(true,8), aln('center','middle',90,true));
   });
   ws.mergeCells(6,CT,8,CT);
-  sc(6,CT,'TOTAL\nDÍAS', C.HDR_AZUL, font(true,8,'FFFFFFFF'), align('center','middle',0,true));
+  sc(6,CT,'TOTAL\nDÍAS', AZ, fnt(true,8,WH), aln('center','middle',0,true));
 
-  // ===== FILAS ESTUDIANTES =====
+  // ===== LISTA DE ESTUDIANTES =====
   const MIN_AS1=Math.max(35,ESTUDIANTES.length);
   for(let idx=0;idx<MIN_AS1;idx++){
     const e=ESTUDIANTES[idx]||null;
     const row=9+idx;
     ws.getRow(row).height=17.4;
-    const bg=idx%2===0?C.WHITE:C.GRIS;
+    const rowBg=idx%2===0?WH:GR;
 
-    sc(row,CN,e?idx+1:'',bg,font(true,9),align('center','middle'));
-    mg(row,NS,NE,e?e.nombre:'',bg,font(false,9),align('left','middle'));
+    sc(row,CN,e?idx+1:'',rowBg,fnt(true,9),aln('center','middle'));
+    mg(row,NS,NE,e?e.nombre:'',rowBg,fnt(false,9),aln('left','middle'));
 
     if(e){
       let cP=0, cL=0, cA=0, cF=0;
@@ -656,54 +646,45 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
         if(est==='P') cP++; if(est==='L') cL++; if(est==='A') cA++; if(est==='F') cF++;
         const bgM={'P':'FFE8F5E9','L':'FFF1F8E9','A':'FFFFF9E6','F':'FFFCE4EC'};
         const txM={'P':'FF2E7D32','L':'FF33691E','A':'FFE65100','F':'FFC62828'};
-        sc(row,DS+j,est,est?bgM[est]:bg,font(true,8,est?txM[est]:'FF333333'),align('center','middle'));
+        sc(row,DS+j,est,est?bgM[est]:rowBg,fnt(true,8,est?txM[est]:'FF333333'),aln('center','middle'));
       });
-      for(let j=fechas.length;j<(DE-DS+1);j++) sc(row,DS+j,'',bg,null,null);
+      for(let j=fechas.length;j<(DE-DS+1);j++) sc(row,DS+j,'',rowBg,null,null);
       
-      sc(row,CP,cP||'','FFF2CF50',font(true,10),align('center','middle'));
-      sc(row,CL,cL||'','FF92D050',font(true,10),align('center','middle'));
-      sc(row,CA,cA||'','FFFDE9D9',font(true,10),align('center','middle'));
-      sc(row,CF,cF||'','FFFFC7CE',font(true,10),align('center','middle'));
-      sc(row,CT,(cP+cL+cA+cF)||'',C.HDR_AZUL,font(true,10,'FFFFFFFF'),align('center','middle'));
+      sc(row,CP,cP||'',LA,fnt(true,10),aln('center','middle'));
+      sc(row,CL,cL||'',LC,fnt(true,10),aln('center','middle'));
+      sc(row,CA,cA||'',AT,fnt(true,10),aln('center','middle'));
+      sc(row,CF,cF||'',FA,fnt(true,10),aln('center','middle'));
+      sc(row,CT,(cP+cL+cA+cF)||'',AZ,fnt(true,10,WH),aln('center','middle'));
     } else {
-      for(let col=DS; col<=CT; col++) sc(row,col,'',bg,null,null);
+      for(let col=DS; col<=CT; col++) sc(row,col,'',rowBg,null,null);
     }
   }
 
-  // ===== FILA TOTALES INFERIORES =====
+  // ===== TOTALES POR DÍA =====
   const rt=9+MIN_AS1;
   ws.getRow(rt).height=18;
-  mg(rt,CN,NE,'TOTALES POR DÍA', C.HDR_AZUL, font(true,9,'FFFFFFFF'), align('center','middle'));
+  mg(rt,CN,NE,'TOTALES POR DÍA', AZ, fnt(true,9,WH), aln('center','middle'));
   fechas.forEach((f,j)=>{
     const cPcol=ESTUDIANTES.filter(e=>(asistenciaData[e.id]&&asistenciaData[e.id][f])==='P').length;
-    sc(rt,DS+j,cPcol||'','FFD9E1F2',font(true,8,C.HDR_AZUL),align('center','middle'));
+    sc(rt,DS+j,cPcol||'','FFD9E1F2',fnt(true,8,AZ),aln('center','middle'));
   });
-  for(let j=fechas.length;j<(DE-DS+1);j++) sc(rt,DS+j,'',C.GRIS,null,null);
+  for(let j=fechas.length;j<(DE-DS+1);j++) sc(rt,DS+j,'',GR,null,null);
 
- // ===== FIRMA Y FECHA (CORREGIDO PARA TU CÓDIGO) =====
-  const rowFirma = rt + 3;
-  ws.getRow(rowFirma).height = 45;
-
- // ===== BLOQUE DE FIRMA Y FECHA (CORRECCIÓN DEFINITIVA) =====
-  const rowFirma = rt + 3;
-  ws.getRow(rowFirma).height = 45;
-
-  // Firma Maestro - Usando color hexadecimal directo para evitar el error 'WH is not defined'
-  mg(rowFirma, 1, 6, '_______________________________', 'FFFFFFFF', fnt(false, 10), aln('center', 'bottom'));
-
-  // Fecha - Alineada a la derecha
+  // ===== FIRMA Y FECHA (EN UNA SOLA LÍNEA) =====
+  const rowFirma=rt+3;
+  ws.getRow(rowFirma).height=45;
+  mg(rowFirma, 1, 6, '_______________________________', WH, fnt(false, 10), aln('center', 'bottom'));
   const fechaHoy = "Chachacomani, miércoles, 25 de marzo de 2026";
-  mg(rowFirma, 20, CT, 'FECHA: ' + fechaHoy, 'FFFFFFFF', fnt(false, 10), aln('right', 'bottom'));
+  mg(rowFirma, 20, CT, 'FECHA: ' + fechaHoy, WH, fnt(false, 10), aln('right', 'bottom'));
   
-  // Etiqueta debajo de la firma
-  ws.getRow(rowFirma + 1).height = 15;
-  mg(rowFirma + 1, 1, 6, 'FIRMA DEL MAESTRO(A)', 'FFFFFFFF', fnt(false, 8, 'FF64748B'), aln('center', 'top'));
-  // Configuración de Impresión Final
+  ws.getRow(rowFirma+1).height=15;
+  mg(rowFirma+1, 1, 6, 'FIRMA DEL MAESTRO(A)', WH, fnt(false, 8, 'FF64748B'), aln('center', 'top'));
+
+  // Configuración de Impresión
   ws.pageSetup.printArea='A1:'+colLetra(CT)+(rowFirma+2);
   ws.pageSetup.showGridLines=false;
   ws.pageSetup.printTitlesRow='1:8';
 }
-
 
 // =====================================================================
 // HOJA 1.BOL — CUADRO DE CALIFICACIONES
