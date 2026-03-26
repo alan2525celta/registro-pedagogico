@@ -680,17 +680,19 @@ async function generarAS1({wb,ESTUDIANTES,asistenciaData,curso,materia,trim,ue,D
   });
   for(let j=fechas.length;j<(DE-DS+1);j++) sc(rt,DS+j,'',C.GRIS,null,null);
 
-  // ===== FIRMA Y FECHA (EN UNA SOLA LÍNEA) =====
-  const rowFirma=rt+3;
-  ws.getRow(rowFirma).height=45;
-  // Firma Maestro
-  merge(rowFirma, 1, 6, '_______________________________', C.WHITE, font(false, 10), align('center', 'bottom'));
-  // Fecha
+ // ===== FIRMA Y FECHA (CORREGIDO PARA TU CÓDIGO) =====
+  const rowFirma = rt + 3;
+  ws.getRow(rowFirma).height = 45;
+
+  // Firma Maestro (Usando tu función mg)
+  mg(rowFirma, 1, 6, '_______________________________', WH, fnt(false, 10), aln('center', 'bottom'));
+
+  // Fecha (Usando tu función mg)
   const fechaHoy = "Chachacomani, miércoles, 25 de marzo de 2026";
-  merge(rowFirma, 20, CT, 'FECHA: ' + fechaHoy, C.WHITE, font(false, 10), align('right', 'bottom'));
+  mg(rowFirma, 20, CT, 'FECHA: ' + fechaHoy, WH, fnt(false, 10), aln('right', 'bottom'));
   
-  ws.getRow(rowFirma+1).height=15;
-  merge(rowFirma+1, 1, 6, 'FIRMA DEL MAESTRO(A)', C.WHITE, font(false, 8, 'FF64748B'), align('center', 'top'));
+  ws.getRow(rowFirma + 1).height = 15;
+  mg(rowFirma + 1, 1, 6, 'FIRMA DEL MAESTRO(A)', WH, fnt(false, 8, 'FF64748B'), aln('center', 'top'));
 
   // Configuración de Impresión Final
   ws.pageSetup.printArea='A1:'+colLetra(CT)+(rowFirma+2);
