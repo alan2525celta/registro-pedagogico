@@ -972,6 +972,7 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   ws.getColumn(C_OBS).width = 4;
 
   ws.getRow(1).height=15.6;
+  
   mg(1,CB,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICO "FRANZ TAMAYO DE CHACHACOMANI"',AZ,fnt(true,10,'FFFFFFFF'),aln('center','middle'));
   ws.getRow(2).height=17.4;
   mg(2,CB,NCOLS,'CENTRALIZADOR DE NOTAS '+new Date().getFullYear(),AM,fnt(true,11,'FFFFFFFF'),aln('center','middle'));
@@ -989,19 +990,26 @@ mg(5, CB, 10, '  PROFESOR(A): ' + DOCENTE.nombre, WH, fnt(true, 10), aln('left',
 mg(5, 11, NCOLS, 'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA', LA, fnt(true, 9), aln('center', 'middle'));
   ws.getRow(6).height=15.6;
  // Fila 6: Títulos de columnas
+
+  // FILA 6 - solo hasta CM_E (sin incluir PROM y OBS en el merge):
+mg(6, CM_S, CM_E, 'CAMPOS DE SABERES Y CONOCIMIENTOS', AZ, fnt(true, 9, WH), aln('center', 'middle'));
+sc(6, C_PROM, 'PROM.', AZ, fnt(true, 8, WH), aln('center', 'middle'));
+sc(6, C_OBS,  'OBS.',  AZ, fnt(true, 8, WH), aln('center', 'middle'));
 sc(6, CB, 'N°', AZ, fnt(true, 8, WH), aln('center', 'middle'));
 sc(6, CNS, 'APELLIDOS Y NOMBRES', AZ, fnt(true, 9, WH), aln('center', 'middle'));
-// Los campos deben empezar exactamente en CM_S (4)
-mg(6, CM_S, NCOLS, 'CAMPOS DE SABERES Y CONOCIMIENTOS', AZ, fnt(true, 9, WH), aln('center', 'middle'));
   // Fila 7: Bloques de colores de los Campos
   // POR ESTE BLOQUE CORREGIDO:
+  // AGREGAR al inicio del bloque de fila 7:
 ws.getRow(7).height = 15;
-mg(7, CM_S,     CM_S + 5,  'COMUNIDAD Y SOCIEDAD',    AM, fnt(true, 7, WH), aln('center', 'middle'));
-mg(7, CM_S + 6, CM_S + 8,  'C. TEC. Y PRODUCCIÓN',   AM, fnt(true, 7, WH), aln('center', 'middle'));
-mg(7, CM_S + 9, CM_S + 12, 'VIDA TIERRA Y TERRITORIO',AM, fnt(true, 7, WH), aln('center', 'middle'));
-mg(7, CM_S + 13,CM_S + 14, 'COSMOS Y PENSAMIENTO',   AM, fnt(true, 7, WH), aln('center', 'middle'));
-sc(7, C_PROM, '', AZ, null, null);   // ← celda PROMEDIO en fila 7 sin merge
-sc(7, C_OBS,  '', AZ, null, null);   // ← celda OBS en fila 7 sin merge
+sc(7, CB,  '', AZ, null, null);   // ← celda N° en fila 7
+sc(7, CNS, '', AZ, null, null);   // ← celda NOMBRES en fila 7
+mg(7, CM_S,      CM_S + 5,  'COMUNIDAD Y SOCIEDAD',     AM, fnt(true, 7, WH), aln('center', 'middle'));
+mg(7, CM_S + 6,  CM_S + 8,  'C. TEC. Y PRODUCCIÓN',    AM, fnt(true, 7, WH), aln('center', 'middle'));
+mg(7, CM_S + 9,  CM_S + 12, 'VIDA TIERRA Y TERRITORIO', AM, fnt(true, 7, WH), aln('center', 'middle'));
+mg(7, CM_S + 13, CM_S + 14, 'COSMOS Y PENSAMIENTO',    AM, fnt(true, 7, WH), aln('center', 'middle'));
+sc(7, C_PROM, '', AZ, null, null);  // ← celda PROMEDIO fila 7
+sc(7, C_OBS,  '', AZ, null, null);  // ← celda OBS fila 7
+
   // Fila 8: Limpiar columnas sobrantes
   sc(8, CB, '', AZ); 
   sc(8, CNS, '', AZ);
