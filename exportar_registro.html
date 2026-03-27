@@ -957,7 +957,7 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   const CAMPOS=[
     {campo:'COMUNIDAD Y SOCIEDAD',materias:['Comunicación y Lenguajes: Lengua Castellana y Originaria','Lengua Extranjera','Ciencias Sociales','Educación Física y Deportes','Educación Musical','Artes Plásticas y Visuales']},
     {campo:'CIENCIA TECNOLOGÍA Y PRODUCCIÓN',materias:['Matemática','Técnica Tecnológica','Técnica Tecnológica Especializada']},
-    {campo:'VIDA TIERRA Y TERRITORIO',materias:['Ciencias Naturales','Ciencias Naturales: Biología - Geografía','Ciencias Naturales: Física','Ciencias Naturales: Química']},
+    {campo:'VIDA TIERRA Y TERRITORIO',materias:['Ciencias Naturales: Biología - Geografía','Ciencias Naturales: Física','Ciencias Naturales: Química']},
     {campo:'COSMOS Y PENSAMIENTO',materias:['Cosmovisiones, Filosofía y Sicología','Valores, Espiritualidad y Religiones']},
   ];
   const todasMaterias=CAMPOS.flatMap(c=>c.materias);
@@ -969,7 +969,7 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   // ===== ANCHOS AJUSTADOS PARA CARTA VERTICAL =====
   ws.getColumn(1).width=0.4;
   ws.getColumn(CB).width=3.5;       // N°
-  ws.getColumn(CNS).width=18;       // Nombres — balanceado con las 15 materias
+  ws.getColumn(CNS).width=26;       // Nombres — balanceado con las 15 materias
   for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=2.6;  // Materias
   ws.getColumn(C_PROM).width=4.5;
   ws.getColumn(C_OBS).width=3.5;
@@ -1002,11 +1002,13 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
 
   // ===== FILA 6: ENCABEZADOS DE COLUMNAS =====
   ws.getRow(6).height=13;
-  sc(6,CB,'N°',AZ,fnt(true,7,WH),aln('center','middle'));
-  sc(6,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,7,WH),aln('center','middle'));
-  mg(6,CM_S,CM_E,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,7,WH),aln('center','middle'));
-  sc(6,C_PROM,'PROM.',AZ,fnt(true,7,WH),aln('center','middle'));
-  sc(6,C_OBS,'OBS.',AZ,fnt(true,7,WH),aln('center','middle'));
+
+sc(6,CB,'N°',AZ,fnt(true,9,WH),aln('center','middle'));
+sc(6,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,WH),aln('center','middle'));
+mg(6,CM_S,CM_E,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,9,WH),aln('center','middle'));
+sc(6,C_PROM,'PROM.',AZ,fnt(true,9,WH),aln('center','middle'));
+sc(6,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','middle'));
+
 
   // ===== FILA 7: BLOQUES DE CAMPOS =====
   ws.getRow(7).height=13;
@@ -1020,15 +1022,15 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   sc(7,C_OBS,'',AZ,fnt(false,6,WH),aln('center','middle'));
 
   // ===== FILA 8: NOMBRES DE MATERIAS VERTICALES =====
-  ws.getRow(8).height=85;
-  sc(8,CB,'N°',AZ,fnt(true,6,WH),aln('center','bottom',90,false));
-  sc(8,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,6,WH),aln('center','bottom',90,false));
+  ws.getRow(8).height=110;
+sc(8,CB,'N°',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
+sc(8,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
   todasMaterias.forEach((mat,i)=>{
     const esActual=mat.toLowerCase()===materia.toLowerCase();
-    sc(8,CM_S+i,mat,esActual?AM:AZ,fnt(esActual,6,WH),aln('center','bottom',90,false));
+    sc(8,CM_S+i,mat,esActual?AM:AZ,fnt(esActual,9,WH),aln('center','bottom',90,false));
   });
-  sc(8,C_PROM,'PROMEDIO',AZ,fnt(true,6,WH),aln('center','bottom',90,false));
-  sc(8,C_OBS,'OBS.',AZ,fnt(true,6,WH),aln('center','bottom',90,false));
+  sc(8,C_PROM,'PROMEDIO',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
+sc(8,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
 
   // ===== FUNCIÓN DE CÁLCULO (una sola vez, fuera del loop) =====
   const serA=ACTIVIDADES.filter(a=>a.dimension==='SER'&&String(a.trimestre)===String(trim));
@@ -1061,8 +1063,8 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
     const est=ESTUDIANTES[i]||null;
     const bg=i%2===0?WH:GR;
 
-    sc(row,CB,est?i+1:'',bg,fnt(false,7),aln('center','middle'));
-    sc(row,CNS,est?est.nombre:'',bg,fnt(false,7),aln('left','middle'));
+   sc(row,CB,est?i+1:'',bg,fnt(false,10),aln('center','middle'));
+sc(row,CNS,est?est.nombre:'',bg,fnt(false,10),aln('left','middle'));
 
     for(let j=0;j<todasMaterias.length;j++){
       const col=CM_S+j;
@@ -1070,15 +1072,15 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
         const tot=calcNota(est.id);
         const bgC=tot!==null&&tot<51?'FFFFC7CE':tot!==null?'FFFFE699':bg;
         const txtC=tot!==null&&tot<51?ROJO:'FF000000';
-        sc(row,col,tot!==null?tot:'',bgC,fnt(true,7,txtC),aln('center','middle'));
+       sc(row,col,tot!==null?tot:'',bgC,fnt(true,10,txtC),aln('center','middle'));
       } else {
-        sc(row,col,'',bg,fnt(false,7),aln('center','middle'));
+        sc(row,col,'',bg,fnt(false,10),aln('center','middle'));
       }
     }
 
     const promEst=est?calcNota(est.id):null;
-    sc(row,C_PROM,promEst!==null?promEst:'',promEst!==null?'FFFFE699':bg,fnt(true,7),aln('center','middle'));
-    sc(row,C_OBS,'',bg,fnt(false,7),aln('center','middle'));
+    sc(row,C_PROM,promEst!==null?promEst:'',promEst!==null?'FFFFE699':bg,fnt(true,10),aln('center','middle'));
+sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
   }
 
   // ===== PROMEDIO DE APROVECHAMIENTO =====
