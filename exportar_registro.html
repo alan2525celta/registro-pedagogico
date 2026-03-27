@@ -968,40 +968,40 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
 
   // ===== ANCHOS AJUSTADOS PARA CARTA VERTICAL =====
   ws.getColumn(1).width=0.4;
-  ws.getColumn(CB).width=3.5;       // N°
-  ws.getColumn(CNS).width=26;       // Nombres — balanceado con las 15 materias
-  for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=2.6;  // Materias
-  ws.getColumn(C_PROM).width=4.5;
-  ws.getColumn(C_OBS).width=3.5;
+  ws.getColumn(CB).width=4.5;       // N°
+  ws.getColumn(CNS).width=32;       // Nombres — balanceado con las 15 materias
+  for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=4;  // Materias
+  ws.getColumn(C_PROM).width=6;
+  ws.getColumn(C_OBS).width=5;
 
   // ===== FILA 1: INSTITUCIÓN =====
-  ws.getRow(1).height=14;
+  ws.getRow(1).height=16;
   mg(1,CB,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICO "FRANZ TAMAYO DE CHACHACOMANI"',
     AZ,fnt(true,8,WH),aln('center','middle'));
 
   // ===== FILA 2: TÍTULO =====
-  ws.getRow(2).height=14;
+  ws.getRow(2).height=16;
   mg(2,CB,NCOLS,'CENTRALIZADOR DE NOTAS '+new Date().getFullYear(),
     AM,fnt(true,9,WH),aln('center','middle'));
 
   // ===== FILA 3: TRIMESTRE =====
-  ws.getRow(3).height=14;
+  ws.getRow(3).height=16;
   mg(3,CB,NCOLS,trimNom[trim],AZ,fnt(true,9,WH),aln('center','middle'));
 
   // ===== FILA 4: DISTRITO | CURSO — bien distribuidos =====
-  ws.getRow(4).height=13;
+  ws.getRow(4).height=15;
   // Mitad izquierda: Distrito (desde CB hasta col 10)
   mg(4,CB,10,'DISTRITO: Batallas',LA,fnt(true,8),aln('left','middle'));
   // Mitad derecha: Curso (desde col 11 hasta NCOLS)
   mg(4,11,NCOLS,'AÑO DE ESCOLARIDAD: '+curso,LA,fnt(true,8),aln('center','middle'));
 
   // ===== FILA 5: PROFESOR | NIVEL — bien distribuidos =====
-  ws.getRow(5).height=13;
+  ws.getRow(5).height=15;
   mg(5,CB,10,'PROFESOR(A): '+DOCENTE.nombre,WH,fnt(false,8),aln('left','middle'));
   mg(5,11,NCOLS,'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA',LA,fnt(true,7),aln('center','middle'));
 
   // ===== FILA 6: ENCABEZADOS DE COLUMNAS =====
-  ws.getRow(6).height=13;
+  ws.getRow(6).height=15;
 
 sc(6,CB,'N°',AZ,fnt(true,9,WH),aln('center','middle'));
 sc(6,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,WH),aln('center','middle'));
@@ -1059,7 +1059,7 @@ sc(8,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
   // ===== FILAS DE ESTUDIANTES =====
   for(let i=0;i<MIN_FILAS;i++){
     const row=9+i;
-    ws.getRow(row).height=13;
+    ws.getRow(row).height=18;
     const est=ESTUDIANTES[i]||null;
     const bg=i%2===0?WH:GR;
 
@@ -1085,7 +1085,7 @@ sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
 
   // ===== PROMEDIO DE APROVECHAMIENTO =====
   const rowProm=9+MIN_FILAS;
-  ws.getRow(rowProm).height=13;
+  ws.getRow(rowProm).height=18;
   mg(rowProm,CB,CNS,'PROMEDIO DE APROVECHAMIENTO',LA,fnt(true,7),aln('center','middle'));
   for(let j=0;j<todasMaterias.length;j++){
     if(j===idxMateria&&idxMateria>=0){
