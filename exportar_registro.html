@@ -968,11 +968,11 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
 
   // ===== ANCHOS AJUSTADOS PARA CARTA VERTICAL =====
   ws.getColumn(1).width=0.4;
-  ws.getColumn(CB).width=4.5;       // N°
-  ws.getColumn(CNS).width=32;       // Nombres — balanceado con las 15 materias
-  for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=4;  // Materias
+  ws.getColumn(CB).width=5;       // N°
+  ws.getColumn(CNS).width=40;       // Nombres — balanceado con las 15 materias
+  for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=6;  // Materias
   ws.getColumn(C_PROM).width=6;
-  ws.getColumn(C_OBS).width=5;
+  ws.getColumn(C_OBS).width=6;
 
   // ===== FILA 1: INSTITUCIÓN =====
   ws.getRow(1).height=16;
