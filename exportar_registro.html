@@ -976,13 +976,13 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
 
   // ===== FILA 1: INSTITUCIÓN =====
   ws.getRow(1).height=16;
-  mg(1,CB,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICO "FRANZ TAMAYO DE CHACHACOMANI"',
-    AZ,fnt(true,8,WH),aln('center','middle'));
+  mg(1,CB,NCOLS,'UNIDAD EDUCATIVA  "................."',
+    AZ,fnt(true,9,WH),aln('center','middle'));
 
   // ===== FILA 2: TÍTULO =====
-  ws.getRow(2).height=16;
+  ws.getRow(2).height=18;
   mg(2,CB,NCOLS,'CENTRALIZADOR DE NOTAS '+new Date().getFullYear(),
-    AM,fnt(true,9,WH),aln('center','middle'));
+    AM,fnt(true,12,WH),aln('center','middle'));
 
   // ===== FILA 3: TRIMESTRE =====
   ws.getRow(3).height=16;
@@ -991,14 +991,14 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   // ===== FILA 4: DISTRITO | CURSO — bien distribuidos =====
   ws.getRow(4).height=15;
   // Mitad izquierda: Distrito (desde CB hasta col 10)
-  mg(4,CB,10,'DISTRITO: Batallas',LA,fnt(true,8),aln('left','middle'));
+  mg(4,CB,10,'DISTRITO: ...............',LA,fnt(true,8),aln('left','middle'));
   // Mitad derecha: Curso (desde col 11 hasta NCOLS)
   mg(4,11,NCOLS,'AÑO DE ESCOLARIDAD: '+curso,LA,fnt(true,8),aln('center','middle'));
 
   // ===== FILA 5: PROFESOR | NIVEL — bien distribuidos =====
   ws.getRow(5).height=15;
-  mg(5,CB,10,'PROFESOR(A): '+DOCENTE.nombre,WH,fnt(false,8),aln('left','middle'));
-  mg(5,11,NCOLS,'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA',LA,fnt(true,7),aln('center','middle'));
+  mg(5,CB,10,'PROFESOR(A): '+DOCENTE.nombre,WH,fnt(false,9),aln('left','middle'));
+  mg(5,11,NCOLS,'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA',LA,fnt(true,8),aln('center','middle'));
 
   // ===== FILA 6: ENCABEZADOS DE COLUMNAS =====
   ws.getRow(6).height=15;
@@ -1012,12 +1012,12 @@ sc(6,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','middle'));
 
   // ===== FILA 7: BLOQUES DE CAMPOS =====
   ws.getRow(7).height=13;
-  sc(7,CB,'',AZ,fnt(false,7,WH),aln('center','middle'));
-  sc(7,CNS,'',AZ,fnt(false,7,WH),aln('center','middle'));
-  mg(7,CM_S,CM_S+5,'COMUNIDAD Y SOCIEDAD',AM,fnt(true,6,WH),aln('center','middle'));
-  mg(7,CM_S+6,CM_S+8,'C.T. Y PROD.',AM,fnt(true,6,WH),aln('center','middle'));
-  mg(7,CM_S+9,CM_S+12,'VIDA TIERRA Y TERRITORIO',AM,fnt(true,6,WH),aln('center','middle'));
-  mg(7,CM_S+13,CM_S+14,'COSMOS',AM,fnt(true,6,WH),aln('center','middle'));
+  sc(7,CB,'',AZ,fnt(false,9,WH),aln('center','middle'));
+  sc(7,CNS,'',AZ,fnt(false,9,WH),aln('center','middle'));
+  mg(7,CM_S,CM_S+4,'COMUNIDAD Y SOC.',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+10,CM_S+12,'C.T. Y PROD.',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+13,CM_S+15,'V.T. Y TERRITORIO',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+16,CM_S+17,'COS. P.',AM,fnt(true,6,WH),aln('center','middle'));
   sc(7,C_PROM,'',AZ,fnt(false,6,WH),aln('center','middle'));
   sc(7,C_OBS,'',AZ,fnt(false,6,WH),aln('center','middle'));
 
