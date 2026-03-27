@@ -586,6 +586,11 @@ let pendingQueue=[];
 let isOnline=navigator.onLine;
 const COLORES_CURSOS=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)','var(--c8)'];
 
+// ===== BATCHING DE NOTAS =====
+let notasPendientesLote={};  // {id: objeto_nota}
+let debounceTimer=null;      // temporizador de inactividad
+const DEBOUNCE_MS=1200;      // 1.2 segundos sin escribir → enviar lote
+
 // ===== OFFLINE =====
 window.addEventListener('online',()=>{ isOnline=true; document.getElementById('offline-banner').classList.remove('show'); syncPending(); });
 window.addEventListener('offline',()=>{ isOnline=false; document.getElementById('offline-banner').classList.add('show'); });
@@ -755,6 +760,8 @@ async function cargarDatos(){
 
 // ===== NAVEGACIÓN =====
 function showScreen(id){
+  // Enviar lote pendiente de notas antes de cambiar de pantalla
+  if(Object.keys(notasPendientesLote).length) flushNotasLote();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
@@ -1275,7 +1282,7 @@ function promDim(estId,acts){
   return suma/acts.length; // divide entre TOTAL de actividades, no solo las llenadas
 }
 
-async function saveNota(estId,actId,dim,curso,materia,val,inputEl){
+function saveNota(estId,actId,dim,curso,materia,val,inputEl){
   const maxPts={'SER':10,'SABER':100,'HACER':100}[dim]||100;
   const num=parseFloat(val);
   if(val===''||val===null) return;
@@ -1286,9 +1293,43 @@ async function saveNota(estId,actId,dim,curso,materia,val,inputEl){
     return;
   }
   inputEl.classList.remove('invalid');
+  // 1. Actualizar memoria local inmediatamente
   if(!NOTAS[estId]) NOTAS[estId]={};
   NOTAS[estId][actId]=num;
-  await sbUpsert('notas',{id:'N_'+estId+'_'+actId,id_docente:DOCENTE.id,id_estudiante:estId,id_actividad:actId,curso,materia,trimestre:String(trimActual),dimension:dim,nota:num});
+  // 2. Guardar en cache local
+  saveLocal('notas',{id:'N_'+estId+'_'+actId,id_docente:DOCENTE.id,id_estudiante:estId,id_actividad:actId,curso,materia,trimestre:String(trimActual),dimension:dim,nota:num});
+  // 3. Acumular en lote pendiente
+  notasPendientesLote['N_'+estId+'_'+actId]={id:'N_'+estId+'_'+actId,id_docente:DOCENTE.id,id_estudiante:estId,id_actividad:actId,curso,materia,trimestre:String(trimActual),dimension:dim,nota:num};
+  // 4. Feedback visual inmediato
+  showToastEscribiendo();
+  // 5. Reiniciar temporizador de inactividad (debounce)
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(()=>flushNotasLote(), DEBOUNCE_MS);
+}
+
+// Enviar todas las notas acumuladas a Supabase en un solo lote
+async function flushNotasLote(){
+  const lote=Object.values(notasPendientesLote);
+  if(!lote.length) return;
+  notasPendientesLote={};
+  if(isOnline){
+    showSync();
+    const {error}=await sb.from('notas').upsert(lote);
+    if(error){
+      // Si falla, redirigir cada nota al pendingQueue (Fix 4: no se pierden)
+      console.error('flushNotasLote error:',error);
+      lote.forEach(n=>{ pendingQueue.push({type:'upsert',tabla:'notas',data:n}); });
+      localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue));
+      showToastGuardado(false);
+    } else {
+      showToastGuardado(true);
+    }
+  } else {
+    // Sin internet: encolar todo en pendingQueue
+    lote.forEach(n=>{ pendingQueue.push({type:'upsert',tabla:'notas',data:n}); });
+    localStorage.setItem('pendingQueue',JSON.stringify(pendingQueue));
+    showToastGuardado(null); // null = sin internet
+  }
 }
 
 async function saveAutoEval(estId,val,curso,materia,inputEl){
@@ -1549,8 +1590,35 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 
+// Feedback visual específico para guardado de notas
+function showToastEscribiendo(){
+  const t=document.getElementById('toast');
+  t.textContent='📝 Escribiendo...';
+  t.style.background='#d97706'; // ámbar = en proceso
+  t.classList.add('show');
+  // No auto-ocultar — se reemplaza al confirmar
+}
+
+function showToastGuardado(exito){
+  const t=document.getElementById('toast');
+  if(exito===true){
+    t.textContent='✅ Cambios guardados';
+    t.style.background='#059669'; // verde = confirmado
+  } else if(exito===false){
+    t.textContent='⚠️ Sin conexión — cambios en cola';
+    t.style.background='#dc2626'; // rojo = error
+  } else {
+    t.textContent='📶 Sin internet — se guardará al reconectar';
+    t.style.background='#7c3aed'; // violeta = offline
+  }
+  t.classList.add('show');
+  setTimeout(()=>{ t.classList.remove('show'); t.style.background=''; },3000);
+}
+
 // ===== CERRAR SESIÓN =====
 async function cerrarSesion(){
+  // Enviar lote de notas pendiente antes de cerrar
+  if(Object.keys(notasPendientesLote).length) await flushNotasLote();
   if(pendingQueue.length>0){
     const seguir=confirm('⚠️ Tienes '+pendingQueue.length+' cambio(s) sin sincronizar con internet.\n\n¿Cerrar sesión de todas formas? Se perderán esos cambios.');
     if(!seguir) return;
