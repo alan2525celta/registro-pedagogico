@@ -1003,8 +1003,8 @@ async function generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,
   // ===== FILA 6: ENCABEZADOS DE COLUMNAS =====
   ws.getRow(6).height=15;
 
-sc(6,CB,'N°',AZ,fnt(true,9,WH),aln('center','middle'));
-sc(6,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,WH),aln('center','middle'));
+sc(6,CB,'',AZ,fnt(true,9,WH),aln('center','middle'));
+sc(6,CNS,'',AZ,fnt(true,9,WH),aln('center','middle'));
 mg(6,CM_S,CM_E,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,9,WH),aln('center','middle'));
 sc(6,C_PROM,'PROM.',AZ,fnt(true,9,WH),aln('center','middle'));
 sc(6,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','middle'));
@@ -1014,17 +1014,17 @@ sc(6,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','middle'));
   ws.getRow(7).height=13;
   sc(7,CB,'',AZ,fnt(false,9,WH),aln('center','middle'));
   sc(7,CNS,'',AZ,fnt(false,9,WH),aln('center','middle'));
-  mg(7,CM_S,CM_S+4,'COMUNIDAD Y SOC.',AM,fnt(true,9,WH),aln('center','middle'));
-  mg(7,CM_S,CM_S+12,'C.T. Y PROD.',AM,fnt(true,9,WH),aln('center','middle'));
-  mg(7,CM_S+13,CM_S+15,'V.T. Y TERRITORIO',AM,fnt(true,9,WH),aln('center','middle'));
-  mg(7,CM_S+16,CM_S+17,'COS. P.',AM,fnt(true,6,WH),aln('center','middle'));
+  mg(7,CM_S,CM_S+5,'C.S.',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+6,CM_S+8,'C.T.P.',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+9,CM_S+11,'V.T.T.',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+12,CM_S+13,'C.P.',AM,fnt(true,9,WH),aln('center','middle'));
   sc(7,C_PROM,'',AZ,fnt(false,6,WH),aln('center','middle'));
   sc(7,C_OBS,'',AZ,fnt(false,6,WH),aln('center','middle'));
 
   // ===== FILA 8: NOMBRES DE MATERIAS VERTICALES =====
   ws.getRow(8).height=110;
-sc(8,CB,'N°',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
-sc(8,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
+sc(8,CB,'N°',AZ,fnt(true,9,WH),aln('center','middle'));
+sc(8,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,12,WH),aln('center','middle'));
   todasMaterias.forEach((mat,i)=>{
     const esActual=mat.toLowerCase()===materia.toLowerCase();
     sc(8,CM_S+i,mat,esActual?AM:AZ,fnt(esActual,9,WH),aln('center','bottom',90,false));
