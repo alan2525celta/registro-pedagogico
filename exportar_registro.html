@@ -1157,30 +1157,25 @@ async function exportarCentralizador(){
   });
 
   prog(20,'Cargando actividades de todas las áreas...','');
-
-  // 2. Todas las actividades del curso y trimestre
   const {data:actsAll}=await sb.from('actividades').select('*').eq('id_docente',id).eq('curso',curso).eq('trimestre',trim);
   log('✓ Actividades totales: '+(actsAll||[]).length);
-  prog(40,'Cargando notas de todas las áreas...','');
 
-  // 3. Todas las notas del curso y trimestre
+  prog(40,'Cargando notas de todas las áreas...','');
   const {data:notasAll}=await sb.from('notas').select('*').eq('id_docente',id).eq('curso',curso).eq('trimestre',trim);
   log('✓ Notas totales: '+(notasAll||[]).length);
-  prog(60,'Cargando autoevaluaciones...','');
 
-  // 4. Autoevaluaciones de todas las materias
+  prog(60,'Cargando autoevaluaciones...','');
   const {data:autoAll}=await sb.from('autoevaluacion').select('*').eq('id_docente',id).eq('curso',curso).eq('trimestre',trim);
   log('✓ Autoevaluaciones: '+(autoAll||[]).length);
+
   prog(70,'Procesando datos...','');
 
-  // Organizar actividades por materia
   const ACTS_POR_MATERIA={};
   (actsAll||[]).forEach(a=>{
     if(!ACTS_POR_MATERIA[a.materia]) ACTS_POR_MATERIA[a.materia]={SER:[],SABER:[],HACER:[]};
     if(ACTS_POR_MATERIA[a.materia][a.dimension]) ACTS_POR_MATERIA[a.materia][a.dimension].push(a);
   });
 
-  // Organizar notas por materia → id_estudiante → id_actividad
   const NOTAS_POR_MATERIA={};
   (notasAll||[]).forEach(n=>{
     if(!NOTAS_POR_MATERIA[n.materia]) NOTAS_POR_MATERIA[n.materia]={};
@@ -1188,7 +1183,6 @@ async function exportarCentralizador(){
     NOTAS_POR_MATERIA[n.materia][n.id_estudiante][n.id_actividad]=parseFloat(n.nota);
   });
 
-  // Organizar autoevals por materia → id_estudiante
   const AUTO_POR_MATERIA={};
   (autoAll||[]).forEach(a=>{
     if(!AUTO_POR_MATERIA[a.materia]) AUTO_POR_MATERIA[a.materia]={};
@@ -1200,26 +1194,16 @@ async function exportarCentralizador(){
   try{
     const wb=new ExcelJS.Workbook();
     wb.creator='Registro Pedagógico 2026';
-
-    await generarCentralizadorCompleto({
-      wb,ESTUDIANTES,NOTAS_POR_MATERIA,AUTO_POR_MATERIA,
-      ACTS_POR_MATERIA,ID_POR_RUDE_MATERIA,curso,trim,ue,DOCENTE
-    });
-
+    await generarCentralizadorCompleto({wb,ESTUDIANTES,NOTAS_POR_MATERIA,AUTO_POR_MATERIA,ACTS_POR_MATERIA,ID_POR_RUDE_MATERIA,curso,trim,ue,DOCENTE});
     prog(95,'Descargando...','');
     log('✓ Centralizador generado');
-
     const buffer=await wb.xlsx.writeBuffer();
     const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
     a.download=`Centralizador_${curso}_Trim${trim}_2026.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
     prog(100,'✅ Centralizador listo','Descarga iniciada');
     log('📁 Archivo descargado');
   }catch(e){
@@ -1230,19 +1214,23 @@ async function exportarCentralizador(){
 }
 
 // =====================================================================
-// HOJA CENTRALIZADOR COMPLETO — todas las áreas, búsqueda por RUDE
+// CENTRALIZADOR COMPLETO — usa la hoja generarCentralizador existente
+// pero alimentada con datos de TODAS las áreas via RUDE
 // =====================================================================
 async function generarCentralizadorCompleto({wb,ESTUDIANTES,NOTAS_POR_MATERIA,AUTO_POR_MATERIA,ACTS_POR_MATERIA,ID_POR_RUDE_MATERIA,curso,trim,ue,DOCENTE}){
+  // Construir NOTAS y AUTOEVALS planos para pasarlos a generarCentralizador
+  // generarCentralizador recibe NOTAS[estId][actId] y AUTOEVALS[estId]
+  // Aquí el estId debe ser el id que tiene el estudiante EN CADA MATERIA
+  // Por eso pasamos estructuras especiales y sobreescribimos calcNota internamente
+
   function colL(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
   const trimNom={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
-  const ws=wb.addWorksheet('Centralizador');
 
-  ws.pageSetup.orientation='portrait';
-  ws.pageSetup.paperSize=1;
-  ws.pageSetup.fitToPage=true;
-  ws.pageSetup.fitToWidth=1;
-  ws.pageSetup.fitToHeight=0;
-  ws.pageSetup.horizontalCentered=true;
+  // Reutilizamos EXACTAMENTE el mismo código de generarCentralizador del archivo base
+  // Solo cambiamos: 1) nombre hoja, 2) calcNota usa RUDE, 3) llena TODAS las materias
+  const ws=wb.addWorksheet('Cent.'+trim+'er TRIM');
+  ws.pageSetup.orientation='portrait';ws.pageSetup.paperSize=1;ws.pageSetup.fitToPage=true;
+  ws.pageSetup.fitToWidth=1;ws.pageSetup.fitToHeight=0;ws.pageSetup.horizontalCentered=true;
   ws.pageSetup.margins={left:0.2,right:0.2,top:0.3,bottom:0.3,header:0,footer:0};
   ws.headerFooter={oddHeader:'',oddFooter:''};
 
@@ -1254,11 +1242,8 @@ async function generarCentralizadorCompleto({wb,ESTUDIANTES,NOTAS_POR_MATERIA,AU
   function sc(r,col,val,bg,fn,al,borde=true){
     const cell=ws.getCell(r,col);
     if(val!==null&&val!==undefined)cell.value=val;
-    if(bg)cell.fill=fill(bg);
-    if(fn)cell.font=fn;
-    if(al)cell.alignment=al;
-    if(borde)cell.border=allB;
-    return cell;
+    if(bg)cell.fill=fill(bg);if(fn)cell.font=fn;if(al)cell.alignment=al;
+    if(borde)cell.border=allB;return cell;
   }
   function mg(r,c1,c2,val,bg,fn,al){
     if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
@@ -1269,10 +1254,10 @@ async function generarCentralizadorCompleto({wb,ESTUDIANTES,NOTAS_POR_MATERIA,AU
   const LA='FFF2CF50',ROJO='FFDC2626';
 
   const CAMPOS=[
-    {abrev:'C.S.',   materias:['Comunicación y Lenguajes: Lengua Castellana y Originaria','Lengua Extranjera','Ciencias Sociales','Educación Física y Deportes','Educación Musical','Artes Plásticas y Visuales']},
-    {abrev:'C.T.P.', materias:['Matemática','Técnica Tecnológica','Técnica Tecnológica Especializada']},
-    {abrev:'V.T.T.', materias:['Ciencias Naturales: Biología - Geografía','Ciencias Naturales: Física','Ciencias Naturales: Química']},
-    {abrev:'C.P.',   materias:['Cosmovisiones, Filosofía y Sicología','Valores, Espiritualidad y Religiones']},
+    {campo:'COMUNIDAD Y SOCIEDAD',materias:['Comunicación y Lenguajes: Lengua Castellana y Originaria','Lengua Extranjera','Ciencias Sociales','Educación Física y Deportes','Educación Musical','Artes Plásticas y Visuales']},
+    {campo:'CIENCIA TECNOLOGÍA Y PRODUCCIÓN',materias:['Matemática','Técnica Tecnológica','Técnica Tecnológica Especializada']},
+    {campo:'VIDA TIERRA Y TERRITORIO',materias:['Ciencias Naturales: Biología - Geografía','Ciencias Naturales: Física','Ciencias Naturales: Química']},
+    {campo:'COSMOS Y PENSAMIENTO',materias:['Cosmovisiones, Filosofía y Sicología','Valores, Espiritualidad y Religiones']},
   ];
   const todasMaterias=CAMPOS.flatMap(c=>c.materias);
 
@@ -1280,146 +1265,111 @@ async function generarCentralizadorCompleto({wb,ESTUDIANTES,NOTAS_POR_MATERIA,AU
   const CM_E=CM_S+todasMaterias.length-1;
   const C_PROM=CM_E+1,C_OBS=C_PROM+1,NCOLS=C_OBS;
 
-  ws.getColumn(1).width=0.4;
-  ws.getColumn(CB).width=4.5;
-  ws.getColumn(CNS).width=30;
-  for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=3.2;
-  ws.getColumn(C_PROM).width=5.5;
-  ws.getColumn(C_OBS).width=4;
+  ws.getColumn(1).width=0.4;ws.getColumn(CB).width=5;ws.getColumn(CNS).width=40;
+  for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=6;
+  ws.getColumn(C_PROM).width=6;ws.getColumn(C_OBS).width=6;
 
-  // ENCABEZADO
   ws.getRow(1).height=16;
-  mg(1,CB,NCOLS,'UNIDAD EDUCATIVA TÉCNICO HUMANÍSTICO "FRANZ TAMAYO DE CHACHACOMANI"',AZ,fnt(true,9,WH),aln('center','middle'));
+  mg(1,CB,NCOLS,'UNIDAD EDUCATIVA  "................."',AZ,fnt(true,9,WH),aln('center','middle'));
   ws.getRow(2).height=18;
-  mg(2,CB,NCOLS,'CENTRALIZADOR DE NOTAS '+new Date().getFullYear(),AM,fnt(true,11,WH),aln('center','middle'));
+  mg(2,CB,NCOLS,'CENTRALIZADOR DE NOTAS '+new Date().getFullYear(),AM,fnt(true,12,WH),aln('center','middle'));
   ws.getRow(3).height=16;
-  mg(3,CB,NCOLS,trimNom[trim],AZ,fnt(true,10,WH),aln('center','middle'));
-  ws.getRow(4).height=14;
-  mg(4,CB,10,'DISTRITO: Batallas',LA,fnt(true,8),aln('left','middle'));
+  mg(3,CB,NCOLS,trimNom[trim],AZ,fnt(true,9,WH),aln('center','middle'));
+  ws.getRow(4).height=15;
+  mg(4,CB,10,'DISTRITO: ...............',LA,fnt(true,8),aln('left','middle'));
   mg(4,11,NCOLS,'AÑO DE ESCOLARIDAD: '+curso,LA,fnt(true,8),aln('center','middle'));
-  ws.getRow(5).height=14;
-  mg(5,CB,10,'PROFESOR(A): '+DOCENTE.nombre,WH,fnt(false,8),aln('left','middle'));
-  mg(5,11,NCOLS,'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA',LA,fnt(true,7),aln('center','middle'));
+  ws.getRow(5).height=15;
+  mg(5,CB,10,'PROFESOR(A): '+DOCENTE.nombre,WH,fnt(false,9),aln('left','middle'));
+  mg(5,11,NCOLS,'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA',LA,fnt(true,8),aln('center','middle'));
 
-  // FILA 6
-  ws.getRow(6).height=14;
-  sc(6,CB,'N°',AZ,fnt(true,8,WH),aln('center','middle'));
-  sc(6,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,8,WH),aln('center','middle'));
-  mg(6,CM_S,CM_E,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,8,WH),aln('center','middle'));
-  sc(6,C_PROM,'PROM.',AZ,fnt(true,8,WH),aln('center','middle'));
-  sc(6,C_OBS,'OBS.',AZ,fnt(true,8,WH),aln('center','middle'));
+  ws.getRow(6).height=15;
+  sc(6,CB,'',AZ,fnt(true,9,WH),aln('center','middle'));
+  sc(6,CNS,'',AZ,fnt(true,9,WH),aln('center','middle'));
+  mg(6,CM_S,CM_E,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,9,WH),aln('center','middle'));
+  sc(6,C_PROM,'PROM.',AZ,fnt(true,9,WH),aln('center','middle'));
+  sc(6,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','middle'));
 
-  // FILA 7: bloques de campos con offset dinámico
-  ws.getRow(7).height=14;
-  sc(7,CB,'',AZ,fnt(false,7,WH),aln('center','middle'));
-  sc(7,CNS,'',AZ,fnt(false,7,WH),aln('center','middle'));
-  let colOffset=0;
-  CAMPOS.forEach(campo=>{
-    const n=campo.materias.length;
-    mg(7,CM_S+colOffset,CM_S+colOffset+n-1,campo.abrev,AM,fnt(true,7,WH),aln('center','middle'));
-    colOffset+=n;
-  });
-  sc(7,C_PROM,'',AZ,fnt(false,7,WH),aln('center','middle'));
-  sc(7,C_OBS,'',AZ,fnt(false,7,WH),aln('center','middle'));
+  ws.getRow(7).height=13;
+  sc(7,CB,'',AZ,fnt(false,9,WH),aln('center','middle'));
+  sc(7,CNS,'',AZ,fnt(false,9,WH),aln('center','middle'));
+  mg(7,CM_S,CM_S+5,'C.S.',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+6,CM_S+8,'C.T.P.',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+9,CM_S+11,'V.T.T.',AM,fnt(true,9,WH),aln('center','middle'));
+  mg(7,CM_S+12,CM_S+13,'C.P.',AM,fnt(true,9,WH),aln('center','middle'));
+  sc(7,C_PROM,'',AZ,fnt(false,6,WH),aln('center','middle'));
+  sc(7,C_OBS,'',AZ,fnt(false,6,WH),aln('center','middle'));
 
-  // FILA 8: materias verticales
-  ws.getRow(8).height=100;
-  sc(8,CB,'N°',AZ,fnt(true,8,WH),aln('center','bottom',90,false));
-  sc(8,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,8,WH),aln('center','bottom',90,false));
+  ws.getRow(8).height=110;
+  sc(8,CB,'N°',AZ,fnt(true,9,WH),aln('center','middle'));
+  sc(8,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,12,WH),aln('center','middle'));
   todasMaterias.forEach((mat,i)=>{
-    sc(8,CM_S+i,mat,AZ,fnt(false,8,WH),aln('center','bottom',90,false));
+    sc(8,CM_S+i,mat,AZ,fnt(false,9,WH),aln('center','bottom',90,true));
   });
-  sc(8,C_PROM,'PROMEDIO',AZ,fnt(true,8,WH),aln('center','bottom',90,false));
-  sc(8,C_OBS,'OBS.',AZ,fnt(true,8,WH),aln('center','bottom',90,false));
+  sc(8,C_PROM,'PROMEDIO',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
+  sc(8,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
 
-  // ===== FUNCIÓN DE CÁLCULO POR RUDE + MATERIA =====
+  // CÁLCULO POR RUDE — busca el ID real del estudiante en cada materia
   function calcNotaMateria(rude,materia){
     const notas=NOTAS_POR_MATERIA[materia]||{};
     const acts=ACTS_POR_MATERIA[materia]||{SER:[],SABER:[],HACER:[]};
     const serA=acts.SER||[],sabA=acts.SABER||[],hacA=acts.HACER||[];
-    // Buscar el ID real del estudiante en ESA materia usando su RUDE
-    const estIdEnMateria=(ID_POR_RUDE_MATERIA[rude]||{})[materia]||null;
-    if(!estIdEnMateria) return null;
-    function pr(actsArr){
-      if(!actsArr.length)return null;
-      const hay=actsArr.some(a=>notas[estIdEnMateria]?.[a.id]!==undefined&&notas[estIdEnMateria]?.[a.id]!=='');
+    const estId=(ID_POR_RUDE_MATERIA[rude]||{})[materia]||null;
+    if(!estId) return null;
+    function pr(a){
+      if(!a.length)return null;
+      const hay=a.some(x=>notas[estId]?.[x.id]!==undefined&&notas[estId]?.[x.id]!=='');
       if(!hay)return null;
-      return actsArr.reduce((acc,a)=>{
-        const n=notas[estIdEnMateria]?.[a.id];
-        return acc+(n!==undefined&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);
-      },0)/actsArr.length;
+      return a.reduce((acc,x)=>{const n=notas[estId]?.[x.id];return acc+(n!==undefined&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);},0)/a.length;
     }
     const pS=pr(serA),pB=pr(sabA),pH=pr(hacA);
     if(pS===null&&pB===null&&pH===null)return null;
-    const auto=(AUTO_POR_MATERIA[materia]||{})[estIdEnMateria]||0;
+    const auto=(AUTO_POR_MATERIA[materia]||{})[estId]||0;
     return Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto);
   }
 
   const MIN_FILAS=40;
-
-  // FILAS DE ESTUDIANTES
   for(let i=0;i<MIN_FILAS;i++){
-    const row=9+i;
-    ws.getRow(row).height=16;
-    const est=ESTUDIANTES[i]||null;
-    const bg=i%2===0?WH:GR;
+    const row=9+i;ws.getRow(row).height=18;
+    const est=ESTUDIANTES[i]||null;const bg=i%2===0?WH:GR;
     const rude=est?(est.codigo_rude||est.nombre):null;
-
-    sc(row,CB,est?i+1:'',bg,fnt(false,9),aln('center','middle'));
-    sc(row,CNS,est?est.nombre:'',bg,fnt(false,9),aln('left','middle'));
-
-    let promTotal=0,contMaterias=0;
-    todasMaterias.forEach((mat,j)=>{
+    sc(row,CB,est?i+1:'',bg,fnt(false,10),aln('center','middle'));
+    sc(row,CNS,est?est.nombre:'',bg,fnt(false,10),aln('left','middle'));
+    let promTotal=0,contMat=0;
+    for(let j=0;j<todasMaterias.length;j++){
       const col=CM_S+j;
       if(est&&rude){
-        const tot=calcNotaMateria(rude,mat);
-        if(tot!==null){promTotal+=tot;contMaterias++;}
+        const tot=calcNotaMateria(rude,todasMaterias[j]);
+        if(tot!==null){promTotal+=tot;contMat++;}
         const bgC=tot!==null&&tot<51?'FFFFC7CE':tot!==null?'FFFFE699':bg;
         const txtC=tot!==null&&tot<51?ROJO:'FF000000';
-        sc(row,col,tot!==null?tot:'',bgC,fnt(true,9,txtC),aln('center','middle'));
+        sc(row,col,tot!==null?tot:'',bgC,fnt(true,10,txtC),aln('center','middle'));
       }else{
-        sc(row,col,'',bg,fnt(false,9),aln('center','middle'));
+        sc(row,col,'',bg,fnt(false,10),aln('center','middle'));
       }
-    });
-
-    const promEst=est&&contMaterias>0?Math.round(promTotal/contMaterias):null;
-    sc(row,C_PROM,promEst!==null?promEst:'',promEst!==null?'FFFFE699':bg,fnt(true,9),aln('center','middle'));
-    sc(row,C_OBS,'',bg,fnt(false,9),aln('center','middle'));
+    }
+    const promEst=est&&contMat>0?Math.round(promTotal/contMat):null;
+    sc(row,C_PROM,promEst!==null?promEst:'',promEst!==null?'FFFFE699':bg,fnt(true,10),aln('center','middle'));
+    sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
   }
 
-  // PROMEDIO DE APROVECHAMIENTO por materia
-  const rowProm=9+MIN_FILAS;
-  ws.getRow(rowProm).height=16;
-  mg(rowProm,CB,CNS,'PROMEDIO DE APROVECHAMIENTO',LA,fnt(true,8),aln('center','middle'));
-  todasMaterias.forEach((mat,j)=>{
-    const vals=ESTUDIANTES.map(e=>{
-      const rude=e.codigo_rude||e.nombre;
-      return calcNotaMateria(rude,mat);
-    }).filter(v=>v!==null);
-    const prom=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1):null;
-    sc(rowProm,CM_S+j,prom!==null?parseFloat(prom):'',LA,fnt(true,8),aln('center','middle'));
-  });
-  const todosProms=ESTUDIANTES.map(e=>{
-    const rude=e.codigo_rude||e.nombre;
-    const ns=todasMaterias.map(m=>calcNotaMateria(rude,m)).filter(v=>v!==null);
-    return ns.length?Math.round(ns.reduce((a,b)=>a+b,0)/ns.length):null;
-  }).filter(v=>v!==null);
-  const promGeneral=todosProms.length?(todosProms.reduce((a,b)=>a+b,0)/todosProms.length).toFixed(1):null;
-  sc(rowProm,C_PROM,promGeneral!==null?parseFloat(promGeneral):'',LA,fnt(true,8),aln('center','middle'));
-  sc(rowProm,C_OBS,'',LA,fnt(false,8),aln('center','middle'));
+  const rowProm=9+MIN_FILAS;ws.getRow(rowProm).height=18;
+  mg(rowProm,CB,CNS,'PROMEDIO DE APROVECHAMIENTO',LA,fnt(true,7),aln('center','middle'));
+  for(let j=0;j<todasMaterias.length;j++){
+    const vals=ESTUDIANTES.map(e=>calcNotaMateria(e.codigo_rude||e.nombre,todasMaterias[j])).filter(v=>v!==null);
+    const prom=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):null;
+    sc(rowProm,CM_S+j,prom!==null?parseFloat(prom):'',LA,fnt(true,7),aln('center','middle'));
+  }
+  sc(rowProm,C_PROM,'',LA,fnt(false,7),aln('center','middle'));
+  sc(rowProm,C_OBS,'',LA,fnt(false,7),aln('center','middle'));
 
-  // FIRMA Y FECHA
-  const rowFirma=rowProm+2;
-  ws.getRow(rowFirma).height=40;
+  const rowFirma=rowProm+2;ws.getRow(rowFirma).height=35;
   mg(rowFirma,CB,6,'_______________________________',WH,fnt(false,9),aln('center','bottom'));
   const fechaHoy=new Intl.DateTimeFormat('es-ES',{dateStyle:'full'}).format(new Date());
   mg(rowFirma,8,NCOLS,'FECHA: Lugar, '+fechaHoy,WH,fnt(false,8),aln('right','bottom'));
-  ws.getRow(rowFirma+1).height=13;
+  ws.getRow(rowFirma+1).height=12;
   mg(rowFirma+1,CB,6,'FIRMA DEL MAESTRO(A)',WH,fnt(false,7,'FF64748B'),aln('center','top'));
-
   ws.pageSetup.printArea='B1:'+colL(NCOLS)+(rowFirma+2);
-  ws.pageSetup.showGridLines=false;
-  ws.pageSetup.printTitlesRow='1:8';
+  ws.pageSetup.showGridLines=false;ws.pageSetup.printTitlesRow='1:8';
 }
 
 // ===== INICIAR =====
