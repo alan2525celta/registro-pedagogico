@@ -583,6 +583,8 @@ let dimActual='RESUMEN',trimActual=1;
 let selectedRowId=null;
 let ctxTarget=null,ctxType=null;
 let pendingQueue=[];
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  
 let isOnline=navigator.onLine;
 const COLORES_CURSOS=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)','var(--c8)'];
 
@@ -678,7 +680,8 @@ async function loginUsuario(){
   if(error||!data){ showLoginMsg('Usuario no encontrado o cuenta inactiva'); return; }
   if(data.contrasena!==btoa(pass)){ showLoginMsg('Contraseña incorrecta'); return; }
   DOCENTE=data;
-  localStorage.setItem('docente',JSON.stringify(DOCENTE));
+  const {contrasena:_, ...docenteSeguro}=DOCENTE;
+localStorage.setItem('docente',JSON.stringify(docenteSeguro));
   iniciarApp();
 }
 
@@ -872,7 +875,7 @@ function renderEstudiantes(){
       oncontextmenu="showCtx(event,'estudiante','${e.id}');return false"
       ontouchstart="startLongPress(event,'estudiante','${e.id}')" ontouchend="cancelLongPress()" style="cursor:pointer">
       <td>${i+1}</td>
-      <td class="td-nombre">${e.nombre}</td>
+      <td class="td-nombre">${esc(e.nombre)}</td>
       <td>${e.codigo_rude||'—'}</td>
       <td>${e.fecha_nac||'—'}</td>
       <td><button class="btn btn-sm" style="background:var(--gris);color:var(--gris2)" onclick="event.stopPropagation();showCtx(event,'estudiante','${e.id}')">⋯</button></td>
@@ -1151,7 +1154,7 @@ function renderActividades(){
       ontouchstart="startLongPress(event,'actividad','${a.id}')" ontouchend="cancelLongPress()">
       <span class="adim ${a.dimension}">${a.dimension}</span>
       <div style="flex:1">
-        <div style="font-weight:600;font-size:13px">${a.nombre_actividad}</div>
+      <div style="font-weight:600;font-size:13px">${esc(a.nombre_actividad)}</div>
         <div style="font-size:11px;color:var(--gris2)">Trim. ${a.trimestre} · ${a.fecha||'—'}</div>
       </div>
       <button class="btn btn-p btn-sm" onclick="goScreen('notas')">📝 Calificar</button>
@@ -1382,14 +1385,14 @@ async function renderObservaciones(forzarRecarga=false){
       ontouchstart="startLongPress(event,'observacion','${o.id}')" ontouchend="cancelLongPress()">
       <div class="oh">
         <div>
-          <span class="oe">${o.nombre_estudiante}</span>
+          <span class="oe">${esc(o.nombre_estudiante)}</span>
         </div>
         <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
           <span class="of">${o.fecha}</span>
           <button class="ov ${o.visible_padre}" onclick="toggleVisObs('${o.id}','${o.visible_padre}')">${o.visible_padre==='SI'?'👁 Visible':'🔒 Privado'}</button>
         </div>
       </div>
-      <div class="ot">${o.observacion}</div>
+      <div class="ot">${esc(o.observacion)}</div>
     </div>`).join('');
 }
 
