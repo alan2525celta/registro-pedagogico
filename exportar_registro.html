@@ -89,10 +89,7 @@ select:disabled{background:#f8fafc;color:#94a3b8}
   <hr class="divider">
 
   <button class="btn btn-g" id="btn-export" onclick="exportarExcel()" disabled>
-    📥 Registro + Asistencia + Boletín
-  </button>
-  <button class="btn btn-p" id="btn-cent" onclick="exportarCentralizador()" disabled style="background:#7c3aed;margin-bottom:8px">
-    📊 Generar Centralizador (todas las áreas)
+    📥 Descargar Registro Excel (.xlsx)
   </button>
   <button class="btn btn-sm" onclick="mostrarCampoEmail()">🔄 Cambiar cuenta</button>
 
@@ -168,7 +165,6 @@ async function cargarCursos(id){
     sc.innerHTML+=`<option value="${c}">${c}</option>`;
   });
   document.getElementById('btn-export').disabled=false;
-  document.getElementById('btn-cent').disabled=false;
 }
 
 function filtrarMaterias(){
@@ -505,6 +501,9 @@ async function generarExcel1T({ESTUDIANTES,ACTIVIDADES,NOTAS,AUTOEVALS,asistenci
 
   await generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistenciaData,curso,materia,trim,ue,DOCENTE});
   log('✓ Hoja 1.BOL generada');
+
+  await generarCentralizador({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,curso,materia,trim,ue,DOCENTE});
+  log('✓ Hoja Centralizador generada');
 
   // ===== DESCARGAR =====
   log('📐 Generando archivo...');
@@ -1116,261 +1115,6 @@ sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
   ws.pageSetup.printTitlesRow='1:8';
 }
 
-
-// =====================================================================
-// EXPORTAR CENTRALIZADOR — recoge TODAS las áreas de Supabase
-// =====================================================================
-async function exportarCentralizador(){
-  const curso=document.getElementById('inp-curso').value;
-  const trim=document.getElementById('inp-trim').value;
-  const ue=document.getElementById('inp-ue').value;
-  if(!DOCENTE){ alert('No hay docente identificado'); return; }
-  if(!curso){ alert('Selecciona un curso'); return; }
-
-  document.getElementById('progress').style.display='block';
-  document.getElementById('log-box').innerHTML='';
-  prog(5,'Iniciando Centralizador...','Cargando todas las áreas');
-
-  const id=DOCENTE.id;
-
-  // 1. Todos los estudiantes del curso (todas las materias)
-  const {data:ests}=await sb.from('estudiantes').select('*').eq('id_docente',id).eq('curso',curso);
-
-  // Deduplicar por RUDE (fallback a nombre si no tiene RUDE)
-  const rudesVistos=new Set();
-  const ESTUDIANTES=(ests||[])
-    .sort((a,b)=>a.nombre.localeCompare(b.nombre))
-    .filter(e=>{
-      const key=e.codigo_rude||e.nombre;
-      if(rudesVistos.has(key)) return false;
-      rudesVistos.add(key);
-      return true;
-    });
-  log('✓ Estudiantes únicos: '+ESTUDIANTES.length);
-
-  // Mapa RUDE → materia → id_en_esa_materia
-  const ID_POR_RUDE_MATERIA={};
-  (ests||[]).forEach(e=>{
-    const key=e.codigo_rude||e.nombre;
-    if(!ID_POR_RUDE_MATERIA[key]) ID_POR_RUDE_MATERIA[key]={};
-    ID_POR_RUDE_MATERIA[key][e.materia]=e.id;
-  });
-
-  prog(20,'Cargando actividades de todas las áreas...','');
-  const {data:actsAll}=await sb.from('actividades').select('*').eq('id_docente',id).eq('curso',curso).eq('trimestre',trim);
-  log('✓ Actividades totales: '+(actsAll||[]).length);
-
-  prog(40,'Cargando notas de todas las áreas...','');
-  const {data:notasAll}=await sb.from('notas').select('*').eq('id_docente',id).eq('curso',curso).eq('trimestre',trim);
-  log('✓ Notas totales: '+(notasAll||[]).length);
-
-  prog(60,'Cargando autoevaluaciones...','');
-  const {data:autoAll}=await sb.from('autoevaluacion').select('*').eq('id_docente',id).eq('curso',curso).eq('trimestre',trim);
-  log('✓ Autoevaluaciones: '+(autoAll||[]).length);
-
-  prog(70,'Procesando datos...','');
-
-  const ACTS_POR_MATERIA={};
-  (actsAll||[]).forEach(a=>{
-    if(!ACTS_POR_MATERIA[a.materia]) ACTS_POR_MATERIA[a.materia]={SER:[],SABER:[],HACER:[]};
-    if(ACTS_POR_MATERIA[a.materia][a.dimension]) ACTS_POR_MATERIA[a.materia][a.dimension].push(a);
-  });
-
-  const NOTAS_POR_MATERIA={};
-  (notasAll||[]).forEach(n=>{
-    if(!NOTAS_POR_MATERIA[n.materia]) NOTAS_POR_MATERIA[n.materia]={};
-    if(!NOTAS_POR_MATERIA[n.materia][n.id_estudiante]) NOTAS_POR_MATERIA[n.materia][n.id_estudiante]={};
-    NOTAS_POR_MATERIA[n.materia][n.id_estudiante][n.id_actividad]=parseFloat(n.nota);
-  });
-
-  const AUTO_POR_MATERIA={};
-  (autoAll||[]).forEach(a=>{
-    if(!AUTO_POR_MATERIA[a.materia]) AUTO_POR_MATERIA[a.materia]={};
-    AUTO_POR_MATERIA[a.materia][a.id_estudiante]=parseFloat(a.nota);
-  });
-
-  prog(80,'Generando Excel Centralizador...','');
-
-  try{
-    const wb=new ExcelJS.Workbook();
-    wb.creator='Registro Pedagógico 2026';
-    await generarCentralizadorCompleto({wb,ESTUDIANTES,NOTAS_POR_MATERIA,AUTO_POR_MATERIA,ACTS_POR_MATERIA,ID_POR_RUDE_MATERIA,curso,trim,ue,DOCENTE});
-    prog(95,'Descargando...','');
-    log('✓ Centralizador generado');
-    const buffer=await wb.xlsx.writeBuffer();
-    const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=`Centralizador_${curso}_Trim${trim}_2026.xlsx`;
-    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-    prog(100,'✅ Centralizador listo','Descarga iniciada');
-    log('📁 Archivo descargado');
-  }catch(e){
-    prog(0,'❌ Error','');
-    log('ERROR: '+e.message);
-    console.error(e);
-  }
-}
-
-// =====================================================================
-// CENTRALIZADOR COMPLETO — usa la hoja generarCentralizador existente
-// pero alimentada con datos de TODAS las áreas via RUDE
-// =====================================================================
-async function generarCentralizadorCompleto({wb,ESTUDIANTES,NOTAS_POR_MATERIA,AUTO_POR_MATERIA,ACTS_POR_MATERIA,ID_POR_RUDE_MATERIA,curso,trim,ue,DOCENTE}){
-  // Construir NOTAS y AUTOEVALS planos para pasarlos a generarCentralizador
-  // generarCentralizador recibe NOTAS[estId][actId] y AUTOEVALS[estId]
-  // Aquí el estId debe ser el id que tiene el estudiante EN CADA MATERIA
-  // Por eso pasamos estructuras especiales y sobreescribimos calcNota internamente
-
-  function colL(n){let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26);}return s;}
-  const trimNom={'1':'PRIMER TRIMESTRE','2':'SEGUNDO TRIMESTRE','3':'TERCER TRIMESTRE'};
-
-  // Reutilizamos EXACTAMENTE el mismo código de generarCentralizador del archivo base
-  // Solo cambiamos: 1) nombre hoja, 2) calcNota usa RUDE, 3) llena TODAS las materias
-  const ws=wb.addWorksheet('Cent.'+trim+'er TRIM');
-  ws.pageSetup.orientation='portrait';ws.pageSetup.paperSize=1;ws.pageSetup.fitToPage=true;
-  ws.pageSetup.fitToWidth=1;ws.pageSetup.fitToHeight=0;ws.pageSetup.horizontalCentered=true;
-  ws.pageSetup.margins={left:0.2,right:0.2,top:0.3,bottom:0.3,header:0,footer:0};
-  ws.headerFooter={oddHeader:'',oddFooter:''};
-
-  const brd={style:'thin',color:{argb:'FF000000'}};
-  const allB={top:brd,left:brd,bottom:brd,right:brd};
-  function fill(a){return{type:'pattern',pattern:'solid',fgColor:{argb:a}};}
-  function fnt(bold,size,color='FF000000'){return{bold,size,name:'Calibri',color:{argb:color}};}
-  function aln(h,v,rot,wrap){return{horizontal:h,vertical:v,textRotation:rot||0,wrapText:!!wrap};}
-  function sc(r,col,val,bg,fn,al,borde=true){
-    const cell=ws.getCell(r,col);
-    if(val!==null&&val!==undefined)cell.value=val;
-    if(bg)cell.fill=fill(bg);if(fn)cell.font=fn;if(al)cell.alignment=al;
-    if(borde)cell.border=allB;return cell;
-  }
-  function mg(r,c1,c2,val,bg,fn,al){
-    if(c1<c2){try{ws.mergeCells(r,c1,r,c2);}catch(e){}}
-    return sc(r,c1,val,bg,fn,al);
-  }
-
-  const AZ='FF1A3A6B',AM='FF2563EB',WH='FFFFFFFF',GR='FFF1F5F9';
-  const LA='FFF2CF50',ROJO='FFDC2626';
-
-  const CAMPOS=[
-    {campo:'COMUNIDAD Y SOCIEDAD',materias:['Comunicación y Lenguajes: Lengua Castellana y Originaria','Lengua Extranjera','Ciencias Sociales','Educación Física y Deportes','Educación Musical','Artes Plásticas y Visuales']},
-    {campo:'CIENCIA TECNOLOGÍA Y PRODUCCIÓN',materias:['Matemática','Técnica Tecnológica','Técnica Tecnológica Especializada']},
-    {campo:'VIDA TIERRA Y TERRITORIO',materias:['Ciencias Naturales: Biología - Geografía','Ciencias Naturales: Física','Ciencias Naturales: Química']},
-    {campo:'COSMOS Y PENSAMIENTO',materias:['Cosmovisiones, Filosofía y Sicología','Valores, Espiritualidad y Religiones']},
-  ];
-  const todasMaterias=CAMPOS.flatMap(c=>c.materias);
-
-  const CB=2,CNS=3,CM_S=4;
-  const CM_E=CM_S+todasMaterias.length-1;
-  const C_PROM=CM_E+1,C_OBS=C_PROM+1,NCOLS=C_OBS;
-
-  ws.getColumn(1).width=0.4;ws.getColumn(CB).width=5;ws.getColumn(CNS).width=40;
-  for(let i=CM_S;i<=CM_E;i++) ws.getColumn(i).width=6;
-  ws.getColumn(C_PROM).width=6;ws.getColumn(C_OBS).width=6;
-
-  ws.getRow(1).height=16;
-  mg(1,CB,NCOLS,'UNIDAD EDUCATIVA  "................."',AZ,fnt(true,9,WH),aln('center','middle'));
-  ws.getRow(2).height=18;
-  mg(2,CB,NCOLS,'CENTRALIZADOR DE NOTAS '+new Date().getFullYear(),AM,fnt(true,12,WH),aln('center','middle'));
-  ws.getRow(3).height=16;
-  mg(3,CB,NCOLS,trimNom[trim],AZ,fnt(true,9,WH),aln('center','middle'));
-  ws.getRow(4).height=15;
-  mg(4,CB,10,'DISTRITO: ...............',LA,fnt(true,8),aln('left','middle'));
-  mg(4,11,NCOLS,'AÑO DE ESCOLARIDAD: '+curso,LA,fnt(true,8),aln('center','middle'));
-  ws.getRow(5).height=15;
-  mg(5,CB,10,'PROFESOR(A): '+DOCENTE.nombre,WH,fnt(false,9),aln('left','middle'));
-  mg(5,11,NCOLS,'NIVEL: SECUNDARIA COMUNITARIA PRODUCTIVA',LA,fnt(true,8),aln('center','middle'));
-
-  ws.getRow(6).height=15;
-  sc(6,CB,'',AZ,fnt(true,9,WH),aln('center','middle'));
-  sc(6,CNS,'',AZ,fnt(true,9,WH),aln('center','middle'));
-  mg(6,CM_S,CM_E,'CAMPOS DE SABERES Y CONOCIMIENTOS',AZ,fnt(true,9,WH),aln('center','middle'));
-  sc(6,C_PROM,'PROM.',AZ,fnt(true,9,WH),aln('center','middle'));
-  sc(6,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','middle'));
-
-  ws.getRow(7).height=13;
-  sc(7,CB,'',AZ,fnt(false,9,WH),aln('center','middle'));
-  sc(7,CNS,'',AZ,fnt(false,9,WH),aln('center','middle'));
-  mg(7,CM_S,CM_S+5,'C.S.',AM,fnt(true,9,WH),aln('center','middle'));
-  mg(7,CM_S+6,CM_S+8,'C.T.P.',AM,fnt(true,9,WH),aln('center','middle'));
-  mg(7,CM_S+9,CM_S+11,'V.T.T.',AM,fnt(true,9,WH),aln('center','middle'));
-  mg(7,CM_S+12,CM_S+13,'C.P.',AM,fnt(true,9,WH),aln('center','middle'));
-  sc(7,C_PROM,'',AZ,fnt(false,6,WH),aln('center','middle'));
-  sc(7,C_OBS,'',AZ,fnt(false,6,WH),aln('center','middle'));
-
-  ws.getRow(8).height=110;
-  sc(8,CB,'N°',AZ,fnt(true,9,WH),aln('center','middle'));
-  sc(8,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,12,WH),aln('center','middle'));
-  todasMaterias.forEach((mat,i)=>{
-    sc(8,CM_S+i,mat,AZ,fnt(false,9,WH),aln('center','bottom',90,true));
-  });
-  sc(8,C_PROM,'PROMEDIO',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
-  sc(8,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
-
-  // CÁLCULO POR RUDE — busca el ID real del estudiante en cada materia
-  function calcNotaMateria(rude,materia){
-    const notas=NOTAS_POR_MATERIA[materia]||{};
-    const acts=ACTS_POR_MATERIA[materia]||{SER:[],SABER:[],HACER:[]};
-    const serA=acts.SER||[],sabA=acts.SABER||[],hacA=acts.HACER||[];
-    const estId=(ID_POR_RUDE_MATERIA[rude]||{})[materia]||null;
-    if(!estId) return null;
-    function pr(a){
-      if(!a.length)return null;
-      const hay=a.some(x=>notas[estId]?.[x.id]!==undefined&&notas[estId]?.[x.id]!=='');
-      if(!hay)return null;
-      return a.reduce((acc,x)=>{const n=notas[estId]?.[x.id];return acc+(n!==undefined&&n!==''&&!isNaN(parseFloat(n))?parseFloat(n):0);},0)/a.length;
-    }
-    const pS=pr(serA),pB=pr(sabA),pH=pr(hacA);
-    if(pS===null&&pB===null&&pH===null)return null;
-    const auto=(AUTO_POR_MATERIA[materia]||{})[estId]||0;
-    return Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto);
-  }
-
-  const MIN_FILAS=40;
-  for(let i=0;i<MIN_FILAS;i++){
-    const row=9+i;ws.getRow(row).height=18;
-    const est=ESTUDIANTES[i]||null;const bg=i%2===0?WH:GR;
-    const rude=est?(est.codigo_rude||est.nombre):null;
-    sc(row,CB,est?i+1:'',bg,fnt(false,10),aln('center','middle'));
-    sc(row,CNS,est?est.nombre:'',bg,fnt(false,10),aln('left','middle'));
-    let promTotal=0,contMat=0;
-    for(let j=0;j<todasMaterias.length;j++){
-      const col=CM_S+j;
-      if(est&&rude){
-        const tot=calcNotaMateria(rude,todasMaterias[j]);
-        if(tot!==null){promTotal+=tot;contMat++;}
-        const bgC=tot!==null&&tot<51?'FFFFC7CE':tot!==null?'FFFFE699':bg;
-        const txtC=tot!==null&&tot<51?ROJO:'FF000000';
-        sc(row,col,tot!==null?tot:'',bgC,fnt(true,10,txtC),aln('center','middle'));
-      }else{
-        sc(row,col,'',bg,fnt(false,10),aln('center','middle'));
-      }
-    }
-    const promEst=est&&contMat>0?Math.round(promTotal/contMat):null;
-    sc(row,C_PROM,promEst!==null?promEst:'',promEst!==null?'FFFFE699':bg,fnt(true,10),aln('center','middle'));
-    sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
-  }
-
-  const rowProm=9+MIN_FILAS;ws.getRow(rowProm).height=18;
-  mg(rowProm,CB,CNS,'PROMEDIO DE APROVECHAMIENTO',LA,fnt(true,7),aln('center','middle'));
-  for(let j=0;j<todasMaterias.length;j++){
-    const vals=ESTUDIANTES.map(e=>calcNotaMateria(e.codigo_rude||e.nombre,todasMaterias[j])).filter(v=>v!==null);
-    const prom=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):null;
-    sc(rowProm,CM_S+j,prom!==null?parseFloat(prom):'',LA,fnt(true,7),aln('center','middle'));
-  }
-  sc(rowProm,C_PROM,'',LA,fnt(false,7),aln('center','middle'));
-  sc(rowProm,C_OBS,'',LA,fnt(false,7),aln('center','middle'));
-
-  const rowFirma=rowProm+2;ws.getRow(rowFirma).height=35;
-  mg(rowFirma,CB,6,'_______________________________',WH,fnt(false,9),aln('center','bottom'));
-  const fechaHoy=new Intl.DateTimeFormat('es-ES',{dateStyle:'full'}).format(new Date());
-  mg(rowFirma,8,NCOLS,'FECHA: Lugar, '+fechaHoy,WH,fnt(false,8),aln('right','bottom'));
-  ws.getRow(rowFirma+1).height=12;
-  mg(rowFirma+1,CB,6,'FIRMA DEL MAESTRO(A)',WH,fnt(false,7,'FF64748B'),aln('center','top'));
-  ws.pageSetup.printArea='B1:'+colL(NCOLS)+(rowFirma+2);
-  ws.pageSetup.showGridLines=false;ws.pageSetup.printTitlesRow='1:8';
-}
 
 // ===== INICIAR =====
 init();
