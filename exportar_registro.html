@@ -802,8 +802,8 @@ async function generarBOL({wb,ESTUDIANTES,NOTAS,AUTOEVALS,ACTIVIDADES,asistencia
   // El nombre del maestro ahora empieza en la columna 3 (CNE)
   mgBlock(5, 6, 3, 6, DOCENTE.nombre, WH, fnt(false, 10), aln('left', 'middle'));
     // Curso: Etiqueta en columna 7 y dato hasta el final
-  mgBlock(5, 6, C_TOT, C_TOT, 'CURSO:', LABEL, fnt(true, 12), aln('center', 'middle'));
-  mgBlock(5, 6, C_AUTO, NCOLS, curso, WH, fnt(true, 12), aln('center', 'middle'));
+  mgBlock(5, 6, 8, 8, 'CURSO:', LABEL, fnt(true, 12), aln('center', 'middle'));
+  mgBlock(5, 6, 9, NCOLS, curso, WH, fnt(true, 12), aln('center', 'middle'));
   // Fila 7: Área / Materia
   ws.getRow(7).height = 18;
   // Combinamos columnas 1 y 2 para "ÁREA:"
