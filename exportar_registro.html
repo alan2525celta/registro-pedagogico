@@ -1028,7 +1028,7 @@ sc(8,CB,'N°',AZ,fnt(true,9,WH),aln('center','middle'));
 sc(8,CNS,'APELLIDOS Y NOMBRES',AZ,fnt(true,12,WH),aln('center','middle'));
   todasMaterias.forEach((mat,i)=>{
     const esActual=mat.toLowerCase()===materia.toLowerCase();
-    sc(8,CM_S+i,mat,esActual?AM:AZ,fnt(esActual,9,WH),aln('center','bottom',90,false));
+    sc(8,CM_S+i,mat,esActual?AM:AZ,fnt(esActual,9,WH),aln('center','bottom',90,true));
   });
   sc(8,C_PROM,'PROMEDIO',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
 sc(8,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
