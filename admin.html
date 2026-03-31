@@ -141,10 +141,10 @@ async function loginAdmin(){
     document.getElementById('admin-msg').textContent='Código incorrecto'; 
     return; 
   }
-  sessionStorage.setItem('admin_auth','1');
-  document.getElementById('admin-login').style.display='none';
-  document.getElementById('admin-panel').style.display='block';
-  await cargarTodo();
+  sessionStorage.setItem('admin_auth', btoa(code+Date.now().toString().slice(-4)));
+document.getElementById('admin-login').style.display='none';
+document.getElementById('admin-panel').style.display='block';
+await cargarTodo();
 }
 
 async function cargarTodo(){
@@ -286,7 +286,8 @@ function cerrarAdmin(){
 }
 
 // Auto-login si ya está autenticado en esta sesión
-if(sessionStorage.getItem('admin_auth')==='1'){
+const token=sessionStorage.getItem('admin_auth');
+if(token && token.length > 10){
   document.getElementById('admin-login').style.display='none';
   document.getElementById('admin-panel').style.display='block';
   cargarTodo();
