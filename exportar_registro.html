@@ -1080,9 +1080,10 @@ sc(row,CNS,est?est.nombre:'',bg,fnt(false,10),aln('left','middle'));
       }
     }
 
-    const promEst=est?calcNota(est.id):null;
-    sc(row,C_PROM,promEst!==null?promEst:'',promEst!==null?'FFFFE699':bg,fnt(true,10),aln('center','middle'));
-sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
+   const promEst=est?calcNota(est.id):null;
+    const promEstFmt=promEst!==null?parseFloat(promEst.toFixed(2)):null;
+    sc(row,C_PROM,promEstFmt!==null?promEstFmt:'',promEstFmt!==null?'FFFFE699':bg,fnt(true,10),aln('center','middle'));
+    sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
   }
 
   // ===== PROMEDIO DE APROVECHAMIENTO =====
@@ -1331,9 +1332,9 @@ async function generarCentralizadorTodas({wb,ESTUDIANTES,ACTS_X_MAT,NOTAS_X_MAT,
         sc(row,col,'',bg,fnt(false,10),aln('center','middle'));
       }
     }
-    const promEst=est&&nMat>0?Math.round(pTotal/nMat):null;
+   const promEst=est&&nMat>0?parseFloat((pTotal/nMat).toFixed(2)):null;
     sc(row,C_PROM,promEst!==null?promEst:'',promEst!==null?'FFFFE699':bg,fnt(true,10),aln('center','middle'));
-    sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
+        sc(row,C_OBS,'',bg,fnt(false,10),aln('center','middle'));
   }
 
   // ===== PROMEDIO APROVECHAMIENTO — IDÉNTICO =====
