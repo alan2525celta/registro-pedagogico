@@ -711,7 +711,8 @@ async function activarCuenta(){
   // NO marcar código como usado — código compartido para múltiples docentes
   // El admin manualmente pone usado=true cuando quiere cerrar el acceso
   DOCENTE=docObj;
-  localStorage.setItem('docente',JSON.stringify(DOCENTE));
+const {contrasena:_2, ...docenteSeguro2}=DOCENTE;
+localStorage.setItem('docente',JSON.stringify(docenteSeguro2));
   showLoginMsg('✓ Cuenta creada exitosamente','ok');
   setTimeout(()=>iniciarApp(),800);
 }
