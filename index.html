@@ -584,7 +584,15 @@ let selectedRowId=null;
 let ctxTarget=null,ctxType=null;
 let pendingQueue=[];
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  
+function generarIdEst(rude,id_docente,curso){
+  if(rude&&rude.trim()){
+    const r=rude.trim().replace(/[^a-zA-Z0-9]/g,'').substring(0,15);
+    const c=curso.replace(/[^a-zA-Z0-9]/g,'').substring(0,6);
+    const d=id_docente.replace(/[^a-zA-Z0-9_]/g,'').substring(0,14);
+    return 'E_'+r+'_'+d+'_'+c;
+  }
+  return 'E_'+crypto.randomUUID().replace(/-/g,'').substring(0,20);
+}  
 let isOnline=navigator.onLine;
 const COLORES_CURSOS=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)','var(--c8)'];
 
@@ -895,7 +903,7 @@ async function agregarEstudiante(){
   const rude=document.getElementById('fe-rude').value.trim();
   const fecha=document.getElementById('fe-fecha').value;
   if(!nombre){ showToast('Ingresa el nombre'); return; }
-  const obj={id:'E_'+Date.now(),id_docente:DOCENTE.id,nombre,codigo_rude:rude,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha_nac:fecha};
+ const obj={id:generarIdEst(rude,DOCENTE.id,cursoCurrent.curso),id_docente:DOCENTE.id,nombre,codigo_rude:rude,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha_nac:fecha};
   await sbUpsert('estudiantes',obj);
   ESTUDIANTES.push(obj);
   ESTUDIANTES.sort((a,b)=>a.nombre.localeCompare(b.nombre));
@@ -971,7 +979,7 @@ async function confirmarImport(){
   let cnt=0;
   for(const e of importData){
     if(!e.nombre) continue;
-    const obj={id:'E_'+Date.now()+'_'+cnt+'_'+Math.floor(Math.random()*9999),id_docente:DOCENTE.id,nombre:e.nombre,codigo_rude:e.rude,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha_nac:e.fecha};
+   const obj={id:generarIdEst(e.rude,DOCENTE.id,cursoCurrent.curso),id_docente:DOCENTE.id,nombre:e.nombre,codigo_rude:e.rude,curso:cursoCurrent.curso,materia:cursoCurrent.materia,fecha_nac:e.fecha};
     await sbUpsert('estudiantes',obj);
     ESTUDIANTES.push(obj);
     cnt++;
