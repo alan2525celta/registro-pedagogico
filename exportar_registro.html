@@ -1055,8 +1055,8 @@ sc(8,C_OBS,'OBS.',AZ,fnt(true,9,WH),aln('center','bottom',90,false));
     return Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto);
   }
 
-  const idxMateria=todasMaterias.findIndex(m=>m.toLowerCase()===materia.toLowerCase());
-  h;
+ const idxMateria=todasMaterias.findIndex(m=>m.toLowerCase()===materia.toLowerCase());
+const MIN_FILAS=Math.max(40,ESTUDIANTES.length);
 
   // ===== FILAS DE ESTUDIANTES =====
   for(let i=0;i<MIN_FILAS;i++){
@@ -1311,7 +1311,7 @@ async function generarCentralizadorTodas({wb,ESTUDIANTES,ACTS_X_MAT,NOTAS_X_MAT,
     return Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto);
   }
 
- const MIN_FILAS = Math.max(40, ESTUDIANTES.length);
+ const MIN_FILAS = ESTUDIANTES.length;
   // ===== FILAS ESTUDIANTES — IDÉNTICO AL ORIGINAL pero con calcXMateria =====
   for(let i=0;i<MIN_FILAS;i++){
     const row=9+i;ws.getRow(row).height=18;
