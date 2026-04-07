@@ -1143,7 +1143,8 @@ async function exportarCentralizador(){
     const k=claveEst(e);
     if(vistos.has(k))return false;vistos.add(k);return true;
   });
-  log('✓ Estudiantes únicos: '+ESTUDIANTES.length);
+  log('✓ Total registros BD: '+(ests||[]).length);
+log('✓ Estudiantes únicos: '+ESTUDIANTES.length);
 
   // Mapa: clave(RUDE o nombre) → materia → id real
   const ID_X_RUDE={};
