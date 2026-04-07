@@ -1311,7 +1311,8 @@ async function generarCentralizadorTodas({wb,ESTUDIANTES,ACTS_X_MAT,NOTAS_X_MAT,
     return Math.round((pS||0)+(pB!==null?Math.round(pB*0.45):0)+(pH!==null?Math.round(pH*0.40):0)+auto);
   }
 
- const MIN_FILAS = Math.max(40, ESTUDIANTES.length);
+ console.log('Estudiantes recibidos:', ESTUDIANTES.length);
+const MIN_FILAS = Math.max(40, ESTUDIANTES.length);
   // ===== FILAS ESTUDIANTES — IDÉNTICO AL ORIGINAL pero con calcXMateria =====
   for(let i=0;i<MIN_FILAS;i++){
     const row=9+i;ws.getRow(row).height=18;
