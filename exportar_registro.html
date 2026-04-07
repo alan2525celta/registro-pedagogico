@@ -1316,7 +1316,7 @@ async function generarCentralizadorTodas({wb,ESTUDIANTES,ACTS_X_MAT,NOTAS_X_MAT,
   for(let i=0;i<MIN_FILAS;i++){
     const row=9+i;ws.getRow(row).height=18;
     const est=ESTUDIANTES[i]||null;const bg=i%2===0?WH:GR;
-    const rude=est?(est.codigo_rude||est.nombre):null;
+    const rude=est?((est.codigo_rude&&est.codigo_rude.trim())?est.codigo_rude.trim():('__NOM__'+est.nombre.trim().toUpperCase())):null;
     sc(row,CB,est?i+1:'',bg,fnt(false,10),aln('center','middle'));
     sc(row,CNS,est?est.nombre:'',bg,fnt(false,10),aln('left','middle'));
     let pTotal=0,nMat=0;
@@ -1341,7 +1341,7 @@ async function generarCentralizadorTodas({wb,ESTUDIANTES,ACTS_X_MAT,NOTAS_X_MAT,
   const rowProm=9+MIN_FILAS;ws.getRow(rowProm).height=18;
   mg(rowProm,CB,CNS,'PROMEDIO DE APROVECHAMIENTO',LA,fnt(true,7),aln('center','middle'));
   for(let j=0;j<todasMaterias.length;j++){
-    const vals=ESTUDIANTES.map(e=>calcXMateria(e.codigo_rude||e.nombre,todasMaterias[j])).filter(v=>v!==null);
+    const vals=ESTUDIANTES.map(e=>calcXMateria((e.codigo_rude&&e.codigo_rude.trim())?e.codigo_rude.trim():('__NOM__'+e.nombre.trim().toUpperCase()),todasMaterias[j])).filter(v=>v!==null);
     const prom=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):null;
     sc(rowProm,CM_S+j,prom!==null?parseFloat(prom):'',LA,fnt(true,7),aln('center','middle'));
   }
