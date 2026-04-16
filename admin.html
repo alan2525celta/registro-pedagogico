@@ -118,9 +118,8 @@ tr:hover td{background:#f8fafc}
       </div>
     </div>
 
-    <div style="text-align:center;margin-bottom:16px;display:flex;flex-direction:column;gap:8px;align-items:center">
-      <button class="btn btn-r" style="width:260px;padding:10px" onclick="borrarTodosLosEstudiantes()">🗑 Borrar TODOS los estudiantes</button>
-      <button class="btn" style="background:rgba(255,255,255,.2);color:#fff;width:260px" onclick="cerrarAdmin()">⏻ Cerrar sesión admin</button>
+    <div style="text-align:center;margin-bottom:16px">
+      <button class="btn" style="background:rgba(255,255,255,.2);color:#fff" onclick="cerrarAdmin()">⏻ Cerrar sesión admin</button>
     </div>
   </div>
 </div>
@@ -280,27 +279,7 @@ async function resetPass(id,nombre){
   await sb.from('docentes').update({contrasena:btoa(nuevaPass)}).eq('id',id);
   showToast('Contraseña actualizada ✓');
 }
-async function borrarTodosLosEstudiantes(){
-  const conf1=confirm('⚠️ ADVERTENCIA\n\nEsto eliminará de Supabase:\n• Todos los estudiantes\n• Todas las notas\n• Toda la asistencia\n• Todas las actividades\n• Todas las autoevaluaciones\n• Todas las observaciones\n• Todos los cursos asignados\n\n¿Estás seguro?');
-  if(!conf1) return;
-  const conf2=confirm('Segunda confirmación requerida.\n\n¿Confirmas que quieres BORRAR TODO?\nEsta acción NO se puede deshacer.');
-  if(!conf2) return;
-  showToast('Borrando datos...');
-  try{
-    await sb.from('notas').delete().neq('id','__');
-    await sb.from('autoevaluacion').delete().neq('id','__');
-    await sb.from('asistencia').delete().neq('id','__');
-    await sb.from('observaciones').delete().neq('id','__');
-    await sb.from('actividades').delete().neq('id','__');
-    await sb.from('estudiantes').delete().neq('id','__');
-    await sb.from('asignaciones').delete().neq('id','__');
-    showToast('✓ Todos los datos borrados correctamente');
-    await cargarTodo();
-  }catch(e){
-    showToast('Error al borrar: '+e.message);
-    console.error(e);
-  }
-}
+
 function cerrarAdmin(){
   sessionStorage.removeItem('admin_auth');
   location.reload();
