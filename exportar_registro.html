@@ -56,8 +56,8 @@ select:disabled{background:#f8fafc;color:#94a3b8}
   </div>
 
   <div class="fg" id="fg-email" style="display:none">
-    <label>Email del docente</label>
-    <input type="email" id="inp-email" placeholder="docente@gmail.com">
+    <label>Usuario</label>
+<input type="text" id="inp-email" placeholder="Tu usuario (ej: acalcina)" autocapitalize="none">
     <button class="btn-sm" onclick="buscarDocente()">🔍 Buscar</button>
   </div>
 
@@ -125,10 +125,12 @@ async function init(){
   if(saved){
     try{
       const doc=JSON.parse(saved);
-      DOCENTE=doc;
-      mostrarDocente(doc);
-      await cargarCursos(doc.id);
-      return;
+      if(doc && doc.id){
+        DOCENTE=doc;
+        mostrarDocente(doc);
+        await cargarCursos(doc.id);
+        return;
+      }
     }catch(e){}
   }
   document.getElementById('fg-email').style.display='block';
@@ -147,14 +149,13 @@ function mostrarCampoEmail(){
 }
 
 async function buscarDocente(){
-  const email=document.getElementById('inp-email').value.trim().toLowerCase();
-  if(!email){ alert('Ingresa el email'); return; }
-  const id='D_'+email.replace(/[@.]/g,'_').replace(/[^a-z0-9_]/gi,'');
-  const {data}=await sb.from('docentes').select('*').eq('id',id).single();
-  if(!data){ alert('Docente no encontrado. Verifica el email.'); return; }
+  const usuario=document.getElementById('inp-email').value.trim().toLowerCase();
+  if(!usuario){ alert('Ingresa tu usuario'); return; }
+  const {data}=await sb.from('docentes').select('*').eq('usuario',usuario).eq('activo',true).single();
+  if(!data){ alert('Usuario no encontrado o cuenta inactiva.'); return; }
   DOCENTE=data;
   mostrarDocente(data);
-  await cargarCursos(id);
+  await cargarCursos(data.id);
   document.getElementById('fg-email').style.display='none';
 }
 
